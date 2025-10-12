@@ -176,16 +176,8 @@ const IndexContent = () => {
 const Index = () => {
   // Check localStorage for onboarding status
   const [isOnboarded, setIsOnboarded] = useState(() => {
-    try {
-      const stored = localStorage.getItem('connectsphere_onboarded');
-      if (stored === null) {
-        localStorage.setItem('connectsphere_onboarded', 'true');
-        return true;
-      }
-      return stored === 'true';
-    } catch {
-      return true;
-    }
+    const stored = localStorage.getItem('connectsphere_onboarded');
+    return stored === 'true';
   });
 
   const handleOnboardingComplete = () => {
