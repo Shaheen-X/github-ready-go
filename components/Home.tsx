@@ -160,9 +160,13 @@ export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
           <EventSummaryCard 
             events={events.slice(0, 3).map(event => ({
               ...event,
+              date: event.date,
+              activity: event.activity,
+              location: event.location || 'TBD',
               attendees: event.attendees.length,
               maxParticipants: event.maxParticipants || 0,
-              isHost: event.isHost || false
+              isHost: event.isHost || false,
+              status: (event.status || 'upcoming') as 'upcoming' | 'completed' | 'cancelled'
             }))}
             onViewAll={handleViewAllEvents}
             onEventClick={handleEventClick}

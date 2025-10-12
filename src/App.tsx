@@ -37,18 +37,9 @@ export default function App() {
   };
   
   const handleSignOut = () => {
-    // Reset app state to go back to onboarding
     setShowOnboarding(true);
     setActiveTab('home');
-    setIsCreateGroupEventModalOpen(false);
-    setIsCreateEventChooserOpen(false);
-    setIsCreatePairingModalOpen(false);
-    setIsEventCreatedModalOpen(false);
-    setIsPairingCreatedModalOpen(false);
-    // Show confirmation toast
-    toast.success('Signed out successfully', {
-      description: 'You have been signed out of ConnectSphere',
-    });
+    toast.success('Signed out successfully');
   };
 
   const handleCreateEvent = () => {
@@ -66,59 +57,34 @@ export default function App() {
   };
 
   const handleCreatePairing = (pairingData: any) => {
-    // Close the create modal first
     setIsCreatePairingModalOpen(false);
-    
-    // Store the pairing data and show the success modal
     setCreatedPairingData(pairingData);
     setIsPairingCreatedModalOpen(true);
-    
-    toast.success('1:1 Pairing request created!', {
-      description: `Looking for ${pairingData.activity} partner`,
-    });
-    console.log('Created pairing:', pairingData);
+    toast.success('1:1 Pairing request created!');
   };
 
   const handleCreateEventModal = (activityData: any) => {
-    // Close the create modal first
     setIsCreateEventModalOpen(false);
-    
-    // Enhance the event data with additional fields
     const enhancedEventData = {
       ...activityData,
-      isPrivate: Math.random() > 0.5, // Random for demo
-      creator: 'You', // Could be dynamic based on user
+      isPrivate: Math.random() > 0.5,
+      creator: 'You',
     };
-    
-    // Store the event data and show the success modal
     setCreatedEventData(enhancedEventData);
     setIsEventCreatedModalOpen(true);
-    
-    toast.success('Event created successfully!', {
-      description: `${activityData.eventName} has been scheduled for ${activityData.date}`,
-    });
-    console.log('Created event:', enhancedEventData);
+    toast.success('Event created successfully!');
   };
 
   const handleCreateGroupEvent = (eventData: any) => {
-    // Close the create modal first
     setIsCreateGroupEventModalOpen(false);
-    
-    // Enhance the event data with additional fields
     const enhancedEventData = {
       ...eventData,
       isPrivate: eventData.visibility === 'private',
-      creator: 'You', // Could be dynamic based on user
+      creator: 'You',
     };
-    
-    // Store the event data and show the success modal
     setCreatedEventData(enhancedEventData);
     setIsEventCreatedModalOpen(true);
-    
-    toast.success('Group event created successfully!', {
-      description: `${eventData.eventName} has been scheduled for ${eventData.date}`,
-    });
-    console.log('Created group event:', enhancedEventData);
+    toast.success('Group event created!');
   };
 
   const renderContent = () => {
@@ -130,12 +96,7 @@ export default function App() {
       case 'messages':
         return <Messages />;
       case 'calendar':
-        return <Calendar 
-          onNavigate={setActiveTab} 
-          onCreateEvent={handleCreateEvent}
-          onCreatePairing={handleChoosePairing}
-          onCreateGroup={handleChooseGroup}
-        />;
+        return <Calendar onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} onCreatePairing={handleChoosePairing} onCreateGroup={handleChooseGroup} />;
       case 'groups':
         return <Groups />;
       case 'profile':
@@ -161,63 +122,15 @@ export default function App() {
   return (
     <CalendarEventsProvider>
       <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-gray-100">
-        {/* Main Content */}
-        <main className="flex-1 overflow-hidden">
-          {renderContent()}
-        </main>
-
-        {/* Navigation */}
+        <main className="flex-1 overflow-hidden">{renderContent()}</main>
         <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-
-        {/* Invite Floating Action */}
         <InviteFloatingAction onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} />
-
-        {/* Create Event Chooser Modal */}
-        <CreateEventChooserModal
-          isOpen={isCreateEventChooserOpen}
-          onClose={() => setIsCreateEventChooserOpen(false)}
-          onChoosePairing={handleChoosePairing}
-          onChooseGroup={handleChooseGroup}
-        />
-
-        {/* Create Event Modal */}
-        <CreateActivityModal
-          isOpen={isCreateEventModalOpen}
-          onClose={() => setIsCreateEventModalOpen(false)}
-          onCreateActivity={handleCreateEventModal}
-        />
-
-        {/* Create Group Event Modal */}
-        <CreateGroupEventModal
-          isOpen={isCreateGroupEventModalOpen}
-          onClose={() => setIsCreateGroupEventModalOpen(false)}
-          onCreateEvent={handleCreateGroupEvent}
-        />
-
-        {/* Create Pairing Modal */}
-        <CreatePairingModal
-          isOpen={isCreatePairingModalOpen}
-          onClose={() => setIsCreatePairingModalOpen(false)}
-          onCreatePairing={handleCreatePairing}
-        />
-
-        {/* Event Created Modal */}
-        <EventCreatedModal
-          isOpen={isEventCreatedModalOpen}
-          onClose={() => setIsEventCreatedModalOpen(false)}
-          onNavigate={setActiveTab}
-          eventData={createdEventData}
-        />
-
-        {/* Pairing Created Modal */}
-        <PairingCreatedModal
-          isOpen={isPairingCreatedModalOpen}
-          onClose={() => setIsPairingCreatedModalOpen(false)}
-          onNavigate={setActiveTab}
-          pairingData={createdPairingData}
-        />
-
-        {/* Toast Notifications */}
+        <CreateEventChooserModal isOpen={isCreateEventChooserOpen} onClose={() => setIsCreateEventChooserOpen(false)} onChoosePairing={handleChoosePairing} onChooseGroup={handleChooseGroup} />
+        <CreateActivityModal isOpen={isCreateEventModalOpen} onClose={() => setIsCreateEventModalOpen(false)} onCreateActivity={handleCreateEventModal} />
+        <CreateGroupEventModal isOpen={isCreateGroupEventModalOpen} onClose={() => setIsCreateGroupEventModalOpen(false)} onCreateEvent={handleCreateGroupEvent} />
+        <CreatePairingModal isOpen={isCreatePairingModalOpen} onClose={() => setIsCreatePairingModalOpen(false)} onCreatePairing={handleCreatePairing} />
+        <EventCreatedModal isOpen={isEventCreatedModalOpen} onClose={() => setIsEventCreatedModalOpen(false)} onNavigate={setActiveTab} eventData={createdEventData} />
+        <PairingCreatedModal isOpen={isPairingCreatedModalOpen} onClose={() => setIsPairingCreatedModalOpen(false)} onNavigate={setActiveTab} pairingData={createdPairingData} />
         <Toaster position="top-center" />
       </div>
     </CalendarEventsProvider>

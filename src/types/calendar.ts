@@ -8,15 +8,21 @@ export interface EventAttendee {
 export interface CalendarEvent {
   id: string;
   title: string;
-  date: Date | string;
+  date: Date;
   time: string;
-  type: 'group' | 'pairing' | 'activity';
+  endTime?: string;
+  type: 'group' | 'pairing' | 'activity' | 'one-to-one';
+  activity: string;
   location?: string;
   description?: string;
   attendees: EventAttendee[];
   maxParticipants?: number;
-  status?: 'pending' | 'confirmed' | 'cancelled';
+  status?: 'upcoming' | 'completed' | 'cancelled';
   tags?: string[];
   image?: string;
   isHost?: boolean;
+  isPrivate?: boolean;
+  hostName?: string;
+  isRepeating?: boolean;
+  repeatFrequency?: string;
 }

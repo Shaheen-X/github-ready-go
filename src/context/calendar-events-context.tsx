@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import type { CalendarEvent, EventAttendee } from '@/types/calendar';
+import type { CalendarEvent } from '@/types/calendar';
 
 interface CalendarEventsContextType {
   events: CalendarEvent[];
@@ -13,7 +13,7 @@ interface CalendarEventsContextType {
 }
 
 export const createEventFromInput = (
-  data: Partial<CalendarEvent> & { title: string; date: Date; time: string },
+  data: Partial<CalendarEvent> & { title: string; date: Date; time: string; activity?: string },
   id?: string
 ): CalendarEvent => {
   return {
@@ -22,6 +22,7 @@ export const createEventFromInput = (
     date: data.date,
     time: data.time,
     type: data.type || 'activity',
+    activity: data.activity || data.title,
     location: data.location,
     description: data.description,
     attendees: data.attendees || [],
@@ -29,7 +30,12 @@ export const createEventFromInput = (
     tags: data.tags,
     image: data.image,
     isHost: true,
-    status: 'confirmed',
+    status: 'upcoming',
+    isPrivate: data.isPrivate,
+    endTime: data.endTime,
+    hostName: data.hostName,
+    isRepeating: data.isRepeating,
+    repeatFrequency: data.repeatFrequency,
   };
 };
 
@@ -54,7 +60,7 @@ export const CalendarEventsProvider = ({ children }: { children: ReactNode }) =>
     setEvents((prev) =>
       prev.map((event) =>
         event.id === eventId
-          ? { ...event, status: status === 'accepted' ? 'confirmed' : 'cancelled' }
+          ? { ...event, status: status === 'accepted' ? 'upcoming' : 'cancelled' as const }
           : event
       )
     );

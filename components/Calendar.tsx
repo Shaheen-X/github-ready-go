@@ -165,7 +165,7 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
   };
 
   const handleAccept = (event: CalendarEvent) => {
-    respondToInvitation(event.id, 'You', 'accepted');
+    respondToInvitation(event.id, 'accepted');
     setHighlightedDate(event.date);
     toast.success('Added to calendar—chat pinned!', {
       description: `${event.title} • ${event.time}`,
@@ -173,7 +173,7 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
   };
 
   const handleDecline = (event: CalendarEvent) => {
-    respondToInvitation(event.id, 'You', 'declined');
+    respondToInvitation(event.id, 'declined');
     toast('RSVP updated', {
       description: `Declined ${event.title}. We let the host know.`,
     });
@@ -714,7 +714,7 @@ const AgendaTimeline = ({ sections, onSelectEvent }: AgendaTimelineProps) => {
                       {event.attendees.filter((attendee) => attendee.status === 'accepted').length}/
                       {event.maxParticipants} attending
                     </div>
-                    {event.tags.length > 0 && (
+                    {event.tags && event.tags.length > 0 && (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {event.tags.map((tag) => (
                           <span
@@ -775,7 +775,7 @@ const EventCards = ({ events, onAccept, onDecline, onStartChat, onEditEvent, onS
         const visibleAttendees = isHost 
           ? event.attendees 
           : event.attendees.filter(attendee => 
-              attendee.id === 'att-you' || userConnections.includes(attendee.id)
+              attendee.id === 'att-you' || userConnections.some(conn => conn.id === attendee.id)
             );
         
         const visibleAcceptedAttendees = visibleAttendees.filter((a) => a.status === 'accepted');
