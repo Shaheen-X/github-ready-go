@@ -19,9 +19,9 @@ import { toast } from 'sonner';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import CreateActivityModal from './CreateActivityModal';
 
-import { useCalendarEvents } from '../src/context/calendar-events-context';
-import type { CalendarEvent } from '../src/types/calendar';
-import { userConnections } from '../src/data/calendar-events';
+import { useCalendarEvents } from '@/context/calendar-events-context';
+import type { CalendarEvent } from '@/types/calendar';
+import { userConnections } from '@/data/calendar-events';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Calendar as DayPickerCalendar } from './ui/calendar';
 import { Badge } from './ui/badge';
@@ -165,7 +165,7 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
   };
 
   const handleAccept = (event: CalendarEvent) => {
-    respondToInvitation(event.id, 'accepted');
+    respondToInvitation(event.id, 'You', 'accepted');
     setHighlightedDate(event.date);
     toast.success('Added to calendar—chat pinned!', {
       description: `${event.title} • ${event.time}`,
@@ -173,7 +173,7 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
   };
 
   const handleDecline = (event: CalendarEvent) => {
-    respondToInvitation(event.id, 'declined');
+    respondToInvitation(event.id, 'You', 'declined');
     toast('RSVP updated', {
       description: `Declined ${event.title}. We let the host know.`,
     });
@@ -775,7 +775,7 @@ const EventCards = ({ events, onAccept, onDecline, onStartChat, onEditEvent, onS
         const visibleAttendees = isHost 
           ? event.attendees 
           : event.attendees.filter(attendee => 
-              attendee.id === 'att-you' || userConnections.some(conn => conn.id === attendee.id)
+              attendee.id === 'att-you' || userConnections.includes(attendee.id)
             );
         
         const visibleAcceptedAttendees = visibleAttendees.filter((a) => a.status === 'accepted');
