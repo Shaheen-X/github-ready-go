@@ -286,8 +286,8 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 min-h-0">
-            {/* Pairing Card */}
-            {pairingData && (
+            {/* Pairing Card - Always show */}
+            {pairingData ? (
               <div 
                 className="relative overflow-hidden rounded-2xl shadow-xl border border-amber-300"
                 style={{
@@ -420,6 +420,10 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
                     )}
                   </div>
                 </div>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500 py-4">
+                <p>No pairing data available</p>
               </div>
             )}
 
