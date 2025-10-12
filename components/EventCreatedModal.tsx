@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Share2, UserPlus, Copy, Check, Users, MessageCircle, MoreHorizontal, Edit, Calendar, Volume2, Search, Globe, Lock, User, Trash2 } from 'lucide-react';
+import { X, Share2, Copy, Check, Users, MessageCircle, MoreHorizontal, Edit, Calendar, Volume2, Search, Globe, Lock, User, Trash2, QrCode, Mail, Send, Plane, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -86,6 +86,11 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
   const [selectedBuddies, setSelectedBuddies] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
+  const [showShareSection, setShowShareSection] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [showPlatforms, setShowPlatforms] = useState(false);
+  const [showCopiedLink, setShowCopiedLink] = useState(false);
+  const [showGroupChat, setShowGroupChat] = useState(false);
 
   const eventLink = `https://connectsphere.app/event/${Math.random().toString(36).substr(2, 9)}`;
 
@@ -106,10 +111,64 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
     try {
       await navigator.clipboard.writeText(eventLink);
       setCopied(true);
+      setShowCopiedLink(true);
+      setShowQRCode(false);
+      setShowPlatforms(false);
       toast.success('Link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       toast.error('Failed to copy link');
+    }
+  };
+
+  const handleShare = () => {
+    setShowPlatforms(!showPlatforms);
+    if (!showPlatforms) {
+      setShowQRCode(false);
+      setShowCopiedLink(false);
+    }
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: eventData?.eventName || 'Join my event',
+          text: `Join me for ${eventData?.activity}!`,
+          url: eventLink,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    }
+  };
+
+  const handleSharePlatform = (platform: string) => {
+    const text = `Join me for ${eventData?.activity}! ${eventLink}`;
+    const encodedText = encodeURIComponent(text);
+    const encodedUrl = encodeURIComponent(eventLink);
+
+    let shareUrl = '';
+    switch(platform) {
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${encodedText}`;
+        break;
+      case 'messenger':
+        shareUrl = `fb-messenger://share?link=${encodedUrl}`;
+        break;
+      case 'telegram':
+        shareUrl = `https://t.me/share/url?url=${encodedUrl}&text=${encodeURIComponent(`Join me for ${eventData?.activity}!`)}`;
+        break;
+      case 'sms':
+        shareUrl = `sms:?body=${encodedText}`;
+        break;
+      case 'email':
+        shareUrl = `mailto:?subject=${encodeURIComponent(`Join me for ${eventData?.activity}`)}&body=${encodedText}`;
+        break;
+    }
+
+    if (shareUrl) {
+      window.open(shareUrl, '_blank');
     }
   };
 
@@ -133,29 +192,6 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: eventData?.eventName || 'ConnectSphere Event',
-        text: `Join me for ${eventData?.activity} on ${eventData?.date}!`,
-        url: eventLink,
-      }).catch(() => {
-        // Fallback to copy to clipboard
-        navigator.clipboard.writeText(eventLink).then(() => {
-          toast.success('Link copied to clipboard!');
-        }).catch(() => {
-          toast.error('Failed to share event');
-        });
-      });
-    } else {
-      // Fallback to copy to clipboard
-      navigator.clipboard.writeText(eventLink).then(() => {
-        toast.success('Link copied to clipboard!');
-      }).catch(() => {
-        toast.error('Failed to copy link');
-      });
-    }
-  };
 
   const handleSendInvites = () => {
     if (selectedBuddies.length > 0) {
@@ -267,159 +303,325 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
         </div>
       )}
 
-      {/* Share Event Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
-            <Share2 className="w-5 h-5 text-white" />
-          </div>
-          <h3 className="text-section-header font-semibold">Share Event</h3>
-        </div>
-        
-        {/* Event Link */}
-        <div className="flex gap-2">
-          <Input
-            value={eventLink}
-            readOnly
-            className="glass-card border-white/20 rounded-xl flex-1 text-sm"
-          />
-          <Button
-            onClick={handleCopyLink}
-            className="rounded-xl px-4 shrink-0"
-            variant={copied ? "default" : "outline"}
-          >
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          </Button>
-        </div>
-        
-        <Button
-          onClick={handleShare}
-          className="w-full bg-white text-gray-700 rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border border-gray-200"
-          style={{ fontSize: '17px' }}
-        >
-          <Share2 className="mr-2 w-5 h-5" />
-          Share Event
-        </Button>
-      </div>
-
       <Separator className="bg-gradient-to-r from-blue-500/20 to-cyan-400/20" />
 
-      {/* Create Group Chat Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-white" />
+      {/* Invite from Platform - Priority Section */}
+      <div className="space-y-3">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 p-[1px]">
+          <div className="bg-white rounded-2xl p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-gray-900">Invite from Platform</h4>
+                <p className="text-xs text-gray-500">Find someone you know</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search connections..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 border-gray-200 rounded-xl h-11 text-sm focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {filteredBuddies.slice(0, 5).map((buddy) => {
+                  const isSelected = selectedBuddies.includes(buddy.id);
+                  return (
+                    <button
+                      key={buddy.id}
+                      type="button"
+                      onClick={() => handleBuddyToggle(buddy.id)}
+                      className={`w-full p-3 rounded-xl transition-all duration-200 ${
+                        isSelected 
+                          ? 'bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-400 shadow-md' 
+                          : 'bg-gray-50 hover:bg-white border-2 border-transparent hover:border-gray-200 hover:shadow-sm'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full ${isSelected ? 'bg-gradient-to-br from-blue-500 to-cyan-400 p-[2px]' : ''}`}>
+                          <ImageWithFallback
+                            src={buddy.avatar}
+                            alt={buddy.name}
+                            className={`w-full h-full rounded-full object-cover ${isSelected ? '' : 'border-2 border-gray-200'}`}
+                          />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <h4 className="text-sm font-semibold text-gray-900">{buddy.name}</h4>
+                          <p className="text-xs text-gray-500">{buddy.username}</p>
+                        </div>
+                        {isSelected && (
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedBuddies.length > 0 && (
+                <Button
+                  onClick={handleSendInvites}
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl h-11"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Invitation{selectedBuddies.length > 1 ? 's' : ''} to {selectedBuddies.length} {selectedBuddies.length === 1 ? 'Person' : 'People'}
+                </Button>
+              )}
+            </div>
           </div>
-          <h3 className="text-section-header font-semibold">Create Group Chat</h3>
-        </div>
-        
-        <div className="glass-card p-4 rounded-xl border border-purple-200/50">
-          <p className="text-sm text-gray-600 mb-3">
-            Start a group conversation for all event participants to coordinate, share updates, and get excited together!
-          </p>
-          <Button
-            onClick={() => {
-              toast.success('Group chat created!', {
-                description: `"${eventData?.eventName}" chat is ready for your event participants`,
-              });
-              // Navigate to Messages page
-              if (onNavigate) {
-                onNavigate('messages');
-                onClose();
-              }
-            }}
-            className="w-full bg-white text-gray-700 rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border border-gray-200"
-            style={{ fontSize: '17px' }}
-          >
-            <MessageCircle className="mr-2 w-5 h-5" />
-            Start Group Chat
-          </Button>
         </div>
       </div>
 
-      <Separator className="bg-gradient-to-r from-purple-500/20 to-pink-500/20" />
-
-      {/* Add People Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center">
-            <UserPlus className="w-5 h-5 text-white" />
-          </div>
-          <h3 className="text-section-header font-semibold">Add People</h3>
-        </div>
-        
-        {/* Search Field */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Search friends..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="glass-card border-white/20 rounded-xl pl-10"
-          />
-        </div>
-
-        {/* People List */}
-        <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-hide">
-          {filteredBuddies.map((buddy) => (
-            <button
-              key={buddy.id}
-              onClick={() => handleBuddyToggle(buddy.id)}
-              className={`w-full glass-card p-3 rounded-xl transition-all duration-200 hover:shadow-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                selectedBuddies.includes(buddy.id)
-                  ? 'ring-2 ring-blue-500 bg-gradient-to-r from-blue-50 to-cyan-50'
-                  : 'hover:bg-white/60'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <ImageWithFallback
-                  src={buddy.avatar}
-                  alt={buddy.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <div className="flex-1 text-left">
-                  <h4 className="text-body font-medium">{buddy.name}</h4>
-                  <p className="text-xs text-muted-foreground">{buddy.username}</p>
-                </div>
-                {selectedBuddies.includes(buddy.id) && (
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
-                    <Check className="w-3 h-3 text-white" />
-                  </div>
-                )}
+      {/* Group Chat Section */}
+      <div className="space-y-3">
+        <button
+          type="button"
+          onClick={() => setShowGroupChat(!showGroupChat)}
+          className="w-full group"
+        >
+          <div className="rounded-xl border-2 border-gray-200 hover:border-gray-300 p-4 flex items-center justify-between transition-all duration-200 bg-white hover:bg-gray-50">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center transition-colors">
+                <MessageCircle className="w-4 h-4 text-purple-600" />
               </div>
-            </button>
-          ))}
-          
-          {filteredBuddies.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No friends found</p>
-              <p className="text-xs text-gray-400">Try adjusting your search</p>
+              <div className="text-left">
+                <h4 className="text-sm font-semibold text-gray-900">Create Group Chat</h4>
+                <p className="text-xs text-gray-500">Start chatting with attendees</p>
+              </div>
             </div>
-          )}
-        </div>
+            <div className="w-7 h-7 rounded-full bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition-colors">
+              {showGroupChat ? 
+                <ChevronUp className="w-4 h-4 text-gray-600" /> : 
+                <ChevronDown className="w-4 h-4 text-gray-600" />
+              }
+            </div>
+          </div>
+        </button>
 
-        {/* Send Invites Button */}
-        {selectedBuddies.length > 0 && (
-          <Button
-            onClick={handleSendInvites}
-            className="w-full bg-white text-gray-700 rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border border-gray-200"
-            style={{ fontSize: '17px' }}
-          >
-            <UserPlus className="mr-2 w-5 h-5" />
-            Send Invites to {selectedBuddies.length} {selectedBuddies.length === 1 ? 'Person' : 'People'}
-          </Button>
+        {showGroupChat && (
+          <div className="space-y-4 animate-fade-in bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200">
+            <p className="text-sm text-gray-600">
+              Start a group conversation for all event participants to coordinate, share updates, and get excited together!
+            </p>
+            <Button
+              onClick={() => {
+                toast.success('Group chat created!', {
+                  description: `"${eventData?.eventName}" chat is ready for your event participants`,
+                });
+                if (onNavigate) {
+                  onNavigate('messages');
+                  onClose();
+                }
+              }}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl h-11"
+            >
+              <MessageCircle className="mr-2 w-5 h-5" />
+              Start Group Chat
+            </Button>
+          </div>
         )}
       </div>
 
-      {/* Skip Option */}
-      <div className="flex justify-center pt-4">
-        <Button
-          variant="ghost"
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700"
+      {/* External Sharing - Secondary Option */}
+      <div className="space-y-3">
+        <button
+          type="button"
+          onClick={() => setShowShareSection(!showShareSection)}
+          className="w-full group"
         >
-          I'll do this later
+          <div className="rounded-xl border-2 border-gray-200 hover:border-gray-300 p-4 flex items-center justify-between transition-all duration-200 bg-white hover:bg-gray-50">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition-colors">
+                <Share2 className="w-4 h-4 text-gray-600" />
+              </div>
+              <div className="text-left">
+                <h4 className="text-sm font-semibold text-gray-900">Share Externally</h4>
+                <p className="text-xs text-gray-500">Invite via link, QR code, or apps</p>
+              </div>
+            </div>
+            <div className="w-7 h-7 rounded-full bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition-colors">
+              {showShareSection ? 
+                <ChevronUp className="w-4 h-4 text-gray-600" /> : 
+                <ChevronDown className="w-4 h-4 text-gray-600" />
+              }
+            </div>
+          </div>
+        </button>
+
+        {showShareSection && (
+          <div className="space-y-4 animate-fade-in">
+            {/* Quick Share Grid */}
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 group"
+              >
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                  {copied ? 
+                    <Check className="w-5 h-5 text-white" /> : 
+                    <Copy className="w-5 h-5 text-white" />
+                  }
+                </div>
+                <span className="text-xs font-semibold text-gray-700">{copied ? 'Copied!' : 'Copy Link'}</span>
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQRCode(!showQRCode);
+                  if (!showQRCode) {
+                    setShowPlatforms(false);
+                    setShowCopiedLink(false);
+                  }
+                }}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 group ${
+                  showQRCode 
+                    ? 'bg-gradient-to-br from-cyan-500 to-cyan-600 border-cyan-600 shadow-lg shadow-cyan-500/30' 
+                    : 'bg-white border-gray-200 hover:border-cyan-400 hover:bg-cyan-50'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform ${
+                  showQRCode ? 'bg-white/20' : 'bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-md'
+                }`}>
+                  <QrCode className="w-5 h-5 text-white" />
+                </div>
+                <span className={`text-xs font-semibold ${showQRCode ? 'text-white' : 'text-gray-700'}`}>QR Code</span>
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleShare}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 group ${
+                  showPlatforms
+                    ? 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-600 shadow-lg shadow-purple-500/30'
+                    : 'bg-white border-gray-200 hover:border-purple-400 hover:bg-purple-50'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform ${
+                  showPlatforms ? 'bg-white/20' : 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-md'
+                }`}>
+                  <Share2 className="w-5 h-5 text-white" />
+                </div>
+                <span className={`text-xs font-semibold ${showPlatforms ? 'text-white' : 'text-gray-700'}`}>Share</span>
+              </button>
+            </div>
+
+            {/* Copied Link Display */}
+            {showCopiedLink && (
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border-2 border-blue-200 animate-scale-in">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-600 mb-1">Link copied to clipboard</p>
+                    <p className="text-sm font-mono text-gray-800 truncate">{eventLink}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* QR Code Display */}
+            {showQRCode && (
+              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-6 border-2 border-cyan-200 text-center animate-scale-in">
+                <div className="w-48 h-48 mx-auto bg-white rounded-xl flex items-center justify-center mb-3 shadow-lg">
+                  <QrCode className="w-24 h-24 text-gray-400" />
+                </div>
+                <p className="text-sm font-medium text-gray-700">Scan to join event</p>
+              </div>
+            )}
+
+            {/* Platform Options */}
+            {showPlatforms && (
+              <div className="grid grid-cols-4 gap-3 animate-scale-in">
+                <button
+                  type="button"
+                  onClick={() => handleSharePlatform('sms')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                >
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                    <MessageCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[10px] font-medium text-gray-700">SMS</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSharePlatform('whatsapp')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                >
+                  <div className="w-11 h-11 rounded-full bg-[#25D366] flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                    <MessageCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[10px] font-medium text-gray-700">WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSharePlatform('messenger')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                >
+                  <div className="w-11 h-11 rounded-full bg-[#0084FF] flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                    <Send className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[10px] font-medium text-gray-700">Messenger</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSharePlatform('telegram')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                >
+                  <div className="w-11 h-11 rounded-full bg-[#0088cc] flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                    <Plane className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[10px] font-medium text-gray-700">Telegram</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSharePlatform('email')}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                >
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                    <Mail className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[10px] font-medium text-gray-700">Email</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleNativeShare}
+                  className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group col-span-3"
+                >
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                    <Share2 className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-[10px] font-medium text-gray-700">More Options</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Done Button */}
+      <div className="flex justify-center pt-2">
+        <Button
+          onClick={onClose}
+          className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-xl h-12 font-semibold"
+        >
+          Done
         </Button>
       </div>
     </div>
@@ -427,31 +629,21 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="border-0 max-w-lg max-h-[95vh] p-0 overflow-hidden">
-        <div className="glass-card flex flex-col h-full max-h-[95vh]">
+      <DialogContent className="border-0 max-w-[95vw] md:max-w-2xl max-h-[85vh] p-0 overflow-hidden flex flex-col">
+        <div className="glass-card flex flex-col h-full overflow-hidden">
           {/* Header */}
-          <DialogHeader className="px-4 py-4 bg-gradient-to-r from-green-50 via-blue-50 to-cyan-50 border-b border-white/20 flex-shrink-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-blue-500 flex items-center justify-center shadow-lg flex-shrink-0">
-                  <Check className="w-5 h-5 text-white" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <DialogTitle className="font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: '16px', lineHeight: '1.3' }}>
-                    Congratulations! Your Event is Live! 🎉✨
-                  </DialogTitle>
-                  <p className="text-gray-600 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: '11px' }}>
-                    Share it with friends and others to join the fun!
-                  </p>
-                </div>
-              </div>
+          <DialogHeader className="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-white/20 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-section-header font-semibold">
+                Your Event is Live! 🎉✨
+              </DialogTitle>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="rounded-full hover:bg-white/20 shrink-0 h-8 w-8"
+                className="rounded-full hover:bg-white/20"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </Button>
             </div>
             <DialogDescription className="sr-only">
@@ -459,8 +651,8 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
             </DialogDescription>
           </DialogHeader>
 
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0">
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 min-h-0">
             {renderMainContent()}
           </div>
         </div>
