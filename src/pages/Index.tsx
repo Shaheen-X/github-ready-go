@@ -26,8 +26,9 @@ const IndexContent = () => {
   const [isPairingCreatedOpen, setIsPairingCreatedOpen] = useState(false);
   const [isEventCreatedOpen, setIsEventCreatedOpen] = useState(false);
   const [createdEventData, setCreatedEventData] = useState<any>(null);
+  const [editingPairing, setEditingPairing] = useState<any>(null);
   
-  const { addEvents } = useCalendarEvents();
+  const { addEvents, deleteEvent } = useCalendarEvents();
 
   const handleNavigate = (tab: string) => {
     if (tab === 'create') {
@@ -124,6 +125,23 @@ const IndexContent = () => {
     setActiveTab('calendar');
   };
 
+  const handleEditPairing = () => {
+    if (createdEventData) {
+      setEditingPairing(createdEventData);
+      setIsPairingCreatedOpen(false);
+      setIsCreatePairingOpen(true);
+    }
+  };
+
+  const handleDeletePairing = () => {
+    if (createdEventData?.eventId) {
+      deleteEvent(createdEventData.eventId);
+      setIsPairingCreatedOpen(false);
+      setCreatedEventData(null);
+      setActiveTab('calendar');
+    }
+  };
+
   return (
     <>
       <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-slate-50 to-gray-100">
@@ -150,8 +168,12 @@ const IndexContent = () => {
       
       <CreatePairingModal
         isOpen={isCreatePairingOpen}
-        onClose={() => setIsCreatePairingOpen(false)}
+        onClose={() => {
+          setIsCreatePairingOpen(false);
+          setEditingPairing(null);
+        }}
         onCreatePairing={handleCreatePairing}
+        initialData={editingPairing}
       />
       
       <CreateGroupEventModal
@@ -163,6 +185,8 @@ const IndexContent = () => {
       <PairingCreatedModal
         isOpen={isPairingCreatedOpen}
         onClose={handlePairingCreatedClose}
+        onEdit={handleEditPairing}
+        onDelete={handleDeletePairing}
         pairingData={createdEventData}
       />
       

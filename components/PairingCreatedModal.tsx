@@ -14,6 +14,8 @@ interface PairingCreatedModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate?: (tab: string) => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   pairingData?: {
     title: string;
     activity: string;
@@ -24,8 +26,8 @@ interface PairingCreatedModalProps {
     customTime?: string;
     hasCustomDateTime?: boolean;
     repeat?: string;
-    hasRepeat?: boolean;
     repeatEndDate?: string;
+    hasRepeat?: boolean;
     description?: string;
     invitedBuddies?: string[];
   };
@@ -88,6 +90,8 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   isOpen,
   onClose,
   onNavigate,
+  onEdit,
+  onDelete,
   pairingData
 }) => {
   const [selectedBuddy, setSelectedBuddy] = useState<string | null>(null);
@@ -183,14 +187,18 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   const handleMoreOptions = (action: string) => {
     switch(action) {
       case 'edit':
-        toast.info('Opening pairing editor...');
-        onClose();
+        if (onEdit) {
+          onEdit();
+        } else {
+          toast.info('Edit functionality not available');
+        }
         break;
       case 'delete':
-        toast.error('Pairing deleted', {
-          description: 'Your pairing request has been removed'
-        });
-        onClose();
+        if (onDelete) {
+          onDelete();
+        } else {
+          toast.info('Delete functionality not available');
+        }
         break;
     }
   };
