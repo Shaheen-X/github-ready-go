@@ -277,12 +277,18 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
             {/* Pairing Card */}
             {pairingData && (
               <div className="relative overflow-hidden rounded-2xl bg-white shadow-xl border border-gray-100">
-                <div className="p-6">
+                {/* Colorful Header Banner */}
+                <div className="h-24 bg-gradient-to-br from-blue-400 via-cyan-400 to-purple-400 relative">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.3),transparent_60%)]"></div>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.2),transparent_60%)]"></div>
+                </div>
+                
+                <div className="p-6 -mt-8">
                   {/* Header with More Options */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="choice-chip selected text-xs px-3 py-1">
+                        <span className="choice-chip selected text-xs px-3 py-1 bg-white shadow-md">
                           {pairingData.activity}
                         </span>
                       </div>
@@ -1026,29 +1032,39 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
           {/* Footer with Action Buttons */}
           {!showInviteList && (
             <div className="px-6 py-4 border-t border-white/20">
-              {/* Main Action Buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Show Done button when no one is invited, otherwise show Invite and Chat */}
+              {!hasInviteSent ? (
                 <Button
-                  onClick={() => setShowInviteList(true)}
-                  disabled={hasInviteSent}
-                  className="bg-white text-gray-700 rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  onClick={onClose}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
                   style={{ fontSize: '17px' }}
                 >
-                  <UserPlus className="mr-2 w-5 h-5" />
-                  Invite
+                  <Check className="mr-2 w-5 h-5" />
+                  Done
                 </Button>
-                <Button
-                  onClick={() => {
-                    onNavigate?.('messages');
-                    onClose();
-                  }}
-                  className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-                  style={{ fontSize: '17px' }}
-                >
-                  <MessageCircle className="mr-2 w-5 h-5" />
-                  Chat
-                </Button>
-              </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    onClick={() => setShowInviteList(true)}
+                    className="bg-white text-gray-700 rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border border-gray-200"
+                    style={{ fontSize: '17px' }}
+                  >
+                    <UserPlus className="mr-2 w-5 h-5" />
+                    Invite
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      onNavigate?.('messages');
+                      onClose();
+                    }}
+                    className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                    style={{ fontSize: '17px' }}
+                  >
+                    <MessageCircle className="mr-2 w-5 h-5" />
+                    Chat
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
