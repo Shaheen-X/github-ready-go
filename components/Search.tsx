@@ -522,13 +522,14 @@ export function Search() {
                       <PaginationContent>
                         {currentPage > 1 && (
                           <PaginationItem>
-                            <PaginationPrevious onClick={() => setCurrentPage(currentPage - 1)} />
+                            <PaginationPrevious size="default" onClick={() => setCurrentPage(currentPage - 1)} />
                           </PaginationItem>
                         )}
                         
                         {Array.from({ length: totalPages }).map((_, i) => (
                           <PaginationItem key={i} className={isMobile && totalPages > 3 && ![0, totalPages - 1, currentPage - 1].includes(i) ? "hidden" : undefined}>
                             <PaginationLink 
+                              size="icon"
                               isActive={currentPage === i + 1}
                               onClick={() => setCurrentPage(i + 1)}
                             >
@@ -539,7 +540,7 @@ export function Search() {
                         
                         {currentPage < totalPages && (
                           <PaginationItem>
-                            <PaginationNext onClick={() => setCurrentPage(currentPage + 1)} />
+                            <PaginationNext size="default" onClick={() => setCurrentPage(currentPage + 1)} />
                           </PaginationItem>
                         )}
                       </PaginationContent>

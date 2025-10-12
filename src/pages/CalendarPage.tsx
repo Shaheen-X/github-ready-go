@@ -1,5 +1,5 @@
 import { Calendar as CalendarIcon, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '../../components/ui/button';
 
 export function CalendarPage() {
   const events = [

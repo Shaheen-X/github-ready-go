@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { ChoiceButton } from './ChoiceButton';
 import { activities } from './OnboardingNew';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from './ui/textarea';
 
 interface CreateGroupEventModalProps {
   isOpen: boolean;
@@ -864,7 +864,7 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
                 <Textarea
                   placeholder="Tell people what to expect..."
                   value={formData.description}
-                  onChange={(e) => {
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                     const v = e.target.value;
                     if (v.length <= 200) setFormData(prev => ({ ...prev, description: v }));
                   }}

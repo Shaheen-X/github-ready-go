@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { ChoiceButton } from './ChoiceButton';
 import { activities, timeSlots } from './OnboardingNew';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from './ui/textarea';
 
 interface CreatePairingModalProps {
   isOpen: boolean;
@@ -688,7 +688,7 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
                 <Textarea
                   placeholder="Tell people what to expect..."
                   value={formData.description}
-                  onChange={(e) => {
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                     const v = e.target.value;
                     if (v.length <= 100) setFormData(prev => ({ ...prev, description: v }));
                   }}
