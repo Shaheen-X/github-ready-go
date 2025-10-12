@@ -240,22 +240,37 @@ export const createEventFromInput = (
   input: NewEventInput,
   id: string,
   recurrenceId?: string,
-): CalendarEvent => ({
-  id,
-  title: input.title,
-  type: input.type,
-  activity: input.title,
-  date: input.date,
-  time: input.time,
-  location: input.location,
-  attendees: input.attendees,
-  maxParticipants: input.maxParticipants,
-  isHost: true,
-  status: 'upcoming',
-  description: input.description,
-  image:
-    input.image ||
-    'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop',
-  tags: input.tags,
-  recurrenceId,
-});
+): CalendarEvent => {
+  // Ensure the host (You) is always in the attendees list as 'accepted'
+  const hostAttendee: EventAttendee = {
+    id: 'att-you',
+    name: 'You',
+    status: 'accepted',
+  };
+  
+  // Check if 'You' is already in the attendees list
+  const hasHost = input.attendees.some(a => a.id === 'att-you');
+  const attendees: EventAttendee[] = hasHost 
+    ? input.attendees.map(a => a.id === 'att-you' ? { ...a, status: 'accepted' as RSVPStatus } : a)
+    : [hostAttendee, ...input.attendees];
+
+  return {
+    id,
+    title: input.title,
+    type: input.type,
+    activity: input.title,
+    date: input.date,
+    time: input.time,
+    location: input.location,
+    attendees,
+    maxParticipants: input.maxParticipants,
+    isHost: true,
+    status: 'upcoming',
+    description: input.description,
+    image:
+      input.image ||
+      'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop',
+    tags: input.tags,
+    recurrenceId,
+  };
+};
