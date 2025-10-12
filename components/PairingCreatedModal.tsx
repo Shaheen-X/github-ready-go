@@ -101,16 +101,17 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   const [showQRCode, setShowQRCode] = useState(false);
   const [showPlatforms, setShowPlatforms] = useState(false);
   const [showCopiedLink, setShowCopiedLink] = useState(false);
+  const [inviteCancelled, setInviteCancelled] = useState(false);
   const [inviteStatus, setInviteStatus] = useState<'pending' | 'accepted' | null>(
     pairingData?.invitedBuddies && pairingData.invitedBuddies.length > 0 ? 'pending' : null
   );
   
-  // Get the invited buddy if one exists
-  const invitedBuddy = pairingData?.invitedBuddies && pairingData.invitedBuddies.length > 0
+  // Get the invited buddy if one exists (but only if not cancelled)
+  const invitedBuddy = !inviteCancelled && pairingData?.invitedBuddies && pairingData.invitedBuddies.length > 0
     ? mockBuddies.find(b => b.id === pairingData.invitedBuddies?.[0])
     : null;
 
-  const hasInviteSent = Boolean(invitedBuddy || inviteStatus);
+  const hasInviteSent = Boolean((invitedBuddy || inviteStatus) && !inviteCancelled);
 
   const pairingLink = `https://connectsphere.app/pairing/${Math.random().toString(36).substr(2, 9)}`;
 
@@ -163,6 +164,7 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   const handleSendInvite = () => {
     if (selectedBuddy) {
       setInviteStatus('pending');
+      setInviteCancelled(false);
       setShowInviteList(false);
       toast.success('Invitation sent!');
     } else {
@@ -173,6 +175,7 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   const handleCancelInvite = () => {
     setInviteStatus(null);
     setSelectedBuddy(null);
+    setInviteCancelled(true);
     toast.info('Invitation cancelled');
   };
 
