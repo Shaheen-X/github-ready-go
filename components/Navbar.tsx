@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Search as SearchIcon } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 
 interface NavbarProps {
   title?: string;

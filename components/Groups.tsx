@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Plus, Users, MessageCircle, Settings, Search } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Input } from './ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import Navbar from './Navbar';
 
 interface Group {

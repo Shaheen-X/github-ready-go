@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { ChevronRight, ChevronLeft, Eye, EyeOff, Check, X, MapPin, Calendar, Clock, Users, Camera, QrCode, Upload, Search, Mail, User, Phone, Shield, Heart, Target, Zap, Timer, Globe, Plus } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Badge } from './ui/badge';
-import { Switch } from './ui/switch';
-import { Slider } from './ui/slider';
-import { Checkbox } from './ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Figma asset imports are not available in this environment. Use placeholders to avoid compile errors.
 const exampleImageGoals = '';
 const exampleImageAbout = '';

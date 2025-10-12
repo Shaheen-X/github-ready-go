@@ -16,21 +16,21 @@ import {
   type NewEventInput,
   type RecurrenceConfig,
 } from '../types/calendar';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Switch } from './ui/switch';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from './ui/popover';
-import { Calendar as DayPickerCalendar } from './ui/calendar';
-import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
-import { Checkbox } from './ui/checkbox';
-import { cn } from './ui/utils';
+} from '@/components/ui/popover';
+import { Calendar as DayPickerCalendar } from '@/components/ui/calendar';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { cn } from '@/lib/utils';
 
 interface CreateEventPromptProps {
   onLaunch: (type?: EventType) => void;

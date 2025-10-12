@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { MapPin, Calendar, Users, Star, Briefcase, Clock, Phone, User, MessageCircle, Repeat } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { UserPlus, Copy, Share, X, QrCode, MessageCircle, Mail, Bell } from 'lucide-react';
-import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface TopNavigationProps {
   onNavigate?: (tab: string) => void;

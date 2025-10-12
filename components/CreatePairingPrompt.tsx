@@ -1,4 +1,4 @@
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { User, Sparkles, MapPin } from 'lucide-react';
 
 interface CreatePairingPromptProps {

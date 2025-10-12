@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Heart, Bookmark, MessageCircle, MapPin, Clock, Users } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface Activity {
   id: number;

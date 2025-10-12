@@ -1,7 +1,7 @@
 import { X, MapPin, Clock, Repeat, User, MessageCircle, Users, Star, Calendar, Target, Award, Info } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface User {
