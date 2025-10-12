@@ -48,39 +48,59 @@ const IndexContent = () => {
   };
 
   const handleCreatePairing = (pairingData: any) => {
-    const attendees: EventAttendee[] = pairingData.invitedBuddies?.map((buddyId: string) => ({
+    // Store the pairing data but don't add to calendar yet
+    // Only add to calendar when "Done" is pressed
+    setCreatedEventData(pairingData);
+    setIsCreatePairingOpen(false);
+    setIsPairingCreatedOpen(true);
+  };
+
+  const handlePairingDone = () => {
+    if (!createdEventData) return;
+
+    const attendees: EventAttendee[] = createdEventData.invitedBuddies?.map((buddyId: string) => ({
       id: `attendee-${buddyId}`,
       name: `User ${buddyId}`,
       status: 'pending' as const
     })) || [];
 
-    const eventDate = pairingData.hasCustomDateTime 
-      ? new Date(pairingData.customDate)
+    const eventDate = createdEventData.hasCustomDateTime 
+      ? new Date(createdEventData.customDate)
       : new Date();
     
-    const eventTime = pairingData.hasCustomDateTime
-      ? pairingData.customTime
+    const eventTime = createdEventData.hasCustomDateTime
+      ? createdEventData.customTime
       : '09:00';
 
     const newEvent = createEventFromInput(
       {
-        title: pairingData.title,
+        title: createdEventData.title,
         type: 'one-to-one',
         date: eventDate,
         time: eventTime,
-        location: pairingData.location,
-        description: pairingData.description || '',
+        location: createdEventData.location,
+        description: createdEventData.description || '',
         attendees,
         maxParticipants: 2,
-        tags: pairingData.activity ? [pairingData.activity] : [],
+        tags: createdEventData.activity ? [createdEventData.activity] : [],
       },
       `pairing-${Date.now()}`
     );
 
     addEvents([newEvent]);
-    setCreatedEventData({ ...pairingData, eventId: newEvent.id });
-    setIsCreatePairingOpen(false);
-    setIsPairingCreatedOpen(true);
+    setIsPairingCreatedOpen(false);
+    setCreatedEventData(null);
+    setActiveTab('calendar');
+  };
+
+  const handlePairingEdit = () => {
+    setIsPairingCreatedOpen(false);
+    setIsCreatePairingOpen(true);
+  };
+
+  const handlePairingDelete = () => {
+    setIsPairingCreatedOpen(false);
+    setCreatedEventData(null);
   };
 
   const handleCreateGroupEvent = (eventData: any) => {
@@ -150,8 +170,16 @@ const IndexContent = () => {
       
       <CreatePairingModal
         isOpen={isCreatePairingOpen}
-        onClose={() => setIsCreatePairingOpen(false)}
+        onClose={() => {
+          setIsCreatePairingOpen(false);
+          // Clear createdEventData if not editing
+          if (!isPairingCreatedOpen) {
+            setCreatedEventData(null);
+          }
+        }}
         onCreatePairing={handleCreatePairing}
+        editMode={!!createdEventData}
+        initialData={createdEventData}
       />
       
       <CreateGroupEventModal
@@ -163,6 +191,9 @@ const IndexContent = () => {
       <PairingCreatedModal
         isOpen={isPairingCreatedOpen}
         onClose={handlePairingCreatedClose}
+        onEdit={handlePairingEdit}
+        onDone={handlePairingDone}
+        onDelete={handlePairingDelete}
         pairingData={createdEventData}
       />
       
