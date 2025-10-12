@@ -533,46 +533,69 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
                 const acceptedAttendees = event.attendees.filter(
                   (attendee) => attendee.status === 'accepted',
                 ).length;
+                const isHost = event.isHost;
 
                 return (
                   <div
                     key={event.id}
-                    className="rounded-2xl border border-white/40 bg-white/85 p-4 shadow-md transition hover:shadow-lg"
+                    className="relative overflow-hidden rounded-2xl bg-white shadow-xl cursor-pointer transition-transform hover:scale-[1.02]"
+                    onClick={() => openDayEvents(event.date, event)}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-2">
-                        <h3 className="text-body font-semibold text-foreground">{event.title}</h3>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-subtext">
-                          <Clock className="h-3.5 w-3.5 text-blue-500" />
-                          {event.time}{event.endTime ? ` - ${event.endTime}` : ''}
-                          <MapPin className="h-3.5 w-3.5 text-purple-500" />
-                          {event.location}
+                    {/* Event Image with Compact 3:2 Ratio */}
+                    <div className="relative w-full" style={{ aspectRatio: '3/2' }}>
+                      {event.image ? (
+                        <ImageWithFallback
+                          src={event.image}
+                          alt={event.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-cyan-400" />
+                      )}
+                      
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      
+                      {/* Host Badge */}
+                      {isHost && (
+                        <div className="absolute top-2 left-2">
+                          <div className="px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold shadow-lg">
+                            👑 Host
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Type Badge */}
+                      <div className="absolute top-2 right-2">
+                        <span className="px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-[10px] font-semibold uppercase tracking-wide">
+                          {event.type === 'group' ? 'Group' : '1:1'}
+                        </span>
+                      </div>
+
+                      {/* Event Info Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/60 to-transparent">
+                        <h3 className="text-sm font-bold text-white mb-1 line-clamp-1">{event.title}</h3>
+                        <div className="flex items-center gap-2 text-xs text-white/90 mb-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{event.time}</span>
+                          {event.endTime && <span>- {event.endTime}</span>}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-white/90">
+                          <MapPin className="h-3 w-3" />
+                          <span className="line-clamp-1">{event.location}</span>
                         </div>
                       </div>
-                      <Badge
-                        className={cn(
-                          'self-start rounded-full border-0 px-3 py-1 text-xs font-semibold uppercase tracking-wide shadow',
-                          event.type === 'group'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-purple-100 text-purple-700',
-                        )}
-                      >
-                        {event.type === 'group' ? 'Group' : '1:1'}
-                      </Badge>
                     </div>
-                    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-subtext">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-blue-500" />
-                        {acceptedAttendees}/{event.maxParticipants || '∞'} attending
+
+                    {/* Bottom Info Bar */}
+                    <div className="px-3 py-2 bg-white flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-gray-600">
+                        <Users className="h-3.5 w-3.5 text-blue-500" />
+                        <span>{acceptedAttendees}/{event.maxParticipants || '∞'}</span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="rounded-full px-3 text-xs text-blue-600 hover:bg-blue-50"
-                        onClick={() => openDayEvents(event.date, event)}
-                      >
-                        View details
-                      </Button>
+                      <div className="text-xs text-blue-600 font-medium">
+                        View details →
+                      </div>
                     </div>
                   </div>
                 );
