@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Bell, MapPin, Zap } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import NearbyActivitiesBlock from './NearbyActivitiesBlock';

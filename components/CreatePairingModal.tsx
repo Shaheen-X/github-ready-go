@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { X, MapPin, Users, Zap, Search, Repeat, Calendar, Check, Copy, Share2, QrCode, ChevronDown, ChevronUp, Send, MessageCircle, Mail, Plane } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { ChoiceButton } from './ChoiceButton';
 import { activities, timeSlots } from './OnboardingNew';

@@ -3,8 +3,8 @@ import Navbar from "./Navbar";
 import ActivityCard from "./ActivityCard";
 import ActivityFilter from "./ActivityFilter";
 import ActivityDetailsModal from "./ActivityDetailsModal";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Search as SearchIcon, Filter, Users, MapPin } from "lucide-react";
 import {
   Pagination,
@@ -13,7 +13,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious
-} from "./ui/pagination";
+} from "@/components/ui/pagination";
 import { useIsMobile } from "../hooks/use-mobile";
 import {
   Sheet,
@@ -22,12 +22,12 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "./ui/sheet";
+} from "@/components/ui/sheet";
 import {
   Tabs,
   TabsList,
   TabsTrigger
-} from "./ui/tabs";
+} from "@/components/ui/tabs";
 
 const activities = [
   {

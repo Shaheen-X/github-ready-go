@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Sparkles, Copy, Share, QrCode, Mail, Calendar, Minus } from 'lucide-react';
-import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
-import { Input } from './ui/input';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
 interface InviteFloatingActionProps {

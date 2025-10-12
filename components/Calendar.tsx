@@ -23,31 +23,31 @@ import { useCalendarEvents } from '@/context/calendar-events-context';
 import type { CalendarEvent } from '@/types/calendar';
 import { userConnections } from '@/data/calendar-events';
 import { useIsMobile } from '../hooks/use-mobile';
-import { Calendar as DayPickerCalendar } from './ui/calendar';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Calendar as DayPickerCalendar } from '@/components/ui/calendar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog';
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from './ui/sheet';
-import { cn } from './ui/utils';
+} from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 interface CalendarProps {
   onNavigate?: (tab: string) => void;

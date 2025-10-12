@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from './ui/utils';
+import { cn } from '@/lib/utils';
 
 interface ChoiceButtonProps {
   children: React.ReactNode;

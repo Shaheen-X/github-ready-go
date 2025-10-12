@@ -3,12 +3,12 @@ import { ChevronRight, ChevronLeft, Eye, EyeOff, Check, X, MapPin, Users, Camera
 import { motion } from 'framer-motion';
 // import { Button } from './ui/button';
 // import { Input } from './ui/input';
-import { Badge } from './ui/badge';
-import { Switch } from './ui/switch';
-import { Slider } from './ui/slider';
-import { Checkbox } from './ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ChoiceButton } from './ChoiceButton';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
