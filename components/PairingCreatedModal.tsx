@@ -250,8 +250,8 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="border-0 max-w-[95vw] md:max-w-2xl max-h-[95vh] p-0">
-        <div className="glass-card flex flex-col h-full">
+      <DialogContent className="border-0 max-w-[95vw] md:max-w-2xl max-h-[90vh] h-[90vh] p-0 overflow-hidden">
+        <div className="glass-card flex flex-col h-full max-h-full">
           {/* Header */}
           <DialogHeader className="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-white/20">
             <div className="flex items-center justify-between">
