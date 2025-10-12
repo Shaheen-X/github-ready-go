@@ -20,6 +20,15 @@ interface CreatePairingModalProps {
     activity?: string;
     description?: string;
     location?: string;
+    availableDays?: string[];
+    availableTimes?: string[];
+    customDate?: string;
+    customTime?: string;
+    hasCustomDateTime?: boolean;
+    repeat?: string;
+    repeatEndDate?: string;
+    hasRepeat?: boolean;
+    invitedBuddies?: string[];
   };
 }
 
@@ -141,15 +150,32 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
   // Generate a preview link for sharing
   const previewLink = `https://connectsphere.app/pairing/preview-${Math.random().toString(36).substr(2, 9)}`;
 
-  // Initialize form data from initialData if in edit mode
+  // Initialize form data from initialData
   React.useEffect(() => {
-    if (editMode && initialData) {
+    if (initialData) {
       setFormData(prev => ({
         ...prev,
-        ...initialData
+        title: initialData.title || '',
+        activity: initialData.activity || '',
+        description: initialData.description || '',
+        location: initialData.location || '',
+        availableDays: initialData.availableDays || ['Any'],
+        availableTimes: initialData.availableTimes || [],
+        customDate: initialData.customDate || getTodayDate(),
+        customTime: initialData.customTime || getNextHour(),
+        hasCustomDateTime: initialData.hasCustomDateTime || false,
+        repeat: initialData.repeat || 'never',
+        repeatEndDate: initialData.repeatEndDate || '',
+        hasRepeat: initialData.hasRepeat || false
       }));
+      
+      // Restore selected buddies if available
+      if (initialData.invitedBuddies && initialData.invitedBuddies.length > 0) {
+        const buddies = mockBuddies.filter(b => initialData.invitedBuddies?.includes(b.id));
+        setSelectedBuddies(buddies);
+      }
     }
-  }, [editMode, initialData]);
+  }, [initialData]);
 
   const handleActivityChange = (value: string) => {
     // Limit to 20 characters and two words

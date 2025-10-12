@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import { Home } from '../../components/Home';
 import Search from '../../components/Search';
@@ -127,7 +128,23 @@ const IndexContent = () => {
 
   const handleEditPairing = () => {
     if (createdEventData) {
-      setEditingPairing(createdEventData);
+      // Map the created event data back to the format CreatePairingModal expects
+      const editData = {
+        title: createdEventData.title,
+        activity: createdEventData.activity,
+        description: createdEventData.description,
+        location: createdEventData.location,
+        availableDays: createdEventData.availableDays,
+        availableTimes: createdEventData.availableTimes,
+        customDate: createdEventData.customDate,
+        customTime: createdEventData.customTime,
+        hasCustomDateTime: createdEventData.hasCustomDateTime,
+        repeat: createdEventData.repeat,
+        repeatEndDate: createdEventData.repeatEndDate,
+        hasRepeat: createdEventData.hasRepeat,
+        invitedBuddies: createdEventData.invitedBuddies
+      };
+      setEditingPairing(editData);
       setIsPairingCreatedOpen(false);
       setIsCreatePairingOpen(true);
     }
@@ -139,6 +156,9 @@ const IndexContent = () => {
       setIsPairingCreatedOpen(false);
       setCreatedEventData(null);
       setActiveTab('calendar');
+      toast.success('Pairing deleted', {
+        description: 'Your pairing request has been removed'
+      });
     }
   };
 
