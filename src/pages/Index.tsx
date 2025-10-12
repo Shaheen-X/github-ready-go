@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Onboarding } from '../../components/OnboardingNew';
+
 import { Home } from '../../components/Home';
 import Search from '../../components/Search';
 import { Messages } from '../../components/Messages';
@@ -13,7 +13,7 @@ import PairingCreatedModal from '../../components/PairingCreatedModal';
 import EventCreatedModal from '../../components/EventCreatedModal';
 import CreateEventChooserModal from '../../components/CreateEventChooserModal';
 import type { EventAttendee } from '@/types/calendar';
-import { toast } from 'sonner';
+
 
 type Tab = 'home' | 'search' | 'messages' | 'calendar';
 
@@ -173,30 +173,10 @@ const IndexContent = () => {
   );
 };
 
-const Index = () => {
-  // Check localStorage for onboarding status
-  const [isOnboarded, setIsOnboarded] = useState(() => {
-    const stored = localStorage.getItem('connectsphere_onboarded');
-    return stored === 'true';
-  });
-
-  const handleOnboardingComplete = () => {
-    setIsOnboarded(true);
-    localStorage.setItem('connectsphere_onboarded', 'true');
-    toast.success('Welcome to ConnectSphere!', {
-      description: 'Your profile is all set up. Start creating activities!',
-    });
-  };
-
-  if (!isOnboarded) {
-    return <Onboarding onComplete={handleOnboardingComplete} />;
-  }
-
-  return (
-    <CalendarEventsProvider>
-      <IndexContent />
-    </CalendarEventsProvider>
-  );
-};
+const Index = () => (
+  <CalendarEventsProvider>
+    <IndexContent />
+  </CalendarEventsProvider>
+);
 
 export default Index;
