@@ -250,10 +250,10 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="border-0 max-w-[95vw] md:max-w-2xl max-h-[90vh] h-[90vh] p-0 overflow-hidden">
-        <div className="glass-card flex flex-col h-full max-h-full">
+      <DialogContent className="border-0 max-w-[95vw] md:max-w-2xl max-h-[85vh] p-0 overflow-hidden flex flex-col">
+        <div className="glass-card flex flex-col h-full overflow-hidden">
           {/* Header */}
-          <DialogHeader className="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-white/20">
+          <DialogHeader className="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-white/20 flex-shrink-0">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-section-header font-semibold">
                 Your Pairing Request is Live! 🎉✨
@@ -273,7 +273,7 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
           </DialogHeader>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 min-h-0">
             {/* Pairing Card */}
             {pairingData && (
               <div className="relative overflow-hidden rounded-2xl bg-white shadow-xl border border-gray-100">
