@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { X, UserPlus, Copy, Check, Search, Calendar, Clock, MapPin, Trash2, Edit, MoreHorizontal, MessageCircle, Share2, QrCode, Mail, Send } from 'lucide-react';
+import { X, UserPlus, Copy, Check, Search, Calendar, Clock, MapPin, Trash2, Edit, MoreHorizontal, MessageCircle, Share2, QrCode, Mail, Send, Users, ChevronDown, ChevronUp, Plane } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Label } from './ui/label';
 import { Separator } from './ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -95,6 +94,10 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   const [copied, setCopied] = useState(false);
   const [showInviteList, setShowInviteList] = useState(false);
   const [showExternalShare, setShowExternalShare] = useState(false);
+  const [showShareSection, setShowShareSection] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [showPlatforms, setShowPlatforms] = useState(false);
+  const [showCopiedLink, setShowCopiedLink] = useState(false);
   const [inviteStatus, setInviteStatus] = useState<'pending' | 'accepted' | null>(
     pairingData?.invitedBuddies && pairingData.invitedBuddies.length > 0 ? 'pending' : null
   );
@@ -122,10 +125,35 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
     try {
       await navigator.clipboard.writeText(pairingLink);
       setCopied(true);
+      setShowCopiedLink(true);
+      setShowQRCode(false);
+      setShowPlatforms(false);
       toast.success('Link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       toast.error('Failed to copy link');
+    }
+  };
+
+  const handleShare = () => {
+    setShowPlatforms(!showPlatforms);
+    if (!showPlatforms) {
+      setShowQRCode(false);
+      setShowCopiedLink(false);
+    }
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: pairingData?.activity || 'Join my activity',
+          text: `Join me for ${pairingData?.activity}!`,
+          url: pairingLink,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
     }
   };
 
@@ -425,150 +453,310 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
               <>
                 <Separator className="bg-gradient-to-r from-blue-500/20 to-cyan-400/20" />
                 
-                {/* Invite from Platform */}
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      Invite Someone from ConnectSphere 👥
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Send a direct invitation to someone on the platform
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={() => setShowInviteList(!showInviteList)}
-                    variant="outline"
-                    className="w-full rounded-xl h-12 flex items-center justify-center gap-2 border-2 hover:border-blue-500"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Browse & Invite Users
-                  </Button>
-
-                  {/* Invite List */}
-                  {showInviteList && (
-                    <div className="glass-card border border-white/20 rounded-xl p-4 space-y-4">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <Input
-                          placeholder="Search people..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-10 glass-card border-white/20 rounded-xl h-11"
-                        />
+                {/* Invite Platform Users - Priority Section */}
+                <div className="space-y-3">
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 p-[1px]">
+                    <div className="bg-white rounded-2xl p-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">Invite from Platform</h4>
+                          <p className="text-xs text-gray-500">Find someone you know</p>
+                        </div>
                       </div>
 
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {filteredBuddies.map((buddy) => (
-                          <div
-                            key={buddy.id}
-                            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                              selectedBuddy === buddy.id
-                                ? 'bg-blue-50 border-2 border-blue-500'
-                                : 'hover:bg-gray-50 border-2 border-transparent'
-                            }`}
-                            onClick={() => handleBuddyToggle(buddy.id)}
-                          >
-                            <ImageWithFallback
-                              src={buddy.avatar}
-                              alt={buddy.name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                            <div className="flex-1">
-                              <p className="font-semibold text-gray-900 text-sm">{buddy.name}</p>
-                              <p className="text-xs text-gray-500">{buddy.username}</p>
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                          <Input
+                            placeholder="Search connections..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 border-gray-200 rounded-xl h-11 text-sm focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+
+                        {selectedBuddy && mockBuddies.find(b => b.id === selectedBuddy) && (
+                          <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-cyan-50 px-3 py-2.5 rounded-xl border-2 border-blue-300 animate-scale-in">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 p-[2px]">
+                              <ImageWithFallback
+                                src={mockBuddies.find(b => b.id === selectedBuddy)!.avatar}
+                                alt={mockBuddies.find(b => b.id === selectedBuddy)!.name}
+                                className="w-full h-full rounded-full object-cover"
+                              />
                             </div>
-                            {selectedBuddy === buddy.id && (
-                              <Check className="w-5 h-5 text-blue-600" />
-                            )}
+                            <span className="text-sm font-medium text-gray-900 flex-1">
+                              {mockBuddies.find(b => b.id === selectedBuddy)!.name}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedBuddy(null)}
+                              className="w-7 h-7 rounded-full bg-white hover:bg-red-50 flex items-center justify-center transition-colors shadow-sm"
+                            >
+                              <X className="w-4 h-4 text-gray-600" />
+                            </button>
                           </div>
-                        ))}
-                      </div>
+                        )}
 
-                      <Button
-                        onClick={handleSendInvite}
-                        disabled={!selectedBuddy}
-                        className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl h-11"
-                      >
-                        <Send className="w-4 h-4 mr-2" />
-                        Send Invitation
-                      </Button>
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {filteredBuddies.slice(0, 5).map((buddy) => {
+                            const isSelected = selectedBuddy === buddy.id;
+                            return (
+                              <button
+                                key={buddy.id}
+                                type="button"
+                                onClick={() => handleBuddyToggle(buddy.id)}
+                                className={`w-full p-3 rounded-xl transition-all duration-200 ${
+                                  isSelected 
+                                    ? 'bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-400 shadow-md' 
+                                    : 'bg-gray-50 hover:bg-white border-2 border-transparent hover:border-gray-200 hover:shadow-sm'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-10 h-10 rounded-full ${isSelected ? 'bg-gradient-to-br from-blue-500 to-cyan-400 p-[2px]' : ''}`}>
+                                    <ImageWithFallback
+                                      src={buddy.avatar}
+                                      alt={buddy.name}
+                                      className={`w-full h-full rounded-full object-cover ${isSelected ? '' : 'border-2 border-gray-200'}`}
+                                    />
+                                  </div>
+                                  <div className="flex-1 text-left">
+                                    <h4 className="text-sm font-semibold text-gray-900">{buddy.name}</h4>
+                                    <p className="text-xs text-gray-500">{buddy.username}</p>
+                                  </div>
+                                  {isSelected && (
+                                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg">
+                                      <Check className="w-4 h-4 text-white" />
+                                    </div>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {selectedBuddy && (
+                          <Button
+                            onClick={handleSendInvite}
+                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl h-11"
+                          >
+                            <Send className="w-4 h-4 mr-2" />
+                            Send Invitation
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
 
-                <Separator className="bg-gradient-to-r from-blue-500/20 to-cyan-400/20" />
-
-                {/* Share Externally */}
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      Or Share Externally 🚀
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Invite someone who's not on the platform yet
-                    </p>
-                  </div>
-
-                  {/* Quick Share Buttons */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      onClick={() => handleSharePlatform('whatsapp')}
-                      className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BD5C] text-white rounded-xl h-12"
-                    >
-                      <Send className="w-4 h-4" />
-                      WhatsApp
-                    </Button>
-                    <Button
-                      onClick={() => handleSharePlatform('sms')}
-                      className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl h-12"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      SMS
-                    </Button>
-                    <Button
-                      onClick={() => handleSharePlatform('messenger')}
-                      className="flex items-center justify-center gap-2 bg-[#0084FF] hover:bg-[#0073E6] text-white rounded-xl h-12"
-                    >
-                      <Send className="w-4 h-4" />
-                      Messenger
-                    </Button>
-                    <Button
-                      onClick={() => handleSharePlatform('email')}
-                      className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-800 text-white rounded-xl h-12"
-                    >
-                      <Mail className="w-4 h-4" />
-                      Email
-                    </Button>
-                  </div>
-
-                  {/* Copy Link */}
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Or copy the link</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        readOnly
-                        value={pairingLink}
-                        className="flex-1 glass-card border-white/20 rounded-xl h-12 text-sm"
-                      />
-                      <Button
-                        onClick={handleCopyLink}
-                        className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl px-6 h-12"
-                      >
-                        {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* More Share Options */}
-                  <Button
-                    onClick={handleGeneralShare}
-                    variant="outline"
-                    className="w-full rounded-xl h-12 flex items-center justify-center gap-2"
+                {/* External Sharing - Secondary Option */}
+                <div className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowShareSection(!showShareSection)}
+                    className="w-full group"
                   >
-                    <Share2 className="w-4 h-4" />
-                    More sharing options
-                  </Button>
+                    <div className="rounded-xl border-2 border-gray-200 hover:border-gray-300 p-4 flex items-center justify-between transition-all duration-200 bg-white hover:bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition-colors">
+                          <Share2 className="w-4 h-4 text-gray-600" />
+                        </div>
+                        <div className="text-left">
+                          <h4 className="text-sm font-semibold text-gray-900">Share Externally</h4>
+                          <p className="text-xs text-gray-500">Invite via link, QR code, or apps</p>
+                        </div>
+                      </div>
+                      <div className="w-7 h-7 rounded-full bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition-colors">
+                        {showShareSection ? 
+                          <ChevronUp className="w-4 h-4 text-gray-600" /> : 
+                          <ChevronDown className="w-4 h-4 text-gray-600" />
+                        }
+                      </div>
+                    </div>
+                  </button>
+
+                  {showShareSection && (
+                    <div className="space-y-4 animate-fade-in">
+                      {/* Quick Share Grid */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <button
+                          type="button"
+                          onClick={handleCopyLink}
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white border-2 border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 group"
+                        >
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                            {copied ? 
+                              <Check className="w-5 h-5 text-white" /> : 
+                              <Copy className="w-5 h-5 text-white" />
+                            }
+                          </div>
+                          <span className="text-xs font-semibold text-gray-700">{copied ? 'Copied!' : 'Copy Link'}</span>
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowQRCode(!showQRCode);
+                            if (!showQRCode) {
+                              setShowPlatforms(false);
+                              setShowCopiedLink(false);
+                            }
+                          }}
+                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 group ${
+                            showQRCode 
+                              ? 'bg-gradient-to-br from-cyan-500 to-cyan-600 border-cyan-600 shadow-lg shadow-cyan-500/30' 
+                              : 'bg-white border-gray-200 hover:border-cyan-400 hover:bg-cyan-50'
+                          }`}
+                        >
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform ${
+                            showQRCode ? 'bg-white/20' : 'bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-md'
+                          }`}>
+                            <QrCode className="w-5 h-5 text-white" />
+                          </div>
+                          <span className={`text-xs font-semibold ${showQRCode ? 'text-white' : 'text-gray-700'}`}>QR Code</span>
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={handleShare}
+                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 group ${
+                            showPlatforms
+                              ? 'bg-gradient-to-br from-purple-500 to-purple-600 border-purple-600 shadow-lg shadow-purple-500/30'
+                              : 'bg-white border-gray-200 hover:border-purple-400 hover:bg-purple-50'
+                          }`}
+                        >
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform ${
+                            showPlatforms ? 'bg-white/20' : 'bg-gradient-to-br from-purple-500 to-purple-600 shadow-md'
+                          }`}>
+                            <Share2 className="w-5 h-5 text-white" />
+                          </div>
+                          <span className={`text-xs font-semibold ${showPlatforms ? 'text-white' : 'text-gray-700'}`}>Share</span>
+                        </button>
+                      </div>
+
+                      {/* Copied Link Display */}
+                      {showCopiedLink && (
+                        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4 border-2 border-blue-200 animate-scale-in">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                              <Check className="w-5 h-5 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-600 mb-1">Link copied to clipboard</p>
+                              <p className="text-sm font-mono text-gray-800 truncate">{pairingLink}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Platform Options - Compact 4 per row, smaller, rounder, no borders */}
+                      {showPlatforms && (
+                        <div className="grid grid-cols-4 gap-3 animate-scale-in">
+                          <button
+                            type="button"
+                            onClick={() => handleSharePlatform('sms')}
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                          >
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                              <MessageCircle className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-700">SMS</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSharePlatform('whatsapp')}
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                          >
+                            <div className="w-11 h-11 rounded-full bg-[#25D366] flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                              <MessageCircle className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-700">WhatsApp</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSharePlatform('messenger')}
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                          >
+                            <div className="w-11 h-11 rounded-full bg-[#0084FF] flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                              <Send className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-700">Messenger</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSharePlatform('telegram')}
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                          >
+                            <div className="w-11 h-11 rounded-full bg-[#0088cc] flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                              <Plane className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-700">Telegram</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSharePlatform('email')}
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                          >
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                              <Mail className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-700">Email</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSharePlatform('twitter')}
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group"
+                          >
+                            <div className="w-11 h-11 rounded-full bg-black flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                              <Share2 className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-700">X</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleNativeShare}
+                            className="flex flex-col items-center gap-1.5 p-2 rounded-2xl hover:bg-gray-50 transition-all duration-200 group col-span-2"
+                          >
+                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
+                              <Share2 className="w-5 h-5 text-white" />
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-700">More Options</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* QR Code Display */}
+                      {showQRCode && (
+                        <div className="bg-white rounded-2xl p-6 border-2 border-cyan-200 animate-scale-in">
+                          <div className="flex flex-col items-center gap-4">
+                            <div className="relative">
+                              <div className="w-56 h-56 bg-white rounded-2xl p-4 shadow-2xl border-4 border-cyan-100">
+                                <div className="w-full h-full bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl flex items-center justify-center relative overflow-hidden">
+                                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.15),transparent_60%)]"></div>
+                                  <QrCode className="w-28 h-28 text-cyan-600 relative z-10" />
+                                </div>
+                              </div>
+                              <div className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full flex items-center justify-center shadow-lg">
+                                <Check className="w-5 h-5 text-white" />
+                              </div>
+                            </div>
+                            <div className="text-center">
+                              <h4 className="font-bold text-gray-900 mb-1">Scan to Join</h4>
+                              <p className="text-xs text-gray-500 max-w-xs">Share this QR code for instant access to your pairing request</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </>
             )}
