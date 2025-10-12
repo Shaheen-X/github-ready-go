@@ -23,6 +23,7 @@ interface CreateActivityModalProps {
     location?: string;
     maxParticipants?: number | null;
     isPrivate?: boolean;
+    image?: string;
   };
 }
 
@@ -330,18 +331,23 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
           ...prev,
           eventName: initialData.eventName || '',
           activity: initialData.activity || '',
+          description: initialData.description || '',
           date: initialData.date || getTodayDate(),
           time: initialData.time || getNextHour(),
           location: initialData.location || '',
           maxParticipants: initialData.maxParticipants?.toString() || '',
           visibility: initialData.isPrivate ? 'private' : 'public'
         }));
+        if (initialData.image) {
+          setSelectedImage(initialData.image);
+        }
       } else {
         setFormData(prev => ({
           ...prev,
           date: getTodayDate(),
           time: getNextHour()
         }));
+        setSelectedImage(defaultEventImage);
       }
     }
   }, [isOpen, editMode, initialData]);

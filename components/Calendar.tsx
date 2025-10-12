@@ -84,6 +84,7 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
     pinEventToChat,
     setHighlightedDate,
     deleteEvent,
+    updateEvent,
   } = useCalendarEvents();
   const isMobile = useIsMobile();
   const dialogSurface: DialogSurface = isMobile ? 'sheet' : 'dialog';
@@ -194,12 +195,27 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
   };
 
   const handleSaveEdit = (eventData: any) => {
+    if (!editingEvent) return;
+    
+    // Update the event with new data
+    updateEvent(editingEvent.id, {
+      title: eventData.eventName,
+      activity: eventData.activity,
+      description: eventData.description || '',
+      date: new Date(eventData.date),
+      time: eventData.time,
+      location: eventData.location,
+      maxParticipants: eventData.maxParticipants ? Number(eventData.maxParticipants) : null,
+      isPrivate: eventData.visibility === 'private',
+      image: eventData.selectedImage || editingEvent.image,
+    });
+    
     toast.success('Event updated successfully!', {
       description: `${eventData.eventName} has been updated`,
     });
     setIsEditModalOpen(false);
     setEditingEvent(null);
-    console.log('Updated event:', eventData);
+    setIsEventViewerOpen(false);
   };
 
   const handleShareEvent = (event: CalendarEvent) => {
@@ -642,6 +658,7 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
             location: editingEvent.location,
             maxParticipants: editingEvent.maxParticipants,
             isPrivate: editingEvent.isPrivate,
+            image: editingEvent.image,
           }}
         />
       )}
