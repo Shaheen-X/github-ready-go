@@ -436,8 +436,8 @@ export const CreateActivityModal: React.FC<CreateActivityModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="glass-card border-0 max-w-lg max-h-[95vh] p-0">
-        <div className="flex flex-col h-full">
+      <DialogContent className="border-0 max-w-lg max-h-[95vh] p-0">
+        <div className="glass-card flex flex-col h-full">
           {/* Header */}
           <DialogHeader className="px-6 py-4 bg-gradient-to-r from-green-50 to-blue-50 border-b border-white/20">
             <div className="flex items-center justify-between">

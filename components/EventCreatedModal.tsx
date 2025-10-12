@@ -427,8 +427,8 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="glass-card border-0 max-w-lg max-h-[95vh] p-0 overflow-hidden">
-        <div className="flex flex-col h-full max-h-[95vh]">
+      <DialogContent className="border-0 max-w-lg max-h-[95vh] p-0 overflow-hidden">
+        <div className="glass-card flex flex-col h-full max-h-[95vh]">
           {/* Header */}
           <DialogHeader className="px-4 py-4 bg-gradient-to-r from-green-50 via-blue-50 to-cyan-50 border-b border-white/20 flex-shrink-0">
             <div className="flex items-start justify-between gap-2">
