@@ -14,9 +14,6 @@ interface PairingCreatedModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate?: (tab: string) => void;
-  onEdit?: () => void;
-  onDone?: () => void;
-  onDelete?: () => void;
   pairingData?: {
     title: string;
     activity: string;
@@ -90,9 +87,7 @@ const mockBuddies: Buddy[] = [
 export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   isOpen,
   onClose,
-  onEdit,
-  onDone,
-  onDelete,
+  onNavigate,
   pairingData
 }) => {
   const [selectedBuddy, setSelectedBuddy] = useState<string | null>(null);
@@ -188,22 +183,16 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   const handleMoreOptions = (action: string) => {
     switch(action) {
       case 'edit':
+        toast.info('Opening pairing editor...');
         onClose();
-        onEdit?.();
         break;
       case 'delete':
-        onDelete?.();
         toast.error('Pairing deleted', {
           description: 'Your pairing request has been removed'
         });
         onClose();
         break;
     }
-  };
-
-  const handleDone = () => {
-    onDone?.();
-    onClose();
   };
 
   const handleSharePlatform = (platform: string) => {
@@ -286,8 +275,8 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 min-h-0">
-            {/* Pairing Card - Always show */}
-            {pairingData ? (
+            {/* Pairing Card */}
+            {pairingData && (
               <div 
                 className="relative overflow-hidden rounded-2xl shadow-xl border border-amber-300"
                 style={{
@@ -319,9 +308,9 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="rounded-full bg-white/70 backdrop-blur-md hover:bg-white/90 shadow-lg border border-amber-200/50"
+                          className="rounded-full hover:bg-gray-100"
                         >
-                          <MoreHorizontal className="w-5 h-5 text-amber-900" />
+                          <MoreHorizontal className="w-5 h-5" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="glass-card border-white/20">
@@ -420,10 +409,6 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
                     )}
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-4">
-                <p>No pairing data available</p>
               </div>
             )}
 
@@ -1052,14 +1037,39 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
           {/* Footer with Action Buttons */}
           {!showInviteList && (
             <div className="px-6 py-4 border-t border-white/20">
-              <Button
-                onClick={handleDone}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-                style={{ fontSize: '17px' }}
-              >
-                <Check className="mr-2 w-5 h-5" />
-                Done
-              </Button>
+              {/* Show Done button when no one is invited, otherwise show Invite and Chat */}
+              {!hasInviteSent ? (
+                <Button
+                  onClick={onClose}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                  style={{ fontSize: '17px' }}
+                >
+                  <Check className="mr-2 w-5 h-5" />
+                  Done
+                </Button>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    onClick={() => setShowInviteList(true)}
+                    className="bg-white text-gray-700 rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border border-gray-200"
+                    style={{ fontSize: '17px' }}
+                  >
+                    <UserPlus className="mr-2 w-5 h-5" />
+                    Invite
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      onNavigate?.('messages');
+                      onClose();
+                    }}
+                    className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                    style={{ fontSize: '17px' }}
+                  >
+                    <MessageCircle className="mr-2 w-5 h-5" />
+                    Chat
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
