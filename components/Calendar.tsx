@@ -731,40 +731,79 @@ const AgendaTimeline = ({ sections, onSelectEvent, onEditEvent, onDeleteEvent }:
                 return (
                   <div key={`${event.id}-${index}`} className="relative">
                     <span className="absolute -left-6 top-6 size-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 shadow" />
-                    <div className="relative w-full rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500 px-5 py-4 text-white shadow-lg">
-                      {/* Three Dots Menu */}
-                      <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white/90 transition-colors shadow-lg">
-                              <MoreVertical className="w-4 h-4 text-gray-600" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="glass-card border-white/20 w-48">
-                            {isHost ? (
-                              <>
-                                <DropdownMenuItem 
-                                  className="flex items-center gap-2 text-blue-600 hover:bg-blue-50"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditEvent();
-                                  }}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                  Edit Event
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  className="flex items-center gap-2 text-purple-600 hover:bg-purple-50"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toast.success('Event announced!', {
-                                      description: `Sent announcement for ${event.title} to all attendees.`
-                                    });
-                                  }}
-                                >
-                                  <Megaphone className="w-4 h-4" />
-                                  Announce
-                                </DropdownMenuItem>
+                    <div className="relative w-full rounded-2xl overflow-hidden shadow-lg">
+                      {/* Event Image Background */}
+                      {event.image ? (
+                        <div className="absolute inset-0">
+                          <ImageWithFallback
+                            src={event.image}
+                            alt={event.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-indigo-900/85 to-cyan-900/90" />
+                        </div>
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500" />
+                      )}
+                      
+                      <div className="relative px-5 py-4 text-white">
+                        {/* Three Dots Menu */}
+                        <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white/90 transition-colors shadow-lg">
+                                <MoreVertical className="w-4 h-4 text-gray-600" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="glass-card border-white/20 w-48">
+                              {isHost ? (
+                                <>
+                                  <DropdownMenuItem 
+                                    className="flex items-center gap-2 text-blue-600 hover:bg-blue-50"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditEvent();
+                                    }}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                    Edit Event
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    className="flex items-center gap-2 text-purple-600 hover:bg-purple-50"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toast.success('Event announced!', {
+                                        description: `Sent announcement for ${event.title} to all attendees.`
+                                      });
+                                    }}
+                                  >
+                                    <Megaphone className="w-4 h-4" />
+                                    Announce
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    className="flex items-center gap-2 text-green-600 hover:bg-green-50"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toast.success('Added to calendar!', {
+                                        description: `${event.title} saved to your device calendar.`
+                                      });
+                                    }}
+                                  >
+                                    <CalendarPlus className="w-4 h-4" />
+                                    Add to Calendar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    className="flex items-center gap-2 text-red-600 hover:bg-red-50"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteEvent();
+                                    }}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </>
+                              ) : (
                                 <DropdownMenuItem 
                                   className="flex items-center gap-2 text-green-600 hover:bg-green-50"
                                   onClick={(e) => {
@@ -777,70 +816,47 @@ const AgendaTimeline = ({ sections, onSelectEvent, onEditEvent, onDeleteEvent }:
                                   <CalendarPlus className="w-4 h-4" />
                                   Add to Calendar
                                 </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  className="flex items-center gap-2 text-red-600 hover:bg-red-50"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteEvent();
-                                  }}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </>
-                            ) : (
-                              <DropdownMenuItem 
-                                className="flex items-center gap-2 text-green-600 hover:bg-green-50"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toast.success('Added to calendar!', {
-                                    description: `${event.title} saved to your device calendar.`
-                                  });
-                                }}
-                              >
-                                <CalendarPlus className="w-4 h-4" />
-                                Add to Calendar
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
 
-                      <button
-                        type="button"
-                        onClick={() => onSelectEvent(event)}
-                        className="w-full text-left"
-                      >
-                        <div className="flex items-center justify-between gap-3 pr-8">
-                          <h3 className="text-sm font-semibold leading-snug">{event.title}</h3>
-                          <span className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide">
-                            {event.type === 'group' ? 'Group' : '1:1'}
-                          </span>
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/80">
-                          <Clock className="h-3.5 w-3.5 text-white/90" />
-                          {event.time}{event.endTime ? ` - ${event.endTime}` : ''}
-                          <MapPin className="h-3.5 w-3.5 text-white/90" />
-                          {event.location}
-                        </div>
-                        <div className="mt-3 flex items-center gap-2 text-xs text-white/80">
-                          <Users className="h-3.5 w-3.5 text-white/90" />
-                          {event.attendees.filter((attendee) => attendee.status === 'accepted').length}/
-                          {event.maxParticipants || '∞'} attending
-                        </div>
-                        {event.tags.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {event.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-medium uppercase tracking-wide"
-                              >
-                                #{tag}
-                              </span>
-                            ))}
+                        <button
+                          type="button"
+                          onClick={() => onSelectEvent(event)}
+                          className="w-full text-left"
+                        >
+                          <div className="flex items-center justify-between gap-3 pr-8">
+                            <h3 className="text-sm font-semibold leading-snug">{event.title}</h3>
+                            <span className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide">
+                              {event.type === 'group' ? 'Group' : '1:1'}
+                            </span>
                           </div>
-                        )}
-                      </button>
+                          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/80">
+                            <Clock className="h-3.5 w-3.5 text-white/90" />
+                            {event.time}{event.endTime ? ` - ${event.endTime}` : ''}
+                            <MapPin className="h-3.5 w-3.5 text-white/90" />
+                            {event.location}
+                          </div>
+                          <div className="mt-3 flex items-center gap-2 text-xs text-white/80">
+                            <Users className="h-3.5 w-3.5 text-white/90" />
+                            {event.attendees.filter((attendee) => attendee.status === 'accepted').length}/
+                            {event.maxParticipants || '∞'} attending
+                          </div>
+                          {event.tags.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {event.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-medium uppercase tracking-wide"
+                                >
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
