@@ -7,16 +7,9 @@ import {
   Users, 
   MessageCircle, 
   Trophy, 
-  MapPin, 
   Clock, 
-  Star,
-  Heart,
   UserPlus,
-  Activity,
-  Gift,
-  Zap,
   ChevronRight,
-  Filter,
   MoreVertical,
   CheckCircle2,
   AlertCircle,
@@ -29,7 +22,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Notification {

@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Settings, Edit3, Share, Trophy, Users, Calendar, MapPin, Star, Award, Target, Zap, Camera, ChevronRight, MoreVertical, QrCode, Copy, User, Check, Plus, X } from 'lucide-react';
+import { Settings, Edit3, Trophy, Users, Calendar, MapPin, Star, Target, Zap, Camera, ChevronRight, QrCode, Copy, Check, Plus, X } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -197,23 +196,6 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
     toast.success('Interests updated successfully!');
   };
 
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case 'legendary': return 'from-yellow-400 to-orange-500';
-      case 'epic': return 'from-purple-400 to-pink-500';
-      case 'rare': return 'from-blue-400 to-cyan-500';
-      default: return 'from-gray-400 to-gray-500';
-    }
-  };
-
-  const getRarityBorder = (rarity: string) => {
-    switch (rarity) {
-      case 'legendary': return 'border-yellow-400';
-      case 'epic': return 'border-purple-400';
-      case 'rare': return 'border-blue-400';
-      default: return 'border-gray-400';
-    }
-  };
 
   return (
     <div className="h-full bg-gradient-to-br from-slate-50 to-gray-100 pb-20 overflow-y-auto">
