@@ -4,8 +4,9 @@ import { Home } from '../../components/Home';
 import Search from '../../components/Search';
 import { Messages } from '../../components/Messages';
 import { Calendar } from '../../components/Calendar';
+import { ProfileNew } from '../../components/ProfileNew';
 import { CalendarEventsProvider, useCalendarEvents, createEventFromInput } from '@/context/calendar-events-context';
-import { BottomNavigation } from '../../components/BottomNavigation';
+import { Navigation } from '../../components/Navigation';
 import { InviteFloatingAction } from '../../components/InviteFloatingAction';
 import CreatePairingModal from '../../components/CreatePairingModal';
 import CreateGroupEventModal from '../../components/CreateGroupEventModal';
@@ -15,7 +16,7 @@ import CreateEventChooserModal from '../../components/CreateEventChooserModal';
 import type { EventAttendee } from '@/types/calendar';
 
 
-type Tab = 'home' | 'search' | 'messages' | 'calendar';
+type Tab = 'home' | 'search' | 'messages' | 'calendar' | 'profile';
 
 const IndexContent = () => {
   const [activeTab, setActiveTab] = useState<Tab>('home');
@@ -131,12 +132,13 @@ const IndexContent = () => {
           {activeTab === 'search' && <Search />}
           {activeTab === 'messages' && <Messages />}
           {activeTab === 'calendar' && <Calendar onNavigate={handleNavigate} />}
+          {activeTab === 'profile' && <ProfileNew />}
         </div>
         <InviteFloatingAction 
           onNavigate={handleNavigate}
           onCreateEvent={() => setIsEventChooserOpen(true)}
         />
-        <BottomNavigation activeTab={activeTab} onNavigate={handleNavigate} />
+        <Navigation activeTab={activeTab} onTabChange={handleNavigate} />
       </div>
 
       <CreateEventChooserModal

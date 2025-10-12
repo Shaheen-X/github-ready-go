@@ -1,17 +1,16 @@
 import { useState } from 'react';
-import { Settings, Edit3, Share, Trophy, Users, Calendar, MapPin, Star, Award, Target, Zap, Camera, ChevronRight, MoreVertical, QrCode, Copy, User, Check, Plus, X } from 'lucide-react';
+import { Settings, Edit3, Trophy, Users, Calendar, MapPin, Star, Target, Zap, Camera, ChevronRight, QrCode, Copy, Check, Plus, X } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Progress } from './ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card } from './ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
 interface ProfileData {
   id: string;
@@ -195,24 +194,6 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
   const updateInterests = (newInterests: string[]) => {
     setProfileData(prev => ({ ...prev, interests: newInterests }));
     toast.success('Interests updated successfully!');
-  };
-
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case 'legendary': return 'from-yellow-400 to-orange-500';
-      case 'epic': return 'from-purple-400 to-pink-500';
-      case 'rare': return 'from-blue-400 to-cyan-500';
-      default: return 'from-gray-400 to-gray-500';
-    }
-  };
-
-  const getRarityBorder = (rarity: string) => {
-    switch (rarity) {
-      case 'legendary': return 'border-yellow-400';
-      case 'epic': return 'border-purple-400';
-      case 'rare': return 'border-blue-400';
-      default: return 'border-gray-400';
-    }
   };
 
   return (
