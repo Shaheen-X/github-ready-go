@@ -80,7 +80,6 @@ const mockBuddies: Buddy[] = [
 export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
   isOpen,
   onClose,
-  onNavigate,
   eventData
 }) => {
   const [selectedBuddies, setSelectedBuddies] = useState<string[]>([]);
@@ -90,7 +89,6 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
   const [showQRCode, setShowQRCode] = useState(false);
   const [showPlatforms, setShowPlatforms] = useState(false);
   const [showCopiedLink, setShowCopiedLink] = useState(false);
-  const [showGroupChat, setShowGroupChat] = useState(false);
 
   const eventLink = `https://connectsphere.app/event/${Math.random().toString(36).substr(2, 9)}`;
 
@@ -381,56 +379,6 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
         </div>
       </div>
 
-      {/* Group Chat Section */}
-      <div className="space-y-3">
-        <button
-          type="button"
-          onClick={() => setShowGroupChat(!showGroupChat)}
-          className="w-full group"
-        >
-          <div className="rounded-xl border-2 border-gray-200 hover:border-gray-300 p-4 flex items-center justify-between transition-all duration-200 bg-white hover:bg-gray-50">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center transition-colors">
-                <MessageCircle className="w-4 h-4 text-purple-600" />
-              </div>
-              <div className="text-left">
-                <h4 className="text-sm font-semibold text-gray-900">Create Group Chat</h4>
-                <p className="text-xs text-gray-500">Start chatting with attendees</p>
-              </div>
-            </div>
-            <div className="w-7 h-7 rounded-full bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition-colors">
-              {showGroupChat ? 
-                <ChevronUp className="w-4 h-4 text-gray-600" /> : 
-                <ChevronDown className="w-4 h-4 text-gray-600" />
-              }
-            </div>
-          </div>
-        </button>
-
-        {showGroupChat && (
-          <div className="space-y-4 animate-fade-in bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border-2 border-purple-200">
-            <p className="text-sm text-gray-600">
-              Start a group conversation for all event participants to coordinate, share updates, and get excited together!
-            </p>
-            <Button
-              onClick={() => {
-                toast.success('Group chat created!', {
-                  description: `"${eventData?.eventName}" chat is ready for your event participants`,
-                });
-                if (onNavigate) {
-                  onNavigate('messages');
-                  onClose();
-                }
-              }}
-              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl h-11"
-            >
-              <MessageCircle className="mr-2 w-5 h-5" />
-              Start Group Chat
-            </Button>
-          </div>
-        )}
-      </div>
-
       {/* External Sharing - Secondary Option */}
       <div className="space-y-3">
         <button
@@ -616,10 +564,10 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
       </div>
 
       {/* Done Button */}
-      <div className="flex justify-center pt-2">
+      <div className="pt-4">
         <Button
           onClick={onClose}
-          className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-xl h-12 font-semibold"
+          className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl h-12 font-semibold hover:shadow-lg transition-shadow"
         >
           Done
         </Button>

@@ -958,10 +958,8 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
             <div className="px-6 py-4 border-t border-white/20">
               <Button
                 onClick={onClose}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-                style={{ fontSize: '17px' }}
+                className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl h-12 font-semibold hover:shadow-lg transition-shadow"
               >
-                <Check className="mr-2 w-5 h-5" />
                 Done
               </Button>
             </div>
