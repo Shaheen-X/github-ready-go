@@ -563,7 +563,7 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-subtext">
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4 text-blue-500" />
-                        {acceptedAttendees}/{event.maxParticipants} attending
+                        {acceptedAttendees}/{event.maxParticipants || '∞'} attending
                       </div>
                       <Button
                         variant="ghost"

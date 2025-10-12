@@ -103,7 +103,7 @@ const IndexContent = () => {
         attendees,
         maxParticipants: eventData.maxParticipants ? parseInt(eventData.maxParticipants) : 0,
         tags: eventData.activity ? [eventData.activity] : [],
-        image: eventData.image
+        image: eventData.selectedImage || eventData.image,
       },
       `event-${Date.now()}`
     );
