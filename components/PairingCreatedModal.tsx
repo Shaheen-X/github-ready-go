@@ -13,7 +13,6 @@ import yellowTextureBg from '@/assets/yellow-texture-bg.png';
 interface PairingCreatedModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate?: (tab: string) => void;
   onEdit?: () => void;
   onDelete?: () => void;
   pairingData?: {
@@ -89,7 +88,6 @@ const mockBuddies: Buddy[] = [
 export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   isOpen,
   onClose,
-  onNavigate,
   onEdit,
   onDelete,
   pairingData
@@ -176,12 +174,6 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
     setInviteStatus(null);
     setSelectedBuddy(null);
     toast.info('Invitation cancelled');
-  };
-
-  const handleRemovePerson = () => {
-    setInviteStatus(null);
-    setSelectedBuddy(null);
-    toast.info('Person removed from pairing');
   };
 
   const handleMoreOptions = (action: string) => {
@@ -780,90 +772,6 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
               </>
             )}
 
-            {/* Invite Status Section - Show if someone was invited */}
-            {hasInviteSent && displayBuddy && (
-              <>
-                <Separator className="bg-gradient-to-r from-blue-500/20 to-cyan-400/20" />
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <ImageWithFallback
-                        src={displayBuddy.avatar}
-                        alt={displayBuddy.name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div>
-                        <h4 className="font-medium text-gray-900">{displayBuddy.name}</h4>
-                        <p className="text-xs text-gray-500">{displayBuddy.username}</p>
-                      </div>
-                    </div>
-                    {inviteStatus === 'pending' && (
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-                        Pending
-                      </span>
-                    )}
-                    {inviteStatus === 'accepted' && (
-                      <span className="choice-chip selected text-xs px-3 py-1">
-                        Accepted
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2">
-                    {inviteStatus === 'pending' && (
-                      <>
-                        <Button
-                          onClick={handleCancelInvite}
-                          variant="outline"
-                          className="flex-1 rounded-xl"
-                        >
-                          Cancel Invite
-                        </Button>
-                        <Button
-                          onClick={() => setInviteStatus('accepted')}
-                          className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl"
-                        >
-                          Simulate Accept
-                        </Button>
-                      </>
-                    )}
-                    {inviteStatus === 'accepted' && (
-                      <Button
-                        onClick={handleRemovePerson}
-                        variant="outline"
-                        className="w-full rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        Remove from Pairing
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* Still show external sharing even with buddy invited */}
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <p className="text-sm text-gray-600 mb-3">Share with others too:</p>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={handleCopyLink}
-                        variant="outline"
-                        className="flex-1 rounded-xl h-10"
-                      >
-                        {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                        Copy Link
-                      </Button>
-                      <Button
-                        onClick={handleGeneralShare}
-                        variant="outline"
-                        className="flex-1 rounded-xl h-10"
-                      >
-                        <Share2 className="w-4 h-4 mr-2" />
-                        Share
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
 
             {/* Invite List - Shown when Invite button is clicked */}
             {showInviteList && (
@@ -1045,39 +953,14 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
           {/* Footer with Action Buttons */}
           {!showInviteList && (
             <div className="px-6 py-4 border-t border-white/20">
-              {/* Show Done button when no one is invited, otherwise show Invite and Chat */}
-              {!hasInviteSent ? (
-                <Button
-                  onClick={onClose}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-                  style={{ fontSize: '17px' }}
-                >
-                  <Check className="mr-2 w-5 h-5" />
-                  Done
-                </Button>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    onClick={() => setShowInviteList(true)}
-                    className="bg-white text-gray-700 rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 border border-gray-200"
-                    style={{ fontSize: '17px' }}
-                  >
-                    <UserPlus className="mr-2 w-5 h-5" />
-                    Invite
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      onNavigate?.('messages');
-                      onClose();
-                    }}
-                    className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-                    style={{ fontSize: '17px' }}
-                  >
-                    <MessageCircle className="mr-2 w-5 h-5" />
-                    Chat
-                  </Button>
-                </div>
-              )}
+              <Button
+                onClick={onClose}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full py-3 font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                style={{ fontSize: '17px' }}
+              >
+                <Check className="mr-2 w-5 h-5" />
+                Done
+              </Button>
             </div>
           )}
         </div>
