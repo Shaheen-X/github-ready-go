@@ -276,19 +276,17 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 min-h-0">
             {/* Pairing Card */}
             {pairingData && (
-              <div className="relative overflow-hidden rounded-2xl bg-white shadow-xl border border-gray-100">
-                {/* Colorful Header Banner */}
-                <div className="h-24 bg-gradient-to-br from-blue-400 via-cyan-400 to-purple-400 relative">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.3),transparent_60%)]"></div>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.2),transparent_60%)]"></div>
-                </div>
+              <div className="relative overflow-hidden rounded-2xl shadow-xl border border-amber-200 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-200/30 to-amber-300/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-orange-200/20 to-yellow-200/30 rounded-full blur-2xl -ml-24 -mb-24"></div>
                 
-                <div className="p-6 -mt-8">
+                <div className="p-6 relative">
                   {/* Header with More Options */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="choice-chip selected text-xs px-3 py-1 bg-white shadow-md">
+                        <span className="choice-chip selected text-xs px-3 py-1 bg-white/80 backdrop-blur-sm shadow-sm border border-amber-200">
                           {pairingData.activity}
                         </span>
                       </div>
