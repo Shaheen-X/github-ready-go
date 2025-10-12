@@ -5,7 +5,7 @@ import Search from '../../components/Search';
 import { Messages } from '../../components/Messages';
 import { Calendar } from '../../components/Calendar';
 import { CalendarEventsProvider, useCalendarEvents, createEventFromInput } from '@/context/calendar-events-context';
-import { BottomNavigation } from '@/components/BottomNavigation';
+import { BottomNavigation } from '../../components/BottomNavigation';
 import { InviteFloatingAction } from '../../components/InviteFloatingAction';
 import CreatePairingModal from '../../components/CreatePairingModal';
 import CreateGroupEventModal from '../../components/CreateGroupEventModal';
