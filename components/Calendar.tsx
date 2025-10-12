@@ -13,6 +13,7 @@ import {
   Share2,
   UserPlus,
 } from 'lucide-react';
+import { EventCard } from './EventCard';
 import type { WeekNumberProps } from 'react-day-picker';
 import { toast } from 'sonner';
 
@@ -529,77 +530,14 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
                 </div>
               </div>
             ) : (
-              (eventsByDate.get(selectedDate.toDateString()) ?? []).map((event) => {
-                const acceptedAttendees = event.attendees.filter(
-                  (attendee) => attendee.status === 'accepted',
-                ).length;
-                const isHost = event.isHost;
-
-                return (
-                  <div
-                    key={event.id}
-                    className="relative overflow-hidden rounded-2xl bg-white shadow-xl cursor-pointer transition-transform hover:scale-[1.02]"
-                    onClick={() => openDayEvents(event.date, event)}
-                  >
-                    {/* Event Image with Compact 3:2 Ratio */}
-                    <div className="relative w-full" style={{ aspectRatio: '3/2' }}>
-                      {event.image ? (
-                        <ImageWithFallback
-                          src={event.image}
-                          alt={event.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-cyan-400" />
-                      )}
-                      
-                      {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      
-                      {/* Host Badge */}
-                      {isHost && (
-                        <div className="absolute top-2 left-2">
-                          <div className="px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold shadow-lg">
-                            👑 Host
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Type Badge */}
-                      <div className="absolute top-2 right-2">
-                        <span className="px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-[10px] font-semibold uppercase tracking-wide">
-                          {event.type === 'group' ? 'Group' : '1:1'}
-                        </span>
-                      </div>
-
-                      {/* Event Info Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 via-black/60 to-transparent">
-                        <h3 className="text-sm font-bold text-white mb-1 line-clamp-1">{event.title}</h3>
-                        <div className="flex items-center gap-2 text-xs text-white/90 mb-1">
-                          <Clock className="h-3 w-3" />
-                          <span>{event.time}</span>
-                          {event.endTime && <span>- {event.endTime}</span>}
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-white/90">
-                          <MapPin className="h-3 w-3" />
-                          <span className="line-clamp-1">{event.location}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bottom Info Bar */}
-                    <div className="px-3 py-2 bg-white flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs text-gray-600">
-                        <Users className="h-3.5 w-3.5 text-blue-500" />
-                        <span>{acceptedAttendees}/{event.maxParticipants || '∞'}</span>
-                      </div>
-                      <div className="text-xs text-blue-600 font-medium">
-                        View details →
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+              (eventsByDate.get(selectedDate.toDateString()) ?? []).map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  variant="compact"
+                  onClick={() => openDayEvents(event.date, event)}
+                />
+              ))
             )}
           </CardContent>
         </Card>
@@ -1323,45 +1261,12 @@ const SummarySections = ({ upcoming, onOpenEvent, onViewAll }: SummarySectionsPr
           {upcoming.length === 0
             ? renderEmpty('No upcoming events yet.')
             : upcoming.map((event) => (
-                <div
+                <EventCard
                   key={event.id}
-                  className="rounded-2xl border border-white/40 bg-white/85 p-4 shadow-md transition hover:shadow-lg"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
-                      <h3 className="text-body font-semibold text-foreground">
-                        {event.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-subtext">
-                        {event.date.toLocaleDateString('en-US', {
-                          weekday: 'short',
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                        • {event.time}
-                        • {event.location}
-                      </div>
-                    </div>
-                    <Badge
-                      className={cn(
-                        'rounded-full border-0 px-3 py-1 text-xs font-semibold uppercase tracking-wide shadow',
-                        event.type === 'group'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-purple-100 text-purple-700',
-                      )}
-                    >
-                      {event.type === 'group' ? 'Group' : '1:1'}
-                    </Badge>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mt-3 rounded-full px-4 text-xs text-blue-600 hover:bg-blue-50"
-                    onClick={() => onOpenEvent(event.date)}
-                  >
-                    View details
-                  </Button>
-                </div>
+                  event={event}
+                  variant="compact"
+                  onClick={() => onOpenEvent(event.date)}
+                />
               ))}
         </CardContent>
       </Card>

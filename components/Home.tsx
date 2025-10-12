@@ -158,12 +158,7 @@ export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
         {/* Event Summary Card */}
         <div>
           <EventSummaryCard 
-            events={events.slice(0, 3).map(event => ({
-              ...event,
-              attendees: event.attendees.length,
-              maxParticipants: event.maxParticipants || 0,
-              isHost: event.isHost || false
-            }))}
+            events={events.slice(0, 3)}
             onViewAll={handleViewAllEvents}
             onEventClick={handleEventClick}
           />
