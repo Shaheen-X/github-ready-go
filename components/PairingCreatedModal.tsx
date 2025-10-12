@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { toast } from 'sonner';
 import { timeSlots } from './OnboardingNew';
+import yellowTextureBg from '@/assets/yellow-texture-bg.png';
 
 interface PairingCreatedModalProps {
   isOpen: boolean;
@@ -276,21 +277,27 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 min-h-0">
             {/* Pairing Card */}
             {pairingData && (
-              <div className="relative overflow-hidden rounded-2xl shadow-xl border border-amber-200 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
-                {/* Decorative elements */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-yellow-200/30 to-amber-300/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-orange-200/20 to-yellow-200/30 rounded-full blur-2xl -ml-24 -mb-24"></div>
+              <div 
+                className="relative overflow-hidden rounded-2xl shadow-xl border border-amber-300"
+                style={{
+                  backgroundImage: `url(${yellowTextureBg})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
+                {/* Semi-transparent overlay for better text readability */}
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-400/20 to-yellow-500/10"></div>
                 
                 <div className="p-6 relative">
                   {/* Header with More Options */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-3">
-                        <span className="choice-chip selected text-xs px-3 py-1 bg-white/80 backdrop-blur-sm shadow-sm border border-amber-200">
+                        <span className="text-xs px-3 py-1 bg-amber-900/90 text-amber-50 rounded-full font-semibold shadow-md backdrop-blur-sm">
                           {pairingData.activity}
                         </span>
                       </div>
-                      <h2 className="font-bold text-gray-900" style={{ fontSize: '20px' }}>
+                      <h2 className="font-bold text-amber-950" style={{ fontSize: '20px' }}>
                         {pairingData.title}
                       </h2>
                     </div>
@@ -327,10 +334,10 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
                     {/* Days */}
                     {pairingData.availableDays && pairingData.availableDays.length > 0 && (
                       <div className="flex items-start gap-3">
-                        <Calendar className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                        <Calendar className="w-4 h-4 text-amber-800 mt-0.5 shrink-0" />
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 mb-1">Available Days</p>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-xs text-amber-700 mb-1 font-medium">Available Days</p>
+                          <p className="text-sm text-amber-950 font-medium">
                             {pairingData.availableDays.join(', ')}
                           </p>
                         </div>
@@ -340,10 +347,10 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
                     {/* Time Slots */}
                     {pairingData.availableTimes && pairingData.availableTimes.length > 0 && (
                       <div className="flex items-start gap-3">
-                        <Clock className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                        <Clock className="w-4 h-4 text-amber-800 mt-0.5 shrink-0" />
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 mb-1">Preferred Times</p>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-xs text-amber-700 mb-1 font-medium">Preferred Times</p>
+                          <p className="text-sm text-amber-950 font-medium">
                             {getTimeSlotLabels(pairingData.availableTimes)}
                           </p>
                         </div>
@@ -353,10 +360,10 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
                     {/* Custom Date/Time */}
                     {pairingData.hasCustomDateTime && pairingData.customDate && pairingData.customTime && (
                       <div className="flex items-start gap-3">
-                        <Calendar className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                        <Calendar className="w-4 h-4 text-amber-800 mt-0.5 shrink-0" />
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 mb-1">Specific Date & Time</p>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-xs text-amber-700 mb-1 font-medium">Specific Date & Time</p>
+                          <p className="text-sm text-amber-950 font-medium">
                             {new Date(pairingData.customDate).toLocaleDateString('en-GB', { 
                               weekday: 'short', 
                               year: 'numeric', 
@@ -371,10 +378,10 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
                     {/* Repeat */}
                     {pairingData.hasRepeat && pairingData.repeat && pairingData.repeat !== 'never' && (
                       <div className="flex items-start gap-3">
-                        <Clock className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                        <Clock className="w-4 h-4 text-amber-800 mt-0.5 shrink-0" />
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 mb-1">Repeats</p>
-                          <p className="text-sm text-gray-700">
+                          <p className="text-xs text-amber-700 mb-1 font-medium">Repeats</p>
+                          <p className="text-sm text-amber-950 font-medium">
                             {pairingData.repeat.charAt(0).toUpperCase() + pairingData.repeat.slice(1)}
                             {pairingData.repeatEndDate && ` until ${new Date(pairingData.repeatEndDate).toLocaleDateString('en-GB')}`}
                           </p>
@@ -385,19 +392,19 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
                     {/* Location */}
                     {pairingData.location && (
                       <div className="flex items-start gap-3">
-                        <MapPin className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+                        <MapPin className="w-4 h-4 text-amber-800 mt-0.5 shrink-0" />
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 mb-1">Location</p>
-                          <p className="text-sm text-gray-700">{pairingData.location}</p>
+                          <p className="text-xs text-amber-700 mb-1 font-medium">Location</p>
+                          <p className="text-sm text-amber-950 font-medium">{pairingData.location}</p>
                         </div>
                       </div>
                     )}
 
                     {/* Description */}
                     {pairingData.description && (
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <p className="text-xs text-gray-500 mb-2">Description</p>
-                        <p className="text-sm text-gray-700">{pairingData.description}</p>
+                      <div className="mt-4 pt-4 border-t border-amber-800/20">
+                        <p className="text-xs text-amber-700 mb-2 font-medium">Description</p>
+                        <p className="text-sm text-amber-950">{pairingData.description}</p>
                       </div>
                     )}
                   </div>
