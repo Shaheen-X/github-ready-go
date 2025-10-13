@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, MoreVertical, Phone, Video, Send, Smile, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { useCalendarEvents } from '@/context/calendar-events-context';
 
 // Mock data
 const conversations = [
@@ -97,11 +98,23 @@ interface MessagesProps {
 }
 
 export function Messages({ initialEventId }: MessagesProps = {}) {
+  const { getEventById } = useCalendarEvents();
   const [selectedConversation, setSelectedConversation] = useState<number | null>(
     initialEventId ? Number(initialEventId) : null
   );
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+
+  useEffect(() => {
+    if (initialEventId) {
+      const event = getEventById(String(initialEventId));
+      if (event) {
+        setSelectedEvent(event);
+        setSelectedConversation(Number(initialEventId));
+      }
+    }
+  }, [initialEventId, getEventById]);
 
   const filteredConversations = conversations.filter(conv =>
     conv.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -200,7 +213,17 @@ export function Messages({ initialEventId }: MessagesProps = {}) {
 
   const renderConversationView = () => {
     const conversation = conversations.find(c => c.id === selectedConversation);
-    if (!conversation) return null;
+    
+    // Use event data if available, otherwise fall back to conversation data
+    const displayData = selectedEvent ? {
+      name: selectedEvent.title,
+      avatar: selectedEvent.image || conversation?.avatar,
+      isGroup: selectedEvent.type === 'group',
+      members: selectedEvent.attendees?.length,
+      activity: selectedEvent.activity
+    } : conversation;
+
+    if (!displayData) return null;
 
     return (
       <div className="h-full flex flex-col">
@@ -211,27 +234,30 @@ export function Messages({ initialEventId }: MessagesProps = {}) {
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => setSelectedConversation(null)}
+                onClick={() => {
+                  setSelectedConversation(null);
+                  setSelectedEvent(null);
+                }}
                 className="p-1 text-gray-600"
               >
                 ←
               </Button>
               <div className="relative">
                 <ImageWithFallback
-                  src={conversation.avatar}
-                  alt={conversation.name}
+                  src={displayData.avatar}
+                  alt={displayData.name}
                   className="w-10 h-10 rounded-full object-cover"
                 />
-                {!conversation.isGroup && conversation.online && (
+                {!displayData.isGroup && conversation?.online && (
                   <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                 )}
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">{conversation.name}</h3>
+                <h3 className="font-medium text-gray-900">{displayData.name}</h3>
                 <p className="text-xs text-gray-500">
-                  {conversation.isGroup 
-                    ? `${conversation.members} members` 
-                    : conversation.online ? 'Online now' : 'Last seen 2h ago'
+                  {displayData.isGroup 
+                    ? `${displayData.members} members` 
+                    : conversation?.online ? 'Online now' : 'Last seen 2h ago'
                   }
                 </p>
               </div>

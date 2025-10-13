@@ -134,7 +134,14 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOp
                 <Button onClick={() => onDecline?.(event.id)} variant="outline" className="flex-1 rounded-full">
                   Decline
                 </Button>
-                <Button onClick={() => onStartChat?.(event.id)} variant="outline" className="rounded-full">
+                <Button 
+                  onClick={() => {
+                    onStartChat?.(event.id);
+                    onOpenChange?.(false);
+                  }} 
+                  variant="outline" 
+                  className="rounded-full"
+                >
                   <MessageCircle size={16} className="mr-2" /> Chat
                 </Button>
               </>
