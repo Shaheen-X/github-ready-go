@@ -19,8 +19,8 @@ export const EventCard = ({ event, onClick, variant = 'default' }: EventCardProp
       className="relative overflow-hidden rounded-2xl bg-white shadow-xl cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
       onClick={onClick}
     >
-      {/* Event Image with Compact 3:2 Ratio */}
-      <div className="relative w-full" style={{ aspectRatio: variant === 'compact' ? '3/2' : '16/9' }}>
+      {/* Event Image with Compact Ratio */}
+      <div className="relative w-full" style={{ aspectRatio: variant === 'compact' ? '2/1' : '3/1.5' }}>
         {event.image ? (
           <ImageWithFallback
             src={event.image}
@@ -34,9 +34,16 @@ export const EventCard = ({ event, onClick, variant = 'default' }: EventCardProp
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         
+        {/* Activity Tag */}
+        <div className="absolute top-2 left-2">
+          <span className="px-2 py-1 rounded-full bg-green-500 text-white text-[10px] font-semibold shadow-lg">
+            {event.activity}
+          </span>
+        </div>
+
         {/* Host Badge */}
         {isHost && (
-          <div className="absolute top-2 left-2">
+          <div className="absolute top-2 left-20">
             <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold shadow-lg">
               <Crown className="w-3 h-3" />
               <span>Host</span>
@@ -46,7 +53,7 @@ export const EventCard = ({ event, onClick, variant = 'default' }: EventCardProp
 
         {/* Type Badge */}
         <div className="absolute top-2 right-2">
-          <span className="px-2 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-[10px] font-semibold uppercase tracking-wide">
+          <span className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold uppercase tracking-wide border border-white/30">
             {event.type === 'group' ? 'Group' : '1:1'}
           </span>
         </div>
