@@ -2,8 +2,9 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { MapPin, Clock, Users, MessageCircle } from 'lucide-react';
+import { MapPin, Clock, Users, MessageCircle, Crown } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import type { CalendarEvent } from '@/types/calendar';
 
 export type RSVPStatus = 'accepted' | 'declined' | 'pending';
 
@@ -14,16 +15,8 @@ export interface Attendee {
   status: RSVPStatus;
 }
 
-export interface CalendarEventDetails {
-  id: string | number;
-  title: string;
-  type: 'pairing' | 'group' | string;
+export interface CalendarEventDetails extends CalendarEvent {
   date: string; // formatted date string for display
-  time: string; // formatted time string for display
-  location: string;
-  description?: string;
-  attendees?: Attendee[];
-  image?: string;
 }
 
 interface EventDetailsModalProps {
@@ -67,14 +60,34 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOp
 
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
             {event?.image && (
-              <div className="w-full h-40 rounded-2xl overflow-hidden">
+              <div className="relative w-full h-48 rounded-2xl overflow-hidden">
                 <ImageWithFallback src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                
+                {/* Activity Tag */}
+                <div className="absolute top-2 left-2">
+                  <span className="px-2 py-1 rounded-full bg-green-500 text-white text-xs font-semibold shadow-lg">
+                    {event.activity}
+                  </span>
+                </div>
+
+                {/* Host Badge */}
+                {event?.isHost && (
+                  <div className="absolute top-2 left-20">
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold shadow-lg">
+                      <Crown className="w-3 h-3" />
+                      <span>Host</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Type Badge */}
+                <div className="absolute top-2 right-2">
+                  <span className="px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs font-semibold uppercase tracking-wide border border-white/30">
+                    {isGroup ? 'Group' : '1:1'}
+                  </span>
+                </div>
               </div>
             )}
-
-            <div className="flex items-center gap-2">
-              <Badge className={`${isGroup ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'} border-0`}>{isGroup ? 'Group' : '1:1'}</Badge>
-            </div>
 
             <div className="space-y-2 text-subtext">
               <div className="flex items-center gap-2">
