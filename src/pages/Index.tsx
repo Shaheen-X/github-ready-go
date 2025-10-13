@@ -28,6 +28,7 @@ const IndexContent = () => {
   const [isEventCreatedOpen, setIsEventCreatedOpen] = useState(false);
   const [createdEventData, setCreatedEventData] = useState<any>(null);
   const [editingPairing, setEditingPairing] = useState<any>(null);
+  const [selectedEventForChat, setSelectedEventForChat] = useState<string | number | null>(null);
   
   const { addEvents, deleteEvent } = useCalendarEvents();
 
@@ -162,14 +163,19 @@ const IndexContent = () => {
     }
   };
 
+  const handleStartChat = (eventId: string | number) => {
+    setSelectedEventForChat(eventId);
+    setActiveTab('messages');
+  };
+
   return (
     <>
       <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-slate-50 to-gray-100">
         <div className="flex-1 overflow-hidden">
-          {activeTab === 'home' && <Home onNavigate={handleNavigate} />}
+          {activeTab === 'home' && <Home onNavigate={handleNavigate} onStartChat={handleStartChat} />}
           {activeTab === 'search' && <Search />}
-          {activeTab === 'messages' && <Messages />}
-          {activeTab === 'calendar' && <Calendar onNavigate={handleNavigate} />}
+          {activeTab === 'messages' && <Messages initialEventId={selectedEventForChat} />}
+          {activeTab === 'calendar' && <Calendar onNavigate={handleNavigate} onStartChat={handleStartChat} />}
           {activeTab === 'profile' && <ProfileNew />}
         </div>
         <InviteFloatingAction 

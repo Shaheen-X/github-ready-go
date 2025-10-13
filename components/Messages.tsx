@@ -92,8 +92,14 @@ const currentMessages = [
   }
 ];
 
-export function Messages() {
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(null);
+interface MessagesProps {
+  initialEventId?: string | number | null;
+}
+
+export function Messages({ initialEventId }: MessagesProps = {}) {
+  const [selectedConversation, setSelectedConversation] = useState<number | null>(
+    initialEventId ? Number(initialEventId) : null
+  );
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 

@@ -8,12 +8,14 @@ interface EventSummaryCardProps {
   events: CalendarEvent[];
   onViewAll: () => void;
   onEventClick: () => void;
+  onStartChat?: (eventId: string | number) => void;
 }
 
 const EventSummaryCard: React.FC<EventSummaryCardProps> = ({ 
   events, 
   onViewAll, 
-  onEventClick 
+  onEventClick,
+  onStartChat 
 }) => {
   if (events.length === 0) {
     return (
@@ -56,6 +58,7 @@ const EventSummaryCard: React.FC<EventSummaryCardProps> = ({
             event={event}
             variant="compact"
             onClick={onEventClick}
+            onStartChat={onStartChat}
           />
         ))}
       </div>

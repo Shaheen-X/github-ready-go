@@ -6,9 +6,10 @@ interface EventCardProps {
   event: CalendarEvent;
   onClick?: () => void;
   variant?: 'default' | 'compact';
+  onStartChat?: (eventId: string | number) => void;
 }
 
-export const EventCard = ({ event, onClick, variant = 'default' }: EventCardProps) => {
+export const EventCard = ({ event, onClick, variant = 'default', onStartChat: _onStartChat }: EventCardProps) => {
   const acceptedAttendees = event.attendees.filter(
     (attendee) => attendee.status === 'accepted'
   ).length;

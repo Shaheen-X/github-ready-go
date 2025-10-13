@@ -13,9 +13,10 @@ import type { EventAttendee } from '@/types/calendar';
 
 interface HomeProps {
   onNavigate?: (tab: string) => void;
+  onStartChat?: (eventId: string | number) => void;
 }
 
-export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
+export function Home({ onNavigate, onStartChat }: HomeProps = { onNavigate: () => {}, onStartChat: () => {} }) {
   const [userLevel] = useState(8);
   const [userXP] = useState(1250);
   const [nextLevelXP] = useState(1500);
@@ -161,6 +162,7 @@ export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
             events={events.slice(0, 3)}
             onViewAll={handleViewAllEvents}
             onEventClick={handleEventClick}
+            onStartChat={onStartChat}
           />
         </div>
 

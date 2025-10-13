@@ -55,6 +55,7 @@ interface CalendarProps {
   onCreateEvent?: () => void;
   onCreatePairing?: () => void;
   onCreateGroup?: () => void;
+  onStartChat?: (eventId: string | number) => void;
 }
 
 type DialogSurface = 'dialog' | 'sheet';
@@ -78,7 +79,7 @@ const parseEventDateTime = (event: CalendarEvent) => {
   return value.getTime();
 };
 
-export function Calendar({ onNavigate }: CalendarProps = {}) {
+export function Calendar({ onNavigate: _onNavigate, onStartChat }: CalendarProps = {}) {
   const {
     events,
     respondToInvitation,
@@ -186,7 +187,7 @@ export function Calendar({ onNavigate }: CalendarProps = {}) {
     toast.success('Chat pinned for this event', {
       description: `${event.title} • ${event.attendees.length} RSVPs`,
     });
-    onNavigate?.('messages');
+    onStartChat?.(event.id);
     setHighlightedDate(event.date);
   };
 
