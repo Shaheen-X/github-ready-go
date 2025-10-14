@@ -15,7 +15,13 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const saved = localStorage.getItem('conversationList');
-    return saved ? JSON.parse(saved) : [];
+    const parsed = saved ? JSON.parse(saved) : [];
+    // Ensure sharedImages and sharedFiles exist
+    return parsed.map((c: Conversation) => ({
+      ...c,
+      sharedImages: c.sharedImages || [],
+      sharedFiles: c.sharedFiles || []
+    }));
   });
   
   const [messageStorage, setMessageStorage] = useState<Record<string, Message[]>>(() => {
@@ -58,10 +64,22 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     // Update or create conversation
     setConversations(prev => {
       const existing = prev.find(c => c.eventId === eventId);
+      
+      // Extract new shared media from message attachments
+      const newImages = message.attachments?.filter(a => a.type === 'image').map(a => a.url) || [];
+      const newFiles = message.attachments?.filter(a => a.type === 'file').map(a => a.url) || [];
+      
       if (existing) {
         return prev.map(c =>
           c.eventId === eventId
-            ? { ...c, lastMessage: message.text, time: message.time, unreadCount: 0 }
+            ? { 
+                ...c, 
+                lastMessage: message.text, 
+                time: message.time, 
+                unreadCount: 0,
+                sharedImages: [...(c.sharedImages || []), ...newImages],
+                sharedFiles: [...(c.sharedFiles || []), ...newFiles]
+              }
             : c
         );
       } else {
@@ -72,7 +90,9 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
           time: message.time,
           unreadCount: 0,
           image: eventImage,
-          activity: eventActivity
+          activity: eventActivity,
+          sharedImages: newImages,
+          sharedFiles: newFiles
         }];
       }
     });

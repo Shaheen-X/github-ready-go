@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, Image as ImageIcon, FileText } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
@@ -19,10 +19,13 @@ export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { getEventById } = useCalendarEvents();
-  const { getMessages, sendMessage, deleteConversation } = useChat();
+  const { conversations, getMessages, sendMessage, deleteConversation } = useChat();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [showSharedMedia, setShowSharedMedia] = useState(false);
+  const [sharedMediaType, setSharedMediaType] = useState<'images' | 'files'>('images');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const event = eventId ? getEventById(eventId) : null;
 
@@ -61,6 +64,36 @@ export function ChatPage() {
     if (!eventId) return;
     deleteConversation(eventId);
     navigate('/messages');
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // For demo purposes, create mock URLs (in production, upload to server/storage)
+    const file = files[0];
+    const mockUrl = URL.createObjectURL(file);
+    const isImage = file.type.startsWith('image/');
+
+    const message: Message = {
+      id: Date.now().toString(),
+      sender: 'You',
+      text: isImage ? '📷 Image' : `📎 ${file.name}`,
+      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      isOwn: true,
+      attachments: [{
+        type: isImage ? 'image' : 'file',
+        url: mockUrl,
+        name: file.name
+      }]
+    };
+
+    const updatedMessages = [...messages, message];
+    setMessages(updatedMessages);
+    
+    if (eventId && event) {
+      sendMessage(eventId, message, event.title, event.image, event.activity);
+    }
   };
 
   if (!event) {
@@ -113,9 +146,23 @@ export function ChatPage() {
                   <MoreVertical size={18} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="bg-white">
                 <DropdownMenuItem onClick={() => navigate(`/calendar`)}>
                   View Event Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  setSharedMediaType('images');
+                  setShowSharedMedia(true);
+                }}>
+                  <ImageIcon size={14} className="mr-2" />
+                  Shared Images
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  setSharedMediaType('files');
+                  setShowSharedMedia(true);
+                }}>
+                  <FileText size={14} className="mr-2" />
+                  Shared Files
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDeleteConversation} className="text-red-600">
                   <Trash2 size={14} className="mr-2" />
@@ -154,6 +201,26 @@ export function ChatPage() {
                     ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white' 
                     : 'bg-white text-gray-900'
                 }`}>
+                  {message.attachments && message.attachments.length > 0 && (
+                    <div className="mb-2 space-y-2">
+                      {message.attachments.map((att, idx) => (
+                        <div key={idx}>
+                          {att.type === 'image' ? (
+                            <img src={att.url} alt="" className="max-h-48 rounded-lg" />
+                          ) : (
+                            <a 
+                              href={att.url} 
+                              download={att.name}
+                              className={`flex items-center gap-2 underline ${message.isOwn ? 'text-blue-100' : 'text-blue-600'}`}
+                            >
+                              <FileText size={16} />
+                              {att.name || 'File'}
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <p className="text-sm">{message.text}</p>
                   <p className={`text-xs mt-1 ${
                     message.isOwn ? 'text-blue-100' : 'text-gray-500'
@@ -171,8 +238,20 @@ export function ChatPage() {
       {/* Message Input */}
       <div className="bg-white border-t border-gray-200 p-4">
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" className="text-gray-600">
-            <Plus size={18} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileSelect}
+            className="hidden"
+            accept="image/*,application/pdf,.doc,.docx,.txt"
+          />
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-gray-600"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Paperclip size={18} />
           </Button>
           <div className="flex-1 relative">
             <Input
@@ -194,6 +273,53 @@ export function ChatPage() {
           </Button>
         </div>
       </div>
+
+      {/* Shared Media Modal */}
+      {showSharedMedia && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowSharedMedia(false)}>
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto m-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">
+                {sharedMediaType === 'images' ? 'Shared Images' : 'Shared Files'}
+              </h3>
+              <Button variant="ghost" size="icon" onClick={() => setShowSharedMedia(false)}>
+                ✕
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {sharedMediaType === 'images' ? (
+                conversations.find(c => c.eventId === eventId)?.sharedImages.length ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    {conversations.find(c => c.eventId === eventId)?.sharedImages.map((url, idx) => (
+                      <img key={idx} src={url} alt="" className="w-full h-32 object-cover rounded" />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No shared images yet</p>
+                )
+              ) : (
+                conversations.find(c => c.eventId === eventId)?.sharedFiles.length ? (
+                  <div className="space-y-2">
+                    {conversations.find(c => c.eventId === eventId)?.sharedFiles.map((url, idx) => (
+                      <a 
+                        key={idx}
+                        href={url} 
+                        download
+                        className="flex items-center gap-2 p-3 bg-gray-50 rounded hover:bg-gray-100"
+                      >
+                        <FileText size={20} />
+                        File {idx + 1}
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No shared files yet</p>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
