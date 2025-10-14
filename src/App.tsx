@@ -8,6 +8,7 @@ import { ChatPage } from "./pages/ChatPage";
 import { MessagesPage } from "./pages/MessagesPage";
 import NotFound from "./pages/NotFound";
 import { CalendarEventsProvider } from "@/context/calendar-events-context";
+import { ChatProvider } from "@/context/ChatContext";
 
 const queryClient = new QueryClient();
 
@@ -15,17 +16,19 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CalendarEventsProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/messages" element={<MessagesPage />} />
-            <Route path="/chat/:eventId" element={<ChatPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <ChatProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/messages" element={<MessagesPage />} />
+              <Route path="/chat/:eventId" element={<ChatPage />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </ChatProvider>
       </CalendarEventsProvider>
     </TooltipProvider>
   </QueryClientProvider>

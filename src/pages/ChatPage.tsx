@@ -6,7 +6,8 @@ import { Input } from '../../components/ui/input';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { useCalendarEvents } from '@/context/calendar-events-context';
 import { format } from 'date-fns';
-import { chatStorage, type Message } from '@/utils/chatStorage';
+import { useChat } from '@/context/ChatContext';
+import { type Message } from '@/types/chat';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,7 @@ export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { getEventById } = useCalendarEvents();
+  const { getMessages, sendMessage, deleteConversation } = useChat();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -26,9 +28,9 @@ export function ChatPage() {
 
   useEffect(() => {
     if (eventId) {
-      setMessages(chatStorage.getMessages(eventId));
+      setMessages(getMessages(eventId));
     }
-  }, [eventId]);
+  }, [eventId, getMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,19 +47,19 @@ export function ChatPage() {
       isOwn: true
     };
 
+    // Update local state
     const updatedMessages = [...messages, message];
     setMessages(updatedMessages);
     
-    // Save to localStorage
-    chatStorage.saveMessages(eventId, updatedMessages);
-    chatStorage.updateConversation(eventId, event.title, newMessage, event.image, event.activity);
+    // Update context (which auto-saves to localStorage)
+    sendMessage(eventId, message, event.title, event.image, event.activity);
     
     setNewMessage('');
   };
 
   const handleDeleteConversation = () => {
     if (!eventId) return;
-    chatStorage.deleteConversation(eventId);
+    deleteConversation(eventId);
     navigate('/messages');
   };
 

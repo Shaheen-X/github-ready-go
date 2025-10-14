@@ -2,17 +2,11 @@ import { MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { Badge } from '../../components/ui/badge';
-import { useState, useEffect } from 'react';
-import { chatStorage } from '@/utils/chatStorage';
+import { useChat } from '@/context/ChatContext';
 
 export function MessagesPage() {
   const navigate = useNavigate();
-  const [conversations, setConversations] = useState(chatStorage.getConversations());
-
-  useEffect(() => {
-    // Refresh conversations when component mounts
-    setConversations(chatStorage.getConversations());
-  }, []);
+  const { conversations } = useChat();
 
   return (
     <div className="h-full bg-gradient-to-br from-slate-50 to-gray-100 overflow-y-auto pb-20">
