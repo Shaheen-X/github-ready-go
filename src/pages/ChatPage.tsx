@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, Image as ImageIcon, FileText } from 'lucide-react';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useCalendarEvents } from '@/context/calendar-events-context';
 import { format } from 'date-fns';
 import { useChat } from '@/context/ChatContext';
@@ -13,7 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../../components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();

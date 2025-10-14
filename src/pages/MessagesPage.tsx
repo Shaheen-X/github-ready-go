@@ -1,7 +1,7 @@
 import { MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
-import { Badge } from '../../components/ui/badge';
+import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
+import { Badge } from '@/components/ui/badge';
 import { useChat } from '@/context/ChatContext';
 
 export function MessagesPage() {

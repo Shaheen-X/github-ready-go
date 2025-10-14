@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { Home } from '../../components/Home';
-import Search from '../../components/Search';
-import { Messages } from '../../components/Messages';
-import { Calendar } from '../../components/Calendar';
-import { ProfileNew } from '../../components/ProfileNew';
+import { Home } from '@/components/Home';
+import Search from '@/components/Search';
+import { Messages } from '@/components/Messages';
+import { Calendar } from '@/components/Calendar';
+import { ProfileNew } from '@/components/ProfileNew';
 import { CalendarEventsProvider, useCalendarEvents, createEventFromInput } from '@/context/calendar-events-context';
-import { Navigation } from '../../components/Navigation';
-import { InviteFloatingAction } from '../../components/InviteFloatingAction';
-import CreatePairingModal from '../../components/CreatePairingModal';
-import CreateGroupEventModal from '../../components/CreateGroupEventModal';
-import PairingCreatedModal from '../../components/PairingCreatedModal';
-import EventCreatedModal from '../../components/EventCreatedModal';
-import CreateEventChooserModal from '../../components/CreateEventChooserModal';
+import { Navigation } from '@/components/Navigation';
+import { InviteFloatingAction } from '@/components/InviteFloatingAction';
+import CreatePairingModal from '@/components/CreatePairingModal';
+import CreateGroupEventModal from '@/components/CreateGroupEventModal';
+import PairingCreatedModal from '@/components/PairingCreatedModal';
+import EventCreatedModal from '@/components/EventCreatedModal';
+import CreateEventChooserModal from '@/components/CreateEventChooserModal';
 import type { EventAttendee } from '@/types/calendar';
 
 

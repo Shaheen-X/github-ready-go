@@ -20,10 +20,10 @@ import { toast } from 'sonner';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import CreateActivityModal from './CreateActivityModal';
 
-import { useCalendarEvents } from '../src/context/calendar-events-context';
-import type { CalendarEvent } from '../src/types/calendar';
-import { userConnections } from '../src/data/calendar-events';
-import { useIsMobile } from '../hooks/use-mobile';
+import { useCalendarEvents } from '@/context/calendar-events-context';
+import type { CalendarEvent } from '@/types/calendar';
+import { userConnections } from '@/data/calendar-events';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Calendar as DayPickerCalendar } from './ui/calendar';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
