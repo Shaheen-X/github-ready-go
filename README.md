@@ -68,7 +68,7 @@ ConnectSphere is a React-based web application that helps users organize social 
 │   │   ├── figma/                      # Figma-exported components
 │   │   ├── Home.tsx                    # Main home feed with activity discovery
 │   │   ├── Search.tsx                  # Search and discovery interface
-│   │   ├── Messages.tsx                # Messaging system
+│   │   ├── Messages.tsx                # Messaging system (legacy)
 │   │   ├── Calendar.tsx                # Calendar view (month/week/day)
 │   │   ├── OnboardingNew.tsx           # Multi-step user onboarding
 │   │   ├── CreatePairingModal.tsx      # 1:1 pairing creation modal
@@ -80,15 +80,18 @@ ConnectSphere is a React-based web application that helps users organize social 
 │   │   ├── InviteFloatingAction.tsx    # Floating action button
 │   │   └── ...
 │   ├── context/
-│   │   └── calendar-events-context.tsx # Centralized event state management
+│   │   ├── calendar-events-context.tsx # Centralized event state management
+│   │   └── ChatContext.tsx             # Chat state management with localStorage
 │   ├── pages/
 │   │   ├── Index.tsx                   # Main app container & routing logic
 │   │   ├── HomePage.tsx                # Home page wrapper
 │   │   ├── CalendarPage.tsx            # Calendar page wrapper
-│   │   ├── MessagesPage.tsx            # Messages page wrapper
+│   │   ├── MessagesPage.tsx            # Messages/Conversations list
+│   │   ├── ChatPage.tsx                # Individual chat window
 │   │   └── NotFound.tsx                # 404 page
 │   ├── types/
-│   │   └── calendar.ts                 # TypeScript definitions for events
+│   │   ├── calendar.ts                 # TypeScript definitions for events
+│   │   └── chat.ts                     # TypeScript definitions for chat
 │   ├── hooks/
 │   │   ├── use-mobile.ts               # Mobile device detection
 │   │   └── use-toast.ts                # Toast notification hook
@@ -96,7 +99,7 @@ ConnectSphere is a React-based web application that helps users organize social 
 │   │   └── utils.ts                    # Utility functions (cn, etc.)
 │   ├── data/
 │   │   └── calendar-events.ts          # Mock event data
-│   ├── App.tsx                         # Root app component
+│   ├── App.tsx                         # Root app component with routing
 │   ├── main.tsx                        # App entry point
 │   └── index.css                       # Global styles & CSS variables
 ├── components/                         # Legacy components (being migrated to src/)
@@ -252,13 +255,458 @@ CalendarEventsProvider (context/calendar-events-context.tsx)
 
 ---
 
-### 6. **Messaging** (`Messages.tsx`)
-**Purpose**: Chat interface
+### 6. **Chat System** (Full WhatsApp-like Messaging)
+
+#### **Architecture Overview**
+
+The chat system is built using **React Context API** with **localStorage persistence**, providing a WhatsApp-like experience with conversations, messages, and shared media tracking.
+
+```
+ChatContext (src/context/ChatContext.tsx)
+    ↓
+├── MessagesPage (src/pages/MessagesPage.tsx) - Conversation list
+└── ChatPage (src/pages/ChatPage.tsx) - Individual chat window
+```
+
+---
+
+#### **A. Types & Data Structure** (`src/types/chat.ts`)
+
+```typescript
+export interface Attachment {
+  type: 'image' | 'file';
+  url: string;
+  name?: string;
+}
+
+export interface Message {
+  id: string;
+  sender: string;
+  text: string;
+  time: string;
+  isOwn: boolean;
+  avatar?: string;
+  attachments?: Attachment[];
+}
+
+export interface Conversation {
+  eventId: string;              // Links to calendar event
+  title: string;                // Event title
+  lastMessage: string;          // Preview text
+  time: string;                 // Last message time
+  unreadCount: number;          // Unread badge (not implemented)
+  image?: string;               // Event image
+  activity?: string;            // Activity type badge
+  sharedImages: string[];       // All shared image URLs
+  sharedFiles: string[];        // All shared file URLs
+}
+```
+
+---
+
+#### **B. Chat Context** (`src/context/ChatContext.tsx`)
+
+**Purpose**: Global chat state management with localStorage sync
+
+**State**:
+- `conversations: Conversation[]` - All chat threads
+- `messageStorage: Record<string, Message[]>` - Messages by eventId
+- `activeConversationId: string | null` - Currently open chat
+
+**Methods**:
+```typescript
+interface ChatContextType {
+  conversations: Conversation[];
+  activeConversationId: string | null;
+  getMessages: (eventId: string) => Message[];
+  selectConversation: (id: string) => void;
+  sendMessage: (
+    eventId: string, 
+    message: Message, 
+    eventTitle: string, 
+    eventImage?: string, 
+    eventActivity?: string
+  ) => void;
+  deleteConversation: (id: string) => void;
+}
+```
+
+**Persistence Logic**:
+```typescript
+// Auto-saves to localStorage on every change
+useEffect(() => {
+  localStorage.setItem('conversationList', JSON.stringify(conversations));
+}, [conversations]);
+
+useEffect(() => {
+  localStorage.setItem('messageStorage', JSON.stringify(messageStorage));
+}, [messageStorage]);
+```
+
+**Usage**:
+```tsx
+import { useChat } from '@/context/ChatContext';
+
+const { conversations, sendMessage, deleteConversation } = useChat();
+```
+
+---
+
+#### **C. Messages Page** (`src/pages/MessagesPage.tsx`)
+
+**Route**: `/messages`
+
+**Purpose**: Conversation list view (like WhatsApp home)
 
 **Features**:
-- Conversation list
-- Message threads
-- Real-time UI (backend not connected)
+- Lists all active conversations
+- Shows last message preview
+- Event image with chat icon badge
+- Activity type badge
+- Unread count badge (placeholder)
+- Navigates to individual chat on click
+
+**Data Flow**:
+```typescript
+const { conversations } = useChat();
+
+// Click conversation
+onClick={() => navigate(`/chat/${conv.eventId}`)}
+```
+
+**UI Structure**:
+```
+┌─────────────────────────────────┐
+│ Messages                        │
+├─────────────────────────────────┤
+│ 🖼️  Beach Volleyball           │
+│     "See you tomorrow!" • 2h    │
+│     [Volleyball badge]          │
+├─────────────────────────────────┤
+│ 🖼️  Coffee Meetup              │
+│     "Great! 📷 Image" • 1d      │
+│     [Coffee badge]              │
+└─────────────────────────────────┘
+```
+
+---
+
+#### **D. Chat Page** (`src/pages/ChatPage.tsx`)
+
+**Route**: `/chat/:eventId`
+
+**Purpose**: Individual chat window with full messaging features
+
+**Features**:
+
+1. **Header**:
+   - Back button → `/messages`
+   - Event image & title
+   - Event date & location
+   - Call, Video, More menu buttons
+
+2. **Three-Dot Menu** (DropdownMenu):
+   - **View Event Details** → Navigate to calendar
+   - **Shared Images** → Opens modal with image grid
+   - **Shared Files** → Opens modal with file list
+   - **Delete Conversation** → Removes chat & navigates back
+
+3. **Message Display**:
+   - Auto-scrolls to newest message
+   - Own messages: Right-aligned, blue gradient
+   - Others: Left-aligned, white background
+   - Shows avatar for other users
+   - Time stamp on each message
+   - Supports attachments (images/files inline)
+
+4. **Message Input**:
+   - File attachment button (📎 Paperclip)
+   - Text input field
+   - Emoji button (placeholder)
+   - Send button
+
+5. **File Attachments**:
+   - Accepts: `image/*`, PDF, DOC, DOCX, TXT
+   - Images: Show inline preview
+   - Files: Show as download link with file icon
+   - Automatically tracked in `sharedImages` / `sharedFiles`
+
+**Data Flow**:
+```typescript
+// Load event & messages
+const event = getEventById(eventId);
+const messages = getMessages(eventId);
+
+// Send message
+const handleSendMessage = () => {
+  const message: Message = {
+    id: Date.now().toString(),
+    sender: 'You',
+    text: newMessage,
+    time: new Date().toLocaleTimeString(...),
+    isOwn: true,
+    attachments: [/* files */]
+  };
+  
+  sendMessage(eventId, message, event.title, event.image, event.activity);
+  // Auto-updates: messages, conversations, sharedImages/Files, localStorage
+};
+
+// Delete conversation
+const handleDeleteConversation = () => {
+  deleteConversation(eventId);
+  navigate('/messages');
+};
+```
+
+**Shared Media Modal**:
+```tsx
+// Opens when clicking "Shared Images" or "Shared Files"
+<div className="fixed inset-0 bg-black/50">
+  <div className="bg-white rounded-xl p-6">
+    <h3>Shared Images / Shared Files</h3>
+    
+    {/* Images: 3-column grid */}
+    <div className="grid grid-cols-3 gap-2">
+      {sharedImages.map(url => <img src={url} />)}
+    </div>
+    
+    {/* Files: List with download links */}
+    <div className="space-y-2">
+      {sharedFiles.map(url => 
+        <a href={url} download>📄 File</a>
+      )}
+    </div>
+  </div>
+</div>
+```
+
+---
+
+#### **E. Routing** (`src/App.tsx`)
+
+```tsx
+<ChatProvider>
+  <Routes>
+    <Route path="/" element={<Index />} />
+    <Route path="/messages" element={<MessagesPage />} />
+    <Route path="/chat/:eventId" element={<ChatPage />} />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+</ChatProvider>
+```
+
+**Provider Hierarchy**:
+```tsx
+<QueryClientProvider>
+  <CalendarEventsProvider>
+    <ChatProvider>
+      <BrowserRouter>
+        {/* App routes */}
+      </BrowserRouter>
+    </ChatProvider>
+  </CalendarEventsProvider>
+</QueryClientProvider>
+```
+
+---
+
+#### **F. Complete Chat Flow**
+
+```
+1. User navigates to Messages tab
+   └─> MessagesPage loads conversations from ChatContext
+   └─> Shows list of all active chats
+
+2. User clicks a conversation
+   └─> navigate(`/chat/${eventId}`)
+   └─> ChatPage loads messages via getMessages(eventId)
+   └─> Displays event header, messages, input
+
+3. User types message and clicks Send
+   └─> handleSendMessage()
+   ├─> Create Message object with id, text, time
+   ├─> Add to local messages state
+   ├─> Call sendMessage(eventId, message, eventTitle, ...)
+   │   ├─> Update messageStorage[eventId]
+   │   ├─> Update/create conversation in conversationList
+   │   ├─> Extract attachments → update sharedImages/Files
+   │   └─> Save to localStorage (auto via useEffect)
+   └─> Clear input field
+
+4. User attaches file
+   └─> Click paperclip → Open file picker
+   └─> Select image/file
+   ├─> Create mock URL (URL.createObjectURL)
+   ├─> Create message with attachment
+   ├─> sendMessage() → Tracks in sharedImages/Files
+   └─> Displays inline in chat
+
+5. User clicks three-dot menu → Shared Images
+   └─> setShowSharedMedia(true), type='images'
+   └─> Modal opens showing all sharedImages from conversation
+   └─> 3-column grid of images
+
+6. User clicks Delete Conversation
+   └─> handleDeleteConversation()
+   ├─> deleteConversation(eventId)
+   │   ├─> Remove from conversations array
+   │   ├─> Delete messageStorage[eventId]
+   │   └─> Update localStorage
+   └─> navigate('/messages')
+```
+
+---
+
+#### **G. Key Features**
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **Conversation List** | ✅ Working | Persists in localStorage |
+| **Send Text Messages** | ✅ Working | Auto-saved per event |
+| **Message History** | ✅ Working | Loads from localStorage |
+| **File Attachments** | ✅ Working | Images & files (mock URLs) |
+| **Inline Image Display** | ✅ Working | Shows in message bubble |
+| **File Download Links** | ✅ Working | Click to download |
+| **Shared Media Tracking** | ✅ Working | Separate arrays per conversation |
+| **Shared Media Viewer** | ✅ Working | Modal with grid/list |
+| **Delete Conversation** | ✅ Working | Removes all data |
+| **Auto-scroll** | ✅ Working | Scrolls to newest message |
+| **Event Integration** | ✅ Working | Links to calendar events |
+| **localStorage Sync** | ✅ Working | Auto-saves all changes |
+| **Multi-user Messages** | ⚠️ Mock | Only "You" sender (no backend) |
+| **Real-time Updates** | ❌ Not Implemented | Requires backend |
+| **Read Receipts** | ❌ Not Implemented | UI placeholder only |
+| **Push Notifications** | ❌ Not Implemented | Requires backend |
+
+---
+
+#### **H. Persistence & Data Storage**
+
+**localStorage Keys**:
+- `conversationList` - Array of Conversation objects
+- `messageStorage` - Object mapping eventId → Message[]
+
+**Example Data**:
+```json
+// conversationList
+[
+  {
+    "eventId": "evt-123",
+    "title": "Beach Volleyball",
+    "lastMessage": "See you tomorrow!",
+    "time": "2:30 PM",
+    "unreadCount": 0,
+    "image": "https://...",
+    "activity": "Volleyball",
+    "sharedImages": ["https://...", "https://..."],
+    "sharedFiles": []
+  }
+]
+
+// messageStorage
+{
+  "evt-123": [
+    {
+      "id": "msg-1",
+      "sender": "You",
+      "text": "Hey! Ready for volleyball?",
+      "time": "2:15 PM",
+      "isOwn": true
+    },
+    {
+      "id": "msg-2",
+      "sender": "You",
+      "text": "📷 Image",
+      "time": "2:20 PM",
+      "isOwn": true,
+      "attachments": [
+        {
+          "type": "image",
+          "url": "blob:...",
+          "name": "photo.jpg"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+#### **I. Known Limitations**
+
+1. **No Backend**:
+   - Messages only stored locally (not synced)
+   - Only "You" as sender (no real multi-user)
+   - File attachments use mock blob URLs (not uploaded)
+
+2. **Cross-device**:
+   - No sync between devices
+   - Each browser has separate localStorage
+
+3. **File Storage**:
+   - Uses `URL.createObjectURL()` (temporary)
+   - Files lost on page refresh (blob URLs expire)
+   - TODO: Integrate with Lovable Cloud Storage
+
+4. **Unread Count**:
+   - Field exists but always 0
+   - TODO: Implement when backend added
+
+5. **Typing Indicators**:
+   - Not implemented
+   - Requires WebSocket
+
+---
+
+#### **J. Future Backend Integration**
+
+When adding Lovable Cloud / Supabase:
+
+1. **Database Tables**:
+```sql
+-- conversations table
+CREATE TABLE conversations (
+  id UUID PRIMARY KEY,
+  event_id UUID REFERENCES events(id),
+  title TEXT,
+  image_url TEXT,
+  activity TEXT,
+  created_at TIMESTAMP
+);
+
+-- messages table
+CREATE TABLE messages (
+  id UUID PRIMARY KEY,
+  conversation_id UUID REFERENCES conversations(id),
+  sender_id UUID REFERENCES users(id),
+  text TEXT,
+  attachments JSONB,
+  created_at TIMESTAMP
+);
+
+-- shared_media table
+CREATE TABLE shared_media (
+  id UUID PRIMARY KEY,
+  conversation_id UUID REFERENCES conversations(id),
+  type TEXT, -- 'image' or 'file'
+  url TEXT,
+  uploaded_at TIMESTAMP
+);
+```
+
+2. **Replace Context Logic**:
+   - `sendMessage()` → POST to `/api/messages`
+   - `getMessages()` → GET from `/api/messages?eventId=...`
+   - `conversations` → Real-time subscription
+   - File uploads → Supabase Storage
+
+3. **WebSocket Integration**:
+   - Real-time message delivery
+   - Typing indicators
+   - Read receipts
+   - Online status
 
 ---
 
@@ -808,7 +1256,23 @@ npm run build
 
 ### Recent Changes
 
-**2025-10-12 (Latest)**:
+**2025-10-14 (Latest)**:
+- ✅ **Chat System Implemented**:
+  - Built full WhatsApp-like chat with Context API
+  - Added ChatContext for global state management
+  - Implemented MessagesPage (conversation list)
+  - Implemented ChatPage (individual chat window)
+  - Added file/image attachment support
+  - Created shared media tracking (images & files)
+  - Built shared media viewer modal (grid for images, list for files)
+  - Added delete conversation feature
+  - Full localStorage persistence for messages & conversations
+  - Auto-scroll to newest message
+  - Event-linked conversations (links to calendar events)
+  - Three-dot menu with event details & media options
+  - Responsive design with mobile-first approach
+
+**2025-10-12**:
 - ✅ **Pairing Modal Updates**:
   - Simplified invitation flow in PairingCreatedModal
   - Cancel button now correctly reverts to invitation view
@@ -897,7 +1361,7 @@ footer (optional)
 
 ---
 
-**Last Updated**: 2025-10-12  
-**Version**: 1.0.0  
+**Last Updated**: 2025-10-14  
+**Version**: 1.1.0  
 **Project ID**: 461347f8-a9d3-412f-b152-787ba614a672  
 **Maintained by**: [Your Name/Team]
