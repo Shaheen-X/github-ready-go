@@ -136,8 +136,7 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOp
                 </Button>
                 <Button 
                   onClick={() => {
-                    onStartChat?.(event.id);
-                    onOpenChange?.(false);
+                    window.location.href = `/chat/${event.id}`;
                   }} 
                   variant="outline" 
                   className="rounded-full"
