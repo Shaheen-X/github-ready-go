@@ -1,41 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Plus } from 'lucide-react';
+import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Plus, Trash2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { useCalendarEvents } from '@/context/calendar-events-context';
 import { format } from 'date-fns';
-
-interface Message {
-  id: string;
-  sender: string;
-  text: string;
-  time: string;
-  isOwn: boolean;
-  avatar?: string;
-}
-
-// Temporary storage for messages by event
-const messageStorage: Record<string, Message[]> = {
-  '1': [
-    {
-      id: '1',
-      sender: 'Sarah Martinez',
-      text: 'Hey! Looking forward to this event!',
-      time: '10:30 AM',
-      isOwn: false,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b9c62e38?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: '2',
-      sender: 'You',
-      text: 'Me too! Should be great.',
-      time: '10:32 AM',
-      isOwn: true
-    }
-  ]
-};
+import { chatStorage, type Message } from '@/utils/chatStorage';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../components/ui/dropdown-menu';
 
 export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -49,7 +26,7 @@ export function ChatPage() {
 
   useEffect(() => {
     if (eventId) {
-      setMessages(messageStorage[eventId] || []);
+      setMessages(chatStorage.getMessages(eventId));
     }
   }, [eventId]);
 
@@ -58,7 +35,7 @@ export function ChatPage() {
   }, [messages]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !eventId) return;
+    if (!newMessage.trim() || !eventId || !event) return;
 
     const message: Message = {
       id: Date.now().toString(),
@@ -70,8 +47,18 @@ export function ChatPage() {
 
     const updatedMessages = [...messages, message];
     setMessages(updatedMessages);
-    messageStorage[eventId] = updatedMessages;
+    
+    // Save to localStorage
+    chatStorage.saveMessages(eventId, updatedMessages);
+    chatStorage.updateConversation(eventId, event.title, newMessage, event.image, event.activity);
+    
     setNewMessage('');
+  };
+
+  const handleDeleteConversation = () => {
+    if (!eventId) return;
+    chatStorage.deleteConversation(eventId);
+    navigate('/messages');
   };
 
   if (!event) {
@@ -118,9 +105,22 @@ export function ChatPage() {
             <Button variant="ghost" size="icon" className="text-gray-600">
               <Video size={18} />
             </Button>
-            <Button variant="ghost" size="icon" className="text-gray-600">
-              <MoreVertical size={18} />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-gray-600">
+                  <MoreVertical size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate(`/calendar`)}>
+                  View Event Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDeleteConversation} className="text-red-600">
+                  <Trash2 size={14} className="mr-2" />
+                  Delete Conversation
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>

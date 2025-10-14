@@ -1,26 +1,18 @@
 import { MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useCalendarEvents } from '@/context/calendar-events-context';
 import { ImageWithFallback } from '../../components/figma/ImageWithFallback';
 import { Badge } from '../../components/ui/badge';
-import { format } from 'date-fns';
+import { useState, useEffect } from 'react';
+import { chatStorage } from '@/utils/chatStorage';
 
 export function MessagesPage() {
   const navigate = useNavigate();
-  const { events } = useCalendarEvents();
+  const [conversations, setConversations] = useState(chatStorage.getConversations());
 
-  // Filter events that have chat capability (you can add logic to check if there are messages)
-  const eventConversations = events.map(event => ({
-    id: event.id,
-    title: event.title,
-    lastMessage: 'Start chatting about this event',
-    time: format(new Date(event.date), 'MMM d'),
-    unread: 0,
-    image: event.image,
-    activity: event.activity,
-    location: event.location,
-    date: event.date
-  }));
+  useEffect(() => {
+    // Refresh conversations when component mounts
+    setConversations(chatStorage.getConversations());
+  }, []);
 
   return (
     <div className="h-full bg-gradient-to-br from-slate-50 to-gray-100 overflow-y-auto pb-20">
@@ -28,10 +20,10 @@ export function MessagesPage() {
         <h1 className="text-2xl font-bold mb-6">Messages</h1>
         
         <div className="space-y-2">
-          {eventConversations.map((conv) => (
+          {conversations.map((conv) => (
             <div 
-              key={conv.id} 
-              onClick={() => navigate(`/chat/${conv.id}`)}
+              key={conv.eventId} 
+              onClick={() => navigate(`/chat/${conv.eventId}`)}
               className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
             >
               <div className="flex items-start gap-4">
@@ -57,9 +49,9 @@ export function MessagesPage() {
                         {conv.activity}
                       </Badge>
                     )}
-                    {conv.unread > 0 && (
+                    {conv.unreadCount > 0 && (
                       <span className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
-                        {conv.unread}
+                        {conv.unreadCount}
                       </span>
                     )}
                   </div>
@@ -69,7 +61,7 @@ export function MessagesPage() {
           ))}
         </div>
 
-        {eventConversations.length === 0 && (
+        {conversations.length === 0 && (
           <div className="text-center py-12">
             <MessageCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <p className="text-gray-600">No event chats yet</p>
