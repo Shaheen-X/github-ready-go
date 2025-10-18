@@ -158,7 +158,6 @@ export default function App() {
               <PairingCreatedModal
                 isOpen={isPairingCreatedModalOpen}
                 onClose={() => setIsPairingCreatedModalOpen(false)}
-                onNavigate={setActiveTab}
                 pairingData={createdPairingData}
               />
 

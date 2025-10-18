@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { Message, Conversation } from '@/types/chat';
+import { initializeDemoChat } from '@/utils/demoChat';
 
 interface ChatContextType {
   conversations: Conversation[];
@@ -13,7 +14,13 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
+  // Initialize demo data on first load
+  useEffect(() => {
+    initializeDemoChat();
+  }, []);
+
   const [conversations, setConversations] = useState<Conversation[]>(() => {
+    initializeDemoChat(); // Ensure demo data exists
     const saved = localStorage.getItem('conversationList');
     const parsed = saved ? JSON.parse(saved) : [];
     // Ensure sharedImages and sharedFiles exist
