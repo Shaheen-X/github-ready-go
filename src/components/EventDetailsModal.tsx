@@ -15,7 +15,7 @@ export interface Attendee {
   status: RSVPStatus;
 }
 
-export interface CalendarEventDetails extends CalendarEvent {
+export interface CalendarEventDetails extends Omit<CalendarEvent, 'date'> {
   date: string; // formatted date string for display
 }
 
@@ -39,7 +39,7 @@ const statusBadge = (status: RSVPStatus) => {
   }
 };
 
-export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOpenChange, event, onAccept, onDecline, onStartChat }) => {
+export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOpenChange, event, onAccept, onDecline }) => {
   const isGroup = event?.type === 'group';
 
   return (

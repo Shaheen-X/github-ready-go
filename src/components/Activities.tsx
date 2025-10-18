@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Plus, Calendar, MapPin, Users, Clock, Filter } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, Filter } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
 
 interface Activity {
   id: number;

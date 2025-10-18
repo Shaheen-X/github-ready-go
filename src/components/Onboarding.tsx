@@ -1,16 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ChevronRight, ChevronLeft, Eye, EyeOff, Check, X, MapPin, Calendar, Clock, Users, Camera, QrCode, Upload, Search, Mail, User, Phone, Shield, Heart, Target, Zap, Timer, Globe, Plus } from 'lucide-react';
+import { ChevronLeft, Eye, EyeOff, Check, X, MapPin, Camera, QrCode, Mail, User, Shield, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Badge } from './ui/badge';
+
 import { Switch } from './ui/switch';
 import { Slider } from './ui/slider';
 import { Checkbox } from './ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-// Figma asset imports are not available in this environment. Use placeholders to avoid compile errors.
-const exampleImageGoals = '';
-const exampleImageAbout = '';
-const exampleImageActivities = '';
 // import { format } from 'date-fns';
 
 interface OnboardingProps {

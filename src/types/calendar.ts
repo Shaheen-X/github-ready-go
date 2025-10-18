@@ -11,6 +11,7 @@ export interface Attendee {
 export interface EventAttendee {
   id: string;
   name: string;
+  avatar?: string;
   status: RSVPStatus;
 }
 

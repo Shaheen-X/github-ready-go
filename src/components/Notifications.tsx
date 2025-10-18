@@ -4,19 +4,12 @@ import {
   Check, 
   X, 
   Calendar, 
-  Users, 
+  Users,
   MessageCircle, 
   Trophy, 
-  MapPin, 
   Clock, 
-  Star,
-  Heart,
   UserPlus,
-  Activity,
-  Gift,
-  Zap,
   ChevronRight,
-  Filter,
   MoreVertical,
   CheckCircle2,
   AlertCircle,
@@ -29,7 +22,7 @@ import { Card, CardContent } from './ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import { Alert, AlertDescription } from './ui/alert';
 
 interface Notification {

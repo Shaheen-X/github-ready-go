@@ -1,4 +1,4 @@
-import { Settings, Edit3, Share, Trophy, Users, Calendar, MapPin } from 'lucide-react';
+import { Settings, Edit3, Share, Trophy, Calendar, MapPin } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';

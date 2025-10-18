@@ -2,34 +2,25 @@ import { useState } from 'react';
 import { 
   ChevronRight, 
   User, 
-  Shield, 
-  Bell, 
-  Palette, 
-  Globe, 
-  HelpCircle, 
+  Shield,
+  Bell,
+  Palette,
+  HelpCircle,
   LogOut, 
   MapPin, 
   Camera, 
   Lock, 
-  Eye, 
-  EyeOff,
+  Eye,
   Smartphone,
   Mail,
-  Calendar,
-  Clock,
-  Volume2,
-  VolumeX,
   Moon,
-  Sun,
-  Languages,
+  Volume2,
   Download,
   Trash2,
+  MessageCircle,
   Star,
   Share2,
-  MessageCircle,
-  Heart,
   AlertTriangle,
-  CheckCircle,
   Info
 } from 'lucide-react';
 import { Button } from './ui/button';
@@ -139,7 +130,7 @@ interface SettingsProps {
   onSignOut?: () => void;
 }
 
-export function Settings({ onNavigate, onSignOut }: SettingsProps = { onNavigate: () => {} }) {
+export function Settings({ onNavigate }: SettingsProps = { onNavigate: () => {} }) {
   const [settings, setSettings] = useState(mockSettings);
   const [activeTab, setActiveTab] = useState('account');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);

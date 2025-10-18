@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UserPlus, Copy, Share, X, QrCode, MessageCircle, Mail, Bell } from 'lucide-react';
+import { UserPlus, Copy, Share, X, QrCode, MessageCircle, Bell } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 
@@ -24,6 +24,9 @@ export function TopNavigation({ onNavigate }: TopNavigationProps) {
     setShowInviteOptions(false);
   };
 
+
+  // Native share function - not currently used
+  /*
   const shareNatively = async () => {
     if (navigator.share) {
       await navigator.share({
@@ -34,6 +37,8 @@ export function TopNavigation({ onNavigate }: TopNavigationProps) {
     }
     setShowInviteOptions(false);
   };
+  */
+
 
   const quickActions = [
     {
