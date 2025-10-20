@@ -123,6 +123,68 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ user, activity, cardType = 
     );
   }
 
+  // Special layout for group cards
+  if (cardType === 'group') {
+    return (
+      <div 
+        className="glass-card overflow-hidden card-hover cursor-pointer card-enter"
+        onClick={onCardClick}
+      >
+        {/* Full-width image like Places */}
+        <div className="w-full h-48 overflow-hidden">
+          <ImageWithFallback
+            src={user.image}
+            alt={user.name}
+            className="w-full h-full object-cover image-hover"
+          />
+        </div>
+
+        <div className="p-4">
+          {/* Heading */}
+          <h3 className="font-semibold text-foreground text-lg mb-2">{user.name}</h3>
+
+          {/* Address */}
+          <div className="flex items-center text-sm text-muted-foreground mb-2">
+            <MapPin className="h-4 w-4 mr-1" />
+            <span>{user.location}</span>
+          </div>
+
+          {/* Distance as activity tag on the right */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-blue-600 text-sm font-medium">{user.distance}</span>
+            <Badge className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs border-0 badge-glow">
+              {activity.type}
+            </Badge>
+          </div>
+
+          {/* Event date/time with recurring indicator */}
+          <div className="flex items-center text-sm text-muted-foreground mb-3">
+            <Clock className="h-4 w-4 mr-1" />
+            <span>{activity.time}</span>
+            {activity.hasRepeat && (
+              <Repeat className="h-4 w-4 ml-2" />
+            )}
+          </div>
+
+          {/* Two lines of details */}
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{activity.details}</p>
+
+          {/* Join Group button */}
+          <Button 
+            className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white border-0 btn-scale"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Handle join group action
+            }}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Join Group
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   // Special layout for partner cards
   if (cardType === 'partner') {
     return (
@@ -238,7 +300,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ user, activity, cardType = 
               <div className="flex items-center space-x-2 mb-1">
                 {getCardIcon()}
                 <Badge className={`${getBadgeColor()} text-white text-xs border-0 capitalize`}>
-                  {cardType === 'group' ? 'Group Activity' : cardType}
+                  {cardType}
                 </Badge>
               </div>
               <h3 className="font-semibold text-foreground truncate">{user.name}</h3>

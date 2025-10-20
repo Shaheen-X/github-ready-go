@@ -512,7 +512,8 @@ export function Search() {
                         activity={item.activity}
                         cardType={activeTab === 'partners' ? 'partner' :
                                  activeTab === 'groups' ? 'group' : 'place'}
-                        onCardClick={activeTab === 'partners' ? () => handleActivityCardClick(item.user, item.activity) : undefined}
+                        onCardClick={(activeTab === 'partners' || activeTab === 'groups') ? 
+                          () => handleActivityCardClick(item.user, item.activity) : undefined}
                       />
                     ))}
                   </div>
