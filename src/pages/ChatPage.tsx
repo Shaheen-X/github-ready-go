@@ -20,7 +20,6 @@ export function ChatPage() {
   const navigate = useNavigate();
   const { getEventById } = useCalendarEvents();
   const { conversations, getMessages, sendMessage, deleteConversation } = useChat();
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [showSharedMedia, setShowSharedMedia] = useState(false);
   const [sharedMediaType, setSharedMediaType] = useState<'images' | 'files'>('images');
@@ -28,12 +27,9 @@ export function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const event = eventId ? getEventById(eventId) : null;
-
-  useEffect(() => {
-    if (eventId) {
-      setMessages(getMessages(eventId));
-    }
-  }, [eventId, getMessages]);
+  
+  // Get messages directly from context - this makes it reactive
+  const messages = eventId ? getMessages(eventId) : [];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,11 +46,7 @@ export function ChatPage() {
       isOwn: true
     };
 
-    // Update local state
-    const updatedMessages = [...messages, message];
-    setMessages(updatedMessages);
-    
-    // Update context (which auto-saves to localStorage)
+    // Update context (which auto-saves to localStorage and triggers re-render)
     sendMessage(eventId, message, event.title, event.image, event.activity);
     
     setNewMessage('');
@@ -87,9 +79,6 @@ export function ChatPage() {
         name: file.name
       }]
     };
-
-    const updatedMessages = [...messages, message];
-    setMessages(updatedMessages);
     
     if (eventId && event) {
       sendMessage(eventId, message, event.title, event.image, event.activity);
