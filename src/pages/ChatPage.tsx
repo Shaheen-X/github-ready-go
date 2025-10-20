@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, Image as ImageIcon, FileText } from 'lucide-react';
+import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, Image as ImageIcon, FileText, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
@@ -94,16 +94,16 @@ export function ChatPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
+      <div className="glass-card border-b border-white/20 px-4 py-3 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Button 
               variant="ghost" 
-              size="sm"
+              size="icon"
               onClick={() => navigate('/messages')}
-              className="p-1 text-gray-600"
+              className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all"
             >
               <ArrowLeft size={20} />
             </Button>
@@ -111,31 +111,43 @@ export function ChatPage() {
               <ImageWithFallback
                 src={event.image || 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=100&h=100&fit=crop'}
                 alt={event.title}
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-11 h-11 rounded-2xl object-cover ring-2 ring-white/50 shadow-sm"
               />
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">{event.title}</h3>
-              <p className="text-xs text-gray-500">
+              <h3 className="font-semibold text-foreground">{event.title}</h3>
+              <p className="text-xs text-muted-foreground">
                 {format(new Date(event.date), 'MMM d, yyyy')} • {event.location}
               </p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-gray-600">
+          <div className="flex items-center space-x-1">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all"
+            >
               <Phone size={18} />
             </Button>
-            <Button variant="ghost" size="icon" className="text-gray-600">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all"
+            >
               <Video size={18} />
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-gray-600">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all"
+                >
                   <MoreVertical size={18} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white">
+              <DropdownMenuContent align="end" className="glass-card border-white/20">
                 <DropdownMenuItem onClick={() => navigate(`/calendar`)}>
                   View Event Details
                 </DropdownMenuItem>
@@ -153,7 +165,7 @@ export function ChatPage() {
                   <FileText size={14} className="mr-2" />
                   Shared Files
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDeleteConversation} className="text-red-600">
+                <DropdownMenuItem onClick={handleDeleteConversation} className="text-destructive">
                   <Trash2 size={14} className="mr-2" />
                   Delete Conversation
                 </DropdownMenuItem>
@@ -166,9 +178,14 @@ export function ChatPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-gray-500 mb-2">No messages yet</p>
-            <p className="text-sm text-gray-400">Start the conversation!</p>
+          <div className="flex flex-col items-center justify-center h-full text-center px-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
+              <MessageCircle className="text-blue-600" size={40} />
+            </div>
+            <h3 className="text-xl font-semibold mb-2 text-foreground">Start the conversation</h3>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              Send a message to connect with other participants
+            </p>
           </div>
         ) : (
           messages.map((message) => (
@@ -181,14 +198,14 @@ export function ChatPage() {
                   <ImageWithFallback
                     src={message.avatar}
                     alt={message.sender}
-                    className="w-6 h-6 rounded-full object-cover"
+                    className="w-7 h-7 rounded-full object-cover ring-2 ring-white/50"
                   />
                 )}
                 
-                <div className={`rounded-2xl px-4 py-2 ${
+                <div className={`rounded-2xl px-4 py-2.5 shadow-sm ${
                   message.isOwn 
                     ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white' 
-                    : 'bg-white text-gray-900'
+                    : 'glass-card'
                 }`}>
                   {message.attachments && message.attachments.length > 0 && (
                     <div className="mb-2 space-y-2">
@@ -212,7 +229,7 @@ export function ChatPage() {
                   )}
                   <p className="text-sm">{message.text}</p>
                   <p className={`text-xs mt-1 ${
-                    message.isOwn ? 'text-blue-100' : 'text-gray-500'
+                    message.isOwn ? 'text-blue-100' : 'text-muted-foreground'
                   }`}>
                     {message.time}
                   </p>
@@ -225,7 +242,7 @@ export function ChatPage() {
       </div>
 
       {/* Message Input */}
-      <div className="bg-white border-t border-gray-200 p-4">
+      <div className="glass-card border-t border-white/20 p-4 sticky bottom-0">
         <div className="flex items-center space-x-2">
           <input
             ref={fileInputRef}
@@ -237,10 +254,10 @@ export function ChatPage() {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-gray-600"
+            className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all flex-shrink-0"
             onClick={() => fileInputRef.current?.click()}
           >
-            <Paperclip size={18} />
+            <Paperclip size={20} />
           </Button>
           <div className="flex-1 relative">
             <Input
@@ -248,43 +265,67 @@ export function ChatPage() {
               value={newMessage}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMessage(e.target.value)}
               onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSendMessage()}
-              className="pr-10 bg-gray-50 border-gray-200 rounded-xl"
+              className="pr-10 bg-white/80 border-white/40 rounded-2xl focus:bg-white transition-all"
             />
-            <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-600">
-              <Smile size={16} />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <Smile size={18} />
             </Button>
           </div>
           <Button 
             onClick={handleSendMessage}
-            className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl w-10 h-10 p-0"
+            disabled={!newMessage.trim()}
+            className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/30 rounded-2xl w-11 h-11 p-0 flex-shrink-0 btn-scale disabled:opacity-50"
           >
-            <Send size={16} />
+            <Send size={18} />
           </Button>
         </div>
       </div>
 
       {/* Shared Media Modal */}
       {showSharedMedia && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowSharedMedia(false)}>
-          <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto m-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+          onClick={() => setShowSharedMedia(false)}
+        >
+          <div 
+            className="glass-card max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 glass-card border-b border-white/20 px-6 py-4 flex justify-between items-center">
+              <h3 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                 {sharedMediaType === 'images' ? 'Shared Images' : 'Shared Files'}
               </h3>
-              <Button variant="ghost" size="icon" onClick={() => setShowSharedMedia(false)}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowSharedMedia(false)}
+                className="text-muted-foreground hover:text-foreground hover:bg-white/50"
+              >
                 ✕
               </Button>
             </div>
-            <div className="space-y-4">
+            <div className="p-6">
               {sharedMediaType === 'images' ? (
                 conversations.find(c => c.eventId === eventId)?.sharedImages.length ? (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-3">
                     {conversations.find(c => c.eventId === eventId)?.sharedImages.map((url, idx) => (
-                      <img key={idx} src={url} alt="" className="w-full h-32 object-cover rounded" />
+                      <img 
+                        key={idx} 
+                        src={url} 
+                        alt="" 
+                        className="w-full h-32 object-cover rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer" 
+                      />
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No shared images yet</p>
+                  <div className="text-center py-12">
+                    <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No shared images yet</p>
+                  </div>
                 )
               ) : (
                 conversations.find(c => c.eventId === eventId)?.sharedFiles.length ? (
@@ -294,15 +335,18 @@ export function ChatPage() {
                         key={idx}
                         href={url} 
                         download
-                        className="flex items-center gap-2 p-3 bg-gray-50 rounded hover:bg-gray-100"
+                        className="flex items-center gap-3 p-4 glass-card hover:scale-[1.02] transition-all"
                       >
-                        <FileText size={20} />
-                        File {idx + 1}
+                        <FileText size={24} className="text-blue-600" />
+                        <span className="text-foreground">File {idx + 1}</span>
                       </a>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No shared files yet</p>
+                  <div className="text-center py-12">
+                    <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No shared files yet</p>
+                  </div>
                 )
               )}
             </div>
