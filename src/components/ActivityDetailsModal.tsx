@@ -1,4 +1,5 @@
 import { MapPin, Clock, Users, MessageCircle, Crown, Edit, Trash2, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -36,6 +37,7 @@ export default function ActivityDetailsModal({
   onDelete
 }: ActivityDetailsModalProps) {
   const isGroup = event?.type === 'group';
+  const navigate = useNavigate();
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -111,8 +113,9 @@ export default function ActivityDetailsModal({
                     variant="outline" 
                     size="sm"
                     onClick={() => {
-                      // Navigate to host profile
-                      window.location.href = `/profile/${event.hostId}`;
+                      if (event.hostId) {
+                        navigate(`/profile/${event.hostId}`);
+                      }
                     }}
                     className="rounded-full"
                   >
@@ -167,7 +170,7 @@ export default function ActivityDetailsModal({
                     </Button>
                     <Button 
                       onClick={() => {
-                        window.location.href = `/chat/${event.id}`;
+                        navigate(`/chat/${event.id}`);
                       }} 
                       variant="outline" 
                       className="rounded-full"
@@ -185,7 +188,7 @@ export default function ActivityDetailsModal({
                     </Button>
                     <Button 
                       onClick={() => {
-                        window.location.href = `/chat/${event.id}`;
+                        navigate(`/chat/${event.id}`);
                       }} 
                       variant="outline" 
                       className="rounded-full"

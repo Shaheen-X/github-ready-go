@@ -24,6 +24,7 @@ import PairingCreatedModal from '@/components/PairingCreatedModal';
 import Index from '@/pages/Index';
 import { ChatPage } from '@/pages/ChatPage';
 import { MessagesPage } from '@/pages/MessagesPage';
+import { ProfileViewPage } from '@/pages/ProfileViewPage';
 import NotFound from '@/pages/NotFound';
 import { CalendarEventsProvider } from '@/context/calendar-events-context';
 import { ChatProvider } from '@/context/ChatContext';
@@ -171,6 +172,7 @@ export default function App() {
                   <Route path="/" element={<Index />} />
                   <Route path="/messages" element={<MessagesPage />} />
                   <Route path="/chat/:eventId" element={<ChatPage />} />
+                  <Route path="/profile/:userId" element={<ProfileViewPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
