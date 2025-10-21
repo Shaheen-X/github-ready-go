@@ -199,7 +199,13 @@ export function ChatPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="glass-card border-white/20">
-                <DropdownMenuItem onClick={() => setShowEventDetailsModal(true)}>
+                <DropdownMenuItem 
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    // Close dropdown first, then open modal
+                    setTimeout(() => setShowEventDetailsModal(true), 100);
+                  }}
+                >
                   <Calendar size={14} className="mr-2" />
                   View Event Details
                 </DropdownMenuItem>
@@ -339,7 +345,8 @@ export function ChatPage() {
             <Button 
               onClick={() => {
                 setShowEventDetails(false);
-                setShowEventDetailsModal(true);
+                // Wait for Sheet to close before opening Dialog
+                setTimeout(() => setShowEventDetailsModal(true), 300);
               }}
               className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/30 rounded-2xl h-12"
             >
@@ -350,10 +357,13 @@ export function ChatPage() {
       </Sheet>
 
       {/* Event Details Modal */}
-      {event && (
+      {event && showEventDetailsModal && (
         <EventDetailsModal
+          key={`event-modal-${event.id}`}
           open={showEventDetailsModal}
-          onOpenChange={setShowEventDetailsModal}
+          onOpenChange={(open) => {
+            setShowEventDetailsModal(open);
+          }}
           event={{
             ...event,
             date: format(new Date(event.date), 'EEEE, MMMM d, yyyy')
