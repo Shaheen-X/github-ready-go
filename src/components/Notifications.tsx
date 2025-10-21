@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { useCalendarEvents } from '@/context/calendar-events-context';
+import type { CalendarEvent } from '@/types/calendar';
 import { 
   Bell, 
   Check, 
@@ -27,7 +30,7 @@ import { Alert, AlertDescription } from './ui/alert';
 
 interface Notification {
   id: string;
-  type: 'activity' | 'message' | 'connection' | 'achievement' | 'reminder' | 'system';
+  type: 'activity' | 'message' | 'connection' | 'achievement' | 'reminder' | 'system' | 'event_invite';
   title: string;
   description: string;
   timestamp: string;
@@ -42,20 +45,87 @@ interface Notification {
     achievementId?: string;
     groupId?: string;
     count?: number;
+    eventData?: CalendarEvent;
   };
 }
 
 const mockNotifications: Notification[] = [
   {
-    id: 'notif-1',
-    type: 'activity',
-    title: 'New Activity Near You',
-    description: 'Morning Yoga Session starting in 2 hours at Golden Gate Park',
-    timestamp: '10 minutes ago',
+    id: 'notif-invite-1',
+    type: 'event_invite',
+    title: 'Group Activity Invite: Morning Yoga Session',
+    description: 'Sarah Johnson invited you to join a Morning Yoga session at Golden Gate Park on Oct 25 at 8:00 AM',
+    timestamp: '5 minutes ago',
     isRead: false,
     isArchived: false,
     priority: 'high',
     avatar: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=100&h=100&fit=crop&crop=face',
+    metadata: {
+      eventData: {
+        id: 'invite-event-1',
+        title: 'Morning Yoga Session',
+        type: 'group',
+        activity: 'Yoga',
+        date: new Date(2025, 9, 25, 8, 0),
+        time: '8:00 AM',
+        location: 'Golden Gate Park',
+        description: 'Join us for a refreshing morning yoga session in the park!',
+        attendees: [
+          { id: 'att-1', name: 'Sarah Johnson', status: 'accepted' },
+          { id: 'att-2', name: 'You', status: 'pending' }
+        ],
+        maxParticipants: 15,
+        status: 'upcoming',
+        tags: ['Yoga', 'Wellness', 'Morning'],
+        image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=600&fit=crop',
+        hostName: 'Sarah Johnson',
+        hostId: 'user-sarah'
+      }
+    }
+  },
+  {
+    id: 'notif-invite-2',
+    type: 'event_invite',
+    title: '1:1 Activity Invite: Coffee & Chat',
+    description: 'Mike Chen invited you for a 1:1 coffee meetup at Blue Bottle Coffee on Oct 24 at 10:00 AM',
+    timestamp: '30 minutes ago',
+    isRead: false,
+    isArchived: false,
+    priority: 'high',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+    metadata: {
+      eventData: {
+        id: 'invite-event-2',
+        title: 'Coffee & Chat',
+        type: 'one-to-one',
+        activity: 'Coffee',
+        date: new Date(2025, 9, 24, 10, 0),
+        time: '10:00 AM',
+        location: 'Blue Bottle Coffee, Downtown',
+        description: 'Let\'s catch up over coffee and discuss some ideas!',
+        attendees: [
+          { id: 'att-3', name: 'Mike Chen', status: 'accepted' },
+          { id: 'att-4', name: 'You', status: 'pending' }
+        ],
+        maxParticipants: 2,
+        status: 'upcoming',
+        tags: ['Coffee', 'Networking'],
+        image: 'https://images.unsplash.com/photo-1511920170033-f8396924c348?w=800&h=600&fit=crop',
+        hostName: 'Mike Chen',
+        hostId: 'user-mike'
+      }
+    }
+  },
+  {
+    id: 'notif-1',
+    type: 'activity',
+    title: 'New Activity Near You',
+    description: 'Tennis Match starting in 2 hours at Central Courts',
+    timestamp: '10 minutes ago',
+    isRead: false,
+    isArchived: false,
+    priority: 'high',
+    avatar: 'https://images.unsplash.com/photo-1622163642998-1ea32b0bbc67?w=100&h=100&fit=crop&crop=face',
     metadata: { activityId: 'activity-123', count: 8 }
   },
   {
@@ -171,6 +241,7 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
   const [notifications, setNotifications] = useState(mockNotifications);
   const [activeTab, setActiveTab] = useState('all');
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const { addEvents, respondToInvitation } = useCalendarEvents();
 
   const unreadCount = notifications.filter(n => !n.isRead && !n.isArchived).length;
 
@@ -192,6 +263,8 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
         return <Clock size={20} className={iconClass} />;
       case 'system':
         return <Info size={20} className={iconClass} />;
+      case 'event_invite':
+        return <Calendar size={20} className={iconClass} />;
       default:
         return <Bell size={20} className={iconClass} />;
     }
@@ -235,6 +308,36 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
   const clearAllNotifications = () => {
     setNotifications([]);
     setShowClearDialog(false);
+  };
+
+  const handleAcceptInvite = (notification: Notification) => {
+    if (notification.metadata?.eventData) {
+      const event = notification.metadata.eventData;
+      // Add event to calendar
+      addEvents([event]);
+      // Update RSVP status
+      respondToInvitation(event.id, 'You', 'accepted');
+      // Mark notification as read and archive
+      setNotifications(prev => 
+        prev.map(n => n.id === notification.id ? { ...n, isRead: true, isArchived: true } : n)
+      );
+      toast.success(`You've accepted the invite to ${event.title}!`, {
+        description: 'Event has been added to your calendar'
+      });
+    }
+  };
+
+  const handleDeclineInvite = (notification: Notification) => {
+    if (notification.metadata?.eventData) {
+      const event = notification.metadata.eventData;
+      // Update RSVP status to declined (don't add to calendar)
+      respondToInvitation(event.id, 'You', 'declined');
+      // Mark notification as read and archive
+      setNotifications(prev => 
+        prev.map(n => n.id === notification.id ? { ...n, isRead: true, isArchived: true } : n)
+      );
+      toast.info(`You've declined the invite to ${event.title}`);
+    }
   };
 
   const filteredNotifications = notifications.filter(notification => {
@@ -416,6 +519,34 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
 
                             {/* Action Buttons */}
                             <div className="flex items-center gap-2">
+                              {notification.type === 'event_invite' && !notification.isRead && (
+                                <div className="flex gap-2">
+                                  <Button 
+                                    size="sm" 
+                                    className="choice-chip bg-gradient-to-r from-green-500 to-emerald-400 text-white border-0"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAcceptInvite(notification);
+                                    }}
+                                  >
+                                    <Check size={14} className="mr-1" />
+                                    Accept
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="choice-chip"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeclineInvite(notification);
+                                    }}
+                                  >
+                                    <X size={14} className="mr-1" />
+                                    Decline
+                                  </Button>
+                                </div>
+                              )}
+
                               {notification.type === 'connection' && !notification.isRead && (
                                 <div className="flex gap-2">
                                   <Button size="sm" className="choice-chip bg-gradient-to-r from-blue-500 to-cyan-400 text-white border-0">
