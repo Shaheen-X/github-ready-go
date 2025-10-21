@@ -10,7 +10,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
+import { Slider } from './ui/slider';
+import { ScrollArea } from './ui/scroll-area';
 import { toast } from 'sonner';
+import { ChoiceButton } from './ChoiceButton';
+import { activities, timeSlots } from './OnboardingNew';
 
 interface ProfileData {
   id: string;
@@ -32,6 +36,17 @@ interface ProfileData {
     totalHours: number;
   };
   interests: string[];
+  goals?: string[];
+  personalityTraits?: string[];
+  activityLevel?: string;
+  vibePreference?: string;
+  punctuality?: string;
+  selectedActivities?: string[];
+  availableDays?: string[];
+  availableTimes?: string[];
+  preferredDistance?: number;
+  genderPreference?: string[];
+  ageRange?: [number, number];
   achievements: {
     id: string;
     title: string;
@@ -77,6 +92,17 @@ const mockProfile: ProfileData = {
     totalHours: 156
   },
   interests: ["Hiking", "Yoga", "Photography", "Cooking", "Networking", "Art", "Rock Climbing", "Coffee"],
+  goals: ["Staying active", "New in town", "Explore new places"],
+  personalityTraits: ["Outgoing and fun", "Friendly and social"],
+  activityLevel: "Regularly active",
+  vibePreference: "Laid-back and fun",
+  punctuality: "Very important",
+  selectedActivities: ["Hiking", "Yoga", "Rock Climbing", "Photography"],
+  availableDays: ["Monday", "Wednesday", "Friday", "Saturday"],
+  availableTimes: ["morning", "evening"],
+  preferredDistance: 25,
+  genderPreference: ["Everyone"],
+  ageRange: [22, 45],
   achievements: [
     {
       id: "social-butterfly",
@@ -291,11 +317,11 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
                     Edit Profile
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-2xl max-h-[90vh]">
                   <DialogHeader>
                     <DialogTitle>Edit Profile</DialogTitle>
                     <DialogDescription>
-                      Update your profile information including name, username, bio, and location.
+                      Update your profile information and preferences
                     </DialogDescription>
                   </DialogHeader>
                   <EditProfileForm 
@@ -587,11 +613,23 @@ interface EditProfileFormProps {
 }
 
 function EditProfileForm({ profile, onSave, onCancel }: EditProfileFormProps) {
+  const [activeEditTab, setActiveEditTab] = useState('basic');
   const [formData, setFormData] = useState({
     name: profile.name,
     username: profile.username,
     bio: profile.bio,
     location: profile.location,
+    goals: profile.goals || [],
+    personalityTraits: profile.personalityTraits || [],
+    activityLevel: profile.activityLevel || '',
+    vibePreference: profile.vibePreference || '',
+    punctuality: profile.punctuality || '',
+    selectedActivities: profile.selectedActivities || [],
+    availableDays: profile.availableDays || [],
+    availableTimes: profile.availableTimes || [],
+    preferredDistance: profile.preferredDistance || 25,
+    genderPreference: profile.genderPreference || [],
+    ageRange: profile.ageRange || [18, 65] as [number, number],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -599,53 +637,303 @@ function EditProfileForm({ profile, onSave, onCancel }: EditProfileFormProps) {
     onSave(formData);
   };
 
+  const toggleMultiSelect = (item: string, field: keyof typeof formData) => {
+    setFormData(prev => {
+      const currentArray = prev[field] as string[];
+      const newArray = currentArray.includes(item)
+        ? currentArray.filter(i => i !== item)
+        : [...currentArray, item];
+      return { ...prev, [field]: newArray };
+    });
+  };
+
+  const goals = [
+    'Staying active', 'Workout sessions', 'Friendly games', 'Team sports',
+    'New in town', 'Explore new places', 'Still figuring out', 'Something else'
+  ];
+
+  const personalityTraits = [
+    'Outgoing and fun', 'Calm and easygoing', 'Friendly and social',
+    'Creative and artistic', 'Focused and hardworking', 'Independent and quiet'
+  ];
+
+  const activityLevels = ['Lightly active', 'Casually active', 'Regularly active', 'Highly active'];
+  const vibePreferences = ['Focused and serious', 'Laid-back and fun', 'Competitive spirit', 'No preference'];
+  const punctualityLevels = ['Very important', 'Somewhat important', 'Time is just numbers'];
+  const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const genderOptions = ['Men', 'Women', 'Everyone'];
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Full Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          className="bg-white/50"
-        />
-      </div>
+      <Tabs value={activeEditTab} onValueChange={setActiveEditTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4 mb-4">
+          <TabsTrigger value="basic">Basic</TabsTrigger>
+          <TabsTrigger value="personality">Personality</TabsTrigger>
+          <TabsTrigger value="activities">Activities</TabsTrigger>
+          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+        </TabsList>
 
-      <div className="space-y-2">
-        <Label htmlFor="username">Username</Label>
-        <Input
-          id="username"
-          value={formData.username}
-          onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-          className="bg-white/50"
-          placeholder="@username"
-        />
-      </div>
+        <ScrollArea className="h-[50vh] pr-4">
+          {/* Basic Info Tab */}
+          <TabsContent value="basic" className="space-y-4 mt-0">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                className="bg-white/50"
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="bio">Bio</Label>
-        <Textarea
-          id="bio"
-          value={formData.bio}
-          onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-          className="bg-white/50 resize-none"
-          rows={3}
-          placeholder="Tell others about yourself..."
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={formData.username}
+                onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                className="bg-white/50"
+                placeholder="@username"
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          value={formData.location}
-          onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-          className="bg-white/50"
-          placeholder="City, Country"
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value={formData.bio}
+                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                className="bg-white/50 resize-none"
+                rows={3}
+                placeholder="Tell others about yourself..."
+              />
+            </div>
 
-      <div className="flex gap-2 justify-end pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                value={formData.location}
+                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                className="bg-white/50"
+                placeholder="City, Country"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Goals (Select up to 3)</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {goals.map(goal => (
+                  <ChoiceButton
+                    key={goal}
+                    selected={formData.goals.includes(goal)}
+                    onClick={() => {
+                      if (formData.goals.includes(goal) || formData.goals.length < 3) {
+                        toggleMultiSelect(goal, 'goals');
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    {goal}
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Personality Tab */}
+          <TabsContent value="personality" className="space-y-4 mt-0">
+            <div className="space-y-2">
+              <Label>Personality Traits (Select up to 3)</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {personalityTraits.map(trait => (
+                  <ChoiceButton
+                    key={trait}
+                    selected={formData.personalityTraits.includes(trait)}
+                    onClick={() => {
+                      if (formData.personalityTraits.includes(trait) || formData.personalityTraits.length < 3) {
+                        toggleMultiSelect(trait, 'personalityTraits');
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    {trait}
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Activity Level</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {activityLevels.map(level => (
+                  <ChoiceButton
+                    key={level}
+                    selected={formData.activityLevel === level}
+                    onClick={() => setFormData(prev => ({ ...prev, activityLevel: level }))}
+                    className="w-full"
+                  >
+                    {level}
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Vibe Preference</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {vibePreferences.map(vibe => (
+                  <ChoiceButton
+                    key={vibe}
+                    selected={formData.vibePreference === vibe}
+                    onClick={() => setFormData(prev => ({ ...prev, vibePreference: vibe }))}
+                    className="w-full"
+                  >
+                    {vibe}
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Punctuality</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {punctualityLevels.map(level => (
+                  <ChoiceButton
+                    key={level}
+                    selected={formData.punctuality === level}
+                    onClick={() => setFormData(prev => ({ ...prev, punctuality: level }))}
+                    className="w-full"
+                  >
+                    {level}
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Activities Tab */}
+          <TabsContent value="activities" className="space-y-4 mt-0">
+            <div className="space-y-2">
+              <Label>Activities You're Interested In</Label>
+              <div className="grid grid-cols-3 gap-2 max-h-[300px] overflow-y-auto">
+                {activities.map(activity => (
+                  <ChoiceButton
+                    key={activity}
+                    selected={formData.selectedActivities.includes(activity)}
+                    onClick={() => toggleMultiSelect(activity, 'selectedActivities')}
+                    className="w-full text-xs"
+                  >
+                    {activity}
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Available Days</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {weekDays.map(day => (
+                  <ChoiceButton
+                    key={day}
+                    selected={formData.availableDays.includes(day)}
+                    onClick={() => toggleMultiSelect(day, 'availableDays')}
+                    className="w-full"
+                  >
+                    {day.slice(0, 3)}
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Preferred Times</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {timeSlots.map(slot => (
+                  <ChoiceButton
+                    key={slot.id}
+                    selected={formData.availableTimes.includes(slot.id)}
+                    onClick={() => toggleMultiSelect(slot.id, 'availableTimes')}
+                    className="w-full"
+                  >
+                    <span className="text-lg mr-2">{slot.icon}</span>
+                    <div className="text-left">
+                      <div className="font-medium">{slot.label}</div>
+                      <div className="text-xs opacity-80">{slot.time}</div>
+                    </div>
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Preferences Tab */}
+          <TabsContent value="preferences" className="space-y-4 mt-0">
+            <div className="space-y-2">
+              <Label>Preferred Distance: {formData.preferredDistance} km</Label>
+              <Slider
+                value={[formData.preferredDistance]}
+                onValueChange={([value]) => setFormData(prev => ({ ...prev, preferredDistance: value }))}
+                min={5}
+                max={100}
+                step={5}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>5 km</span>
+                <span>100 km</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Gender Preference</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {genderOptions.map(gender => (
+                  <ChoiceButton
+                    key={gender}
+                    selected={formData.genderPreference.includes(gender)}
+                    onClick={() => {
+                      if (gender === 'Everyone') {
+                        setFormData(prev => ({ ...prev, genderPreference: ['Everyone'] }));
+                      } else {
+                        const newPrefs = formData.genderPreference.filter(p => p !== 'Everyone');
+                        toggleMultiSelect(gender, 'genderPreference');
+                        setFormData(prev => ({
+                          ...prev,
+                          genderPreference: prev.genderPreference.includes(gender)
+                            ? prev.genderPreference.filter(p => p !== gender)
+                            : [...newPrefs, gender]
+                        }));
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    {gender}
+                  </ChoiceButton>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Age Range: {formData.ageRange[0]} - {formData.ageRange[1]} years</Label>
+              <Slider
+                value={formData.ageRange}
+                onValueChange={(values) => setFormData(prev => ({ ...prev, ageRange: values as [number, number] }))}
+                min={18}
+                max={80}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>18</span>
+                <span>80</span>
+              </div>
+            </div>
+          </TabsContent>
+        </ScrollArea>
+      </Tabs>
+
+      <div className="flex gap-2 justify-end pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancel} className="choice-chip">
           Cancel
         </Button>

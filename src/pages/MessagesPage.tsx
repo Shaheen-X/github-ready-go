@@ -1,4 +1,4 @@
-import { MessageCircle, Search, Plus, Users, Calendar } from 'lucide-react';
+import { MessageCircle, Search, Users, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
@@ -30,13 +30,6 @@ export function MessagesPage() {
               {conversations.length} {conversations.length === 1 ? 'conversation' : 'conversations'}
             </p>
           </div>
-          <Button 
-            size="icon"
-            className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/30 btn-scale"
-            onClick={() => navigate('/')}
-          >
-            <Plus size={20} />
-          </Button>
         </div>
 
         {/* Search */}
