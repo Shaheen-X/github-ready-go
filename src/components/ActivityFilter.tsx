@@ -5,6 +5,7 @@ import { Slider } from './ui/slider';
 import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { Separator } from './ui/separator';
+import { ScrollArea } from './ui/scroll-area';
 import { MapPin, Clock, Users, Filter } from 'lucide-react';
 
 interface ActivityFilterProps {
@@ -69,9 +70,9 @@ const ActivityFilter: React.FC<ActivityFilterProps> = ({ className = "", activeT
   };
 
   return (
-    <div className={`glass-card p-4 space-y-6 ${className}`}>
+    <div className={`glass-card p-4 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <Filter className="h-5 w-5 text-blue-600" />
           <h3 className="font-semibold text-foreground">Filters</h3>
@@ -86,7 +87,9 @@ const ActivityFilter: React.FC<ActivityFilterProps> = ({ className = "", activeT
         </Button>
       </div>
 
-      <Separator />
+      <ScrollArea className="h-[calc(100vh-200px)]">
+        <div className="space-y-6 pr-4">
+          <Separator />
 
       {/* Type Filter - Show for partners and groups tabs */}
       {(activeTab === 'partners' || activeTab === 'groups') && (
@@ -236,12 +239,14 @@ const ActivityFilter: React.FC<ActivityFilterProps> = ({ className = "", activeT
 
       <Separator />
 
-      {/* Apply Button */}
-      <Button 
-        className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white border-0 rounded-full py-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
-      >
-        Apply Filters
-      </Button>
+          {/* Apply Button */}
+          <Button 
+            className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white border-0 rounded-full py-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
+          >
+            Apply Filters
+          </Button>
+        </div>
+      </ScrollArea>
     </div>
   );
 };
