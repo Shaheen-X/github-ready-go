@@ -343,6 +343,28 @@ export function Search() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedActivity, setSelectedActivity] = useState<{user: any, activity: any} | null>(null);
   const [isActivityDetailsModalOpen, setIsActivityDetailsModalOpen] = useState(false);
+
+  // Convert activity data to event format for the modal
+  const convertToEventDetails = (user: any, activity: any) => {
+    if (!user || !activity) return null;
+    
+    return {
+      id: `event-${user.name}`,
+      title: activity.title,
+      type: activeTab === 'groups' ? 'group' as const : 'one-to-one' as const,
+      activity: activity.type,
+      date: activity.time.split(',')[0] || activity.time, // Use first part as date
+      time: activity.time,
+      location: user.location,
+      description: activity.details,
+      attendees: [],
+      maxParticipants: activeTab === 'groups' ? 20 : 2,
+      status: 'upcoming' as const,
+      tags: [activity.type],
+      image: user.image,
+      isHost: false, // Users viewing from search are not hosts
+    };
+  };
   const isMobile = useIsMobile();
   const itemsPerPage = isMobile ? 4 : 8;
 
@@ -567,8 +589,15 @@ export function Search() {
         <ActivityDetailsModal
           isOpen={isActivityDetailsModalOpen}
           onClose={() => setIsActivityDetailsModalOpen(false)}
-          user={selectedActivity.user}
-          activity={selectedActivity.activity}
+          event={convertToEventDetails(selectedActivity.user, selectedActivity.activity)}
+          onAccept={(eventId) => {
+            console.log('Accepted event:', eventId);
+            setIsActivityDetailsModalOpen(false);
+          }}
+          onDecline={(eventId) => {
+            console.log('Declined event:', eventId);
+            setIsActivityDetailsModalOpen(false);
+          }}
         />
       )}
     </div>
