@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, Image as ImageIcon, FileText, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, Image as ImageIcon, FileText, MessageCircle, Bell, BellOff, UserPlus, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
@@ -14,6 +14,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 
 export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -23,6 +29,9 @@ export function ChatPage() {
   const [newMessage, setNewMessage] = useState('');
   const [showSharedMedia, setShowSharedMedia] = useState(false);
   const [sharedMediaType, setSharedMediaType] = useState<'images' | 'files'>('images');
+  const [showEventDetails, setShowEventDetails] = useState(false);
+  const [showCallOptions, setShowCallOptions] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -104,46 +113,59 @@ export function ChatPage() {
     <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
       {/* Header */}
       <div className="glass-card border-b border-white/20 px-4 py-3 sticky top-0 z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center space-x-3 flex-1 min-w-0">
             <Button 
               variant="ghost" 
               size="icon"
               onClick={() => navigate('/messages')}
-              className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all"
+              className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all flex-shrink-0"
             >
               <ArrowLeft size={20} />
             </Button>
-            <div className="relative">
+            <div className="relative flex-shrink-0">
               <ImageWithFallback
                 src={event.image || 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=100&h=100&fit=crop'}
                 alt={event.title}
                 className="w-11 h-11 rounded-2xl object-cover ring-2 ring-white/50 shadow-sm"
               />
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground">{event.title}</h3>
-              <p className="text-xs text-muted-foreground">
-                {format(new Date(event.date), 'MMM d, yyyy')} • {event.location}
+            <div 
+              className="flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => setShowEventDetails(true)}
+            >
+              <h3 className="font-semibold text-foreground truncate">{event.title}</h3>
+              <p className="text-xs text-muted-foreground truncate">
+                {format(new Date(event.date), 'EEEE, MMM d')}
+              </p>
+              <p className="text-xs text-muted-foreground truncate">
+                {event.location}
               </p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all"
-            >
-              <Phone size={18} />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all"
-            >
-              <Video size={18} />
-            </Button>
+          <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
+            <DropdownMenu open={showCallOptions} onOpenChange={setShowCallOptions}>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-muted-foreground hover:text-foreground hover:bg-white/50 transition-all"
+                >
+                  <Phone size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="glass-card border-white/20">
+                <DropdownMenuItem>
+                  <Phone size={14} className="mr-2" />
+                  Audio Call
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Video size={14} className="mr-2" />
+                  Video Call
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
@@ -155,8 +177,22 @@ export function ChatPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="glass-card border-white/20">
-                <DropdownMenuItem onClick={() => navigate(`/calendar`)}>
+                <DropdownMenuItem onClick={() => setShowEventDetails(true)}>
+                  <Calendar size={14} className="mr-2" />
                   View Event Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsMuted(!isMuted)}>
+                  {isMuted ? (
+                    <>
+                      <BellOff size={14} className="mr-2" />
+                      Unmute Notifications
+                    </>
+                  ) : (
+                    <>
+                      <Bell size={14} className="mr-2" />
+                      Mute Notifications
+                    </>
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
                   setSharedMediaType('images');
@@ -181,6 +217,112 @@ export function ChatPage() {
           </div>
         </div>
       </div>
+
+      {/* Event Details Sheet */}
+      <Sheet open={showEventDetails} onOpenChange={setShowEventDetails}>
+        <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
+          <SheetHeader>
+            <SheetTitle className="text-2xl font-bold gradient-text">{event.title}</SheetTitle>
+          </SheetHeader>
+          
+          <div className="mt-6 space-y-6">
+            {/* Event Info */}
+            <div className="glass-card p-4 rounded-2xl space-y-3">
+              <div className="flex items-center gap-3 text-sm">
+                <Calendar className="text-blue-600" size={18} />
+                <div>
+                  <p className="font-medium text-foreground">{format(new Date(event.date), 'EEEE, MMMM d, yyyy')}</p>
+                  <p className="text-muted-foreground">{event.time}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 text-sm">
+                <svg className="text-blue-600 mt-0.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <p className="text-foreground">{event.location}</p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-4 gap-3">
+              <button className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                  <Phone className="text-blue-600" size={20} />
+                </div>
+                <span className="text-xs font-medium text-foreground">Audio</span>
+              </button>
+              <button className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                  <Video className="text-blue-600" size={20} />
+                </div>
+                <span className="text-xs font-medium text-foreground">Video</span>
+              </button>
+              <button className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                  <UserPlus className="text-blue-600" size={20} />
+                </div>
+                <span className="text-xs font-medium text-foreground">Add</span>
+              </button>
+              <button 
+                onClick={() => setIsMuted(!isMuted)}
+                className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform"
+              >
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  isMuted 
+                    ? 'bg-gradient-to-br from-red-100 to-orange-100' 
+                    : 'bg-gradient-to-br from-blue-100 to-cyan-100'
+                }`}>
+                  {isMuted ? (
+                    <BellOff className="text-red-600" size={20} />
+                  ) : (
+                    <Bell className="text-blue-600" size={20} />
+                  )}
+                </div>
+                <span className="text-xs font-medium text-foreground">
+                  {isMuted ? 'Unmute' : 'Mute'}
+                </span>
+              </button>
+            </div>
+
+            {/* Members */}
+            <div className="glass-card p-4 rounded-2xl">
+              <h4 className="font-semibold text-foreground mb-3">Members ({event.attendees.length})</h4>
+              <div className="space-y-2">
+                {event.attendees.slice(0, 5).map((attendee) => (
+                  <div key={attendee.id} className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                      <span className="text-sm font-medium text-blue-600">
+                        {attendee.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{attendee.name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{attendee.status}</p>
+                    </div>
+                  </div>
+                ))}
+                {event.attendees.length > 5 && (
+                  <p className="text-xs text-muted-foreground text-center pt-2">
+                    +{event.attendees.length - 5} more
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Event Details Button */}
+            <Button 
+              onClick={() => {
+                setShowEventDetails(false);
+                navigate(`/calendar`);
+              }}
+              className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/30 rounded-2xl h-12"
+            >
+              View Full Event Details
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
