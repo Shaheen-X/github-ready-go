@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Settings, Edit3, Trophy, Users, Calendar, MapPin, Star, Target, Zap, Camera, ChevronRight, QrCode, Copy, Check, Plus, X } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import { Settings, Edit3, Trophy, Users, Calendar, MapPin, Star, Target, Zap, Camera, QrCode, Copy, Check, Plus, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -15,6 +14,8 @@ import { ScrollArea } from './ui/scroll-area';
 import { toast } from 'sonner';
 import { ChoiceButton } from './ChoiceButton';
 import { activities, timeSlots } from './OnboardingNew';
+import { EventCard } from './EventCard';
+import type { CalendarEvent } from '@/types/calendar';
 
 interface ProfileData {
   id: string;
@@ -471,34 +472,38 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
                 <Calendar size={18} className="mr-2 text-blue-500" />
                 Recent Activities
               </h3>
-              <div className="space-y-3">
-                {profileData.recentActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-center space-x-3 p-3 bg-white/50 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200">
-                    <ImageWithFallback
-                      src={activity.image}
-                      alt={activity.title}
-                      className="w-14 h-14 rounded-lg object-cover"
+              <div className="grid grid-cols-1 gap-3">
+                {profileData.recentActivities.map((activity) => {
+                  // Transform activity data to CalendarEvent format
+                  const calendarEvent: CalendarEvent = {
+                    id: `activity-${activity.id}`,
+                    title: activity.title,
+                    type: 'group',
+                    activity: activity.type,
+                    date: new Date(),
+                    time: activity.date,
+                    location: 'Location',
+                    description: '',
+                    attendees: Array.from({ length: activity.attendees }, (_, i) => ({
+                      id: `attendee-${i}`,
+                      name: `Attendee ${i + 1}`,
+                      status: 'accepted' as const
+                    })),
+                    maxParticipants: activity.attendees,
+                    status: 'completed',
+                    tags: [],
+                    image: activity.image,
+                    isHost: false
+                  };
+                  
+                  return (
+                    <EventCard 
+                      key={activity.id} 
+                      event={calendarEvent}
+                      variant="compact"
                     />
-                    <div className="flex-1">
-                      <h4 className="text-body font-medium">{activity.title}</h4>
-                      <div className="flex items-center space-x-2 text-subtext">
-                        <Badge variant="secondary" className="text-tag">{activity.type}</Badge>
-                        <span>{activity.date}</span>
-                        <div className="flex items-center gap-1">
-                          <Users size={12} />
-                          <span>{activity.attendees}</span>
-                        </div>
-                        {activity.rating && (
-                          <div className="flex items-center gap-1">
-                            <Star size={12} className="fill-yellow-400 text-yellow-400" />
-                            <span>{activity.rating}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <ChevronRight size={16} className="text-gray-400" />
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
           </TabsContent>
