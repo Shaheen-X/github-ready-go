@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { ChoiceButton } from './ChoiceButton';
 import { activities, timeSlots } from './OnboardingNew';
 import { EventCard } from './EventCard';
+import { PastEventDetailsModal } from './PastEventDetailsModal';
 import type { CalendarEvent } from '@/types/calendar';
 
 interface ProfileData {
@@ -198,6 +199,8 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const [showInterestsEdit, setShowInterestsEdit] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [showEventDetails, setShowEventDetails] = useState(false);
   const [profileData, setProfileData] = useState(mockProfile);
   const xpProgress = (profileData.xp / profileData.nextLevelXp) * 100;
 
@@ -223,6 +226,19 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
     toast.success('Interests updated successfully!');
   };
 
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setShowEventDetails(true);
+  };
+
+  const handleDeleteEvent = () => {
+    if (selectedEvent) {
+      toast.success('Event deleted successfully!');
+      setShowEventDetails(false);
+      setSelectedEvent(null);
+    }
+  };
+
   return (
     <div className="h-full bg-gradient-to-br from-slate-50 to-gray-100 pb-20 overflow-y-auto">
       {/* Header */}
@@ -239,6 +255,14 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
           </Button>
         </div>
       </div>
+
+      {/* Past Event Details Modal */}
+      <PastEventDetailsModal
+        open={showEventDetails}
+        onOpenChange={setShowEventDetails}
+        event={selectedEvent}
+        onDelete={handleDeleteEvent}
+      />
 
       <div className="p-6 space-y-6">
         {/* Profile Header Card */}
@@ -501,6 +525,7 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
                       key={activity.id} 
                       event={calendarEvent}
                       variant="compact"
+                      onClick={() => handleEventClick(calendarEvent)}
                     />
                   );
                 })}
