@@ -1,4 +1,4 @@
-import { MapPin, Clock, Users, MessageCircle, Crown, Edit, Trash2 } from 'lucide-react';
+import { MapPin, Clock, Users, MessageCircle, Crown, Edit, Trash2, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -94,6 +94,33 @@ export default function ActivityDetailsModal({
                 <span>{event?.location}</span>
               </div>
             </div>
+
+            {/* Host Profile Section - Only show if not the host */}
+            {!event?.isHost && event?.hostName && (
+              <div className="glass-card p-4 rounded-xl border border-white/20">
+                <h4 className="text-body font-semibold mb-3">Host</h4>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
+                    <User className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm text-foreground font-semibold">{event.hostName}</div>
+                    <div className="text-xs text-subtext">Event Organizer</div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      // Navigate to host profile
+                      window.location.href = `/profile/${event.hostId}`;
+                    }}
+                    className="rounded-full"
+                  >
+                    View Profile
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {event?.description && (
               <div>
