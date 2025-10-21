@@ -21,7 +21,6 @@ import CreateEventChooserModal from '@/components/CreateEventChooserModal';
 import CreatePairingModal from '@/components/CreatePairingModal';
 import EventCreatedModal from '@/components/EventCreatedModal';
 import PairingCreatedModal from '@/components/PairingCreatedModal';
-import Index from '@/pages/Index';
 import { ChatPage } from '@/pages/ChatPage';
 import { MessagesPage } from '@/pages/MessagesPage';
 import { ProfileViewPage } from '@/pages/ProfileViewPage';
@@ -123,60 +122,63 @@ export default function App() {
       <TooltipProvider>
         <CalendarEventsProvider>
           <ChatProvider>
-            <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-gray-100">
-              <main className="flex-1 overflow-hidden">{renderContent()}</main>
-              <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-              <InviteFloatingAction onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} />
+            <BrowserRouter>
+              <Routes>
+                {/* Standalone Routes */}
+                <Route path="/messages" element={<MessagesPage />} />
+                <Route path="/chat/:eventId" element={<ChatPage />} />
+                <Route path="/profile/:userId" element={<ProfileViewPage />} />
+                
+                {/* Main App Route */}
+                <Route path="/" element={
+                  <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-gray-100">
+                    <main className="flex-1 overflow-hidden">{renderContent()}</main>
+                    <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+                    <InviteFloatingAction onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} />
 
-              {/* Modals */}
-              <CreateEventChooserModal
-                isOpen={isCreateEventChooserOpen}
-                onClose={() => setIsCreateEventChooserOpen(false)}
-                onChoosePairing={handleChoosePairing}
-                onChooseGroup={handleChooseGroup}
-              />
-              <CreateActivityModal
-                isOpen={isCreateEventModalOpen}
-                onClose={() => setIsCreateEventModalOpen(false)}
-                onCreateActivity={handleCreateEventModal}
-              />
-              <CreateGroupEventModal
-                isOpen={isCreateGroupEventModalOpen}
-                onClose={() => setIsCreateGroupEventModalOpen(false)}
-                onCreateEvent={handleCreateGroupEvent}
-              />
-              <CreatePairingModal
-                isOpen={isCreatePairingModalOpen}
-                onClose={() => setIsCreatePairingModalOpen(false)}
-                onCreatePairing={handleCreatePairing}
-              />
-              <EventCreatedModal
-                isOpen={isEventCreatedModalOpen}
-                onClose={() => setIsEventCreatedModalOpen(false)}
-                onNavigate={setActiveTab}
-                eventData={createdEventData}
-              />
-              <PairingCreatedModal
-                isOpen={isPairingCreatedModalOpen}
-                onClose={() => setIsPairingCreatedModalOpen(false)}
-                pairingData={createdPairingData}
-              />
+                    {/* Modals */}
+                    <CreateEventChooserModal
+                      isOpen={isCreateEventChooserOpen}
+                      onClose={() => setIsCreateEventChooserOpen(false)}
+                      onChoosePairing={handleChoosePairing}
+                      onChooseGroup={handleChooseGroup}
+                    />
+                    <CreateActivityModal
+                      isOpen={isCreateEventModalOpen}
+                      onClose={() => setIsCreateEventModalOpen(false)}
+                      onCreateActivity={handleCreateEventModal}
+                    />
+                    <CreateGroupEventModal
+                      isOpen={isCreateGroupEventModalOpen}
+                      onClose={() => setIsCreateGroupEventModalOpen(false)}
+                      onCreateEvent={handleCreateGroupEvent}
+                    />
+                    <CreatePairingModal
+                      isOpen={isCreatePairingModalOpen}
+                      onClose={() => setIsCreatePairingModalOpen(false)}
+                      onCreatePairing={handleCreatePairing}
+                    />
+                    <EventCreatedModal
+                      isOpen={isEventCreatedModalOpen}
+                      onClose={() => setIsEventCreatedModalOpen(false)}
+                      onNavigate={setActiveTab}
+                      eventData={createdEventData}
+                    />
+                    <PairingCreatedModal
+                      isOpen={isPairingCreatedModalOpen}
+                      onClose={() => setIsPairingCreatedModalOpen(false)}
+                      pairingData={createdPairingData}
+                    />
+                  </div>
+                } />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
 
               {/* Toast Notifications */}
               <Toaster />
               <Sonner />
-
-              {/* Optional Routes */}
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/messages" element={<MessagesPage />} />
-                  <Route path="/chat/:eventId" element={<ChatPage />} />
-                  <Route path="/profile/:userId" element={<ProfileViewPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </div>
+            </BrowserRouter>
           </ChatProvider>
         </CalendarEventsProvider>
       </TooltipProvider>
