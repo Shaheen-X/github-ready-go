@@ -664,7 +664,9 @@ function EditProfileForm({ profile, onSave, onCancel }: EditProfileFormProps) {
   const genderOptions = ['Men', 'Women', 'Everyone'];
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" onKeyDown={(e) => {
+      if (e.key === 'Enter') e.preventDefault();
+    }}>
       <Tabs value={activeEditTab} onValueChange={setActiveEditTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 mb-4">
           <TabsTrigger value="basic">Basic</TabsTrigger>

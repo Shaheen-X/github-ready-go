@@ -41,6 +41,7 @@ export function ChoiceButton({
 
   return (
     <button
+      type="button"
       className={baseClasses}
       onClick={onClick}
       disabled={disabled}
