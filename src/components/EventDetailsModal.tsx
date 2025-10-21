@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -41,6 +42,7 @@ const statusBadge = (status: RSVPStatus) => {
 
 export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOpenChange, event, onAccept, onDecline }) => {
   const isGroup = event?.type === 'group';
+  const navigate = useNavigate();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -136,7 +138,7 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOp
                 </Button>
                 <Button 
                   onClick={() => {
-                    window.location.href = `/chat/${event.id}`;
+                    navigate(`/chat/${event.id}`);
                   }} 
                   variant="outline" 
                   className="rounded-full"

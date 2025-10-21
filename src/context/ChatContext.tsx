@@ -9,6 +9,7 @@ interface ChatContextType {
   selectConversation: (id: string) => void;
   sendMessage: (eventId: string, message: Message, eventTitle: string, eventImage?: string, eventActivity?: string) => void;
   deleteConversation: (id: string) => void;
+  createConversation: (eventId: string, eventTitle: string, eventImage?: string, eventActivity?: string) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -117,6 +118,26 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const createConversation = (eventId: string, eventTitle: string, eventImage?: string, eventActivity?: string) => {
+    setConversations(prev => {
+      const existing = prev.find(c => c.eventId === eventId);
+      if (existing) {
+        return prev;
+      }
+      return [...prev, {
+        eventId,
+        title: eventTitle,
+        lastMessage: '',
+        time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        unreadCount: 0,
+        image: eventImage,
+        activity: eventActivity,
+        sharedImages: [],
+        sharedFiles: []
+      }];
+    });
+  };
+
   return (
     <ChatContext.Provider
       value={{ 
@@ -125,7 +146,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         getMessages,
         selectConversation, 
         sendMessage, 
-        deleteConversation 
+        deleteConversation,
+        createConversation 
       }}
     >
       {children}

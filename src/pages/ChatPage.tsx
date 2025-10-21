@@ -19,7 +19,7 @@ export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { getEventById } = useCalendarEvents();
-  const { conversations, getMessages, sendMessage, deleteConversation } = useChat();
+  const { conversations, getMessages, sendMessage, deleteConversation, createConversation } = useChat();
   const [newMessage, setNewMessage] = useState('');
   const [showSharedMedia, setShowSharedMedia] = useState(false);
   const [sharedMediaType, setSharedMediaType] = useState<'images' | 'files'>('images');
@@ -30,6 +30,13 @@ export function ChatPage() {
   
   // Get messages directly from context - this makes it reactive
   const messages = eventId ? getMessages(eventId) : [];
+
+  // Create conversation when opening chat for the first time
+  useEffect(() => {
+    if (event && eventId) {
+      createConversation(eventId, event.title, event.image, event.activity);
+    }
+  }, [event, eventId, createConversation]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
