@@ -505,6 +505,17 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
+                        
+                        {/* Invitation Context Text */}
+                        <div className="px-2 py-2 bg-blue-50/50 rounded-lg border border-blue-100">
+                          <p className="text-sm text-gray-700">
+                            <span className="font-semibold text-blue-600">
+                              {notification.metadata.eventData.hostName || 'Someone'}
+                            </span>
+                            {' '}invited you to {notification.metadata.eventData.type === 'one-to-one' ? 'a 1:1' : 'a group'} event
+                          </p>
+                        </div>
+                        
                         <EventCard 
                           event={notification.metadata.eventData}
                           onClick={() => handleEventCardClick(notification)}
