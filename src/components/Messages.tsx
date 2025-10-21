@@ -1,348 +1,125 @@
-import { useState, useEffect } from 'react';
-import { Search, MoreVertical, Phone, Video, Send, Smile, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { useCalendarEvents } from '@/context/calendar-events-context';
+import { useChat } from '@/context/ChatContext';
 
-// Mock data
-const conversations = [
-  {
-    id: 1,
-    name: 'Sarah Martinez',
-    lastMessage: 'Great workout today! Same time tomorrow?',
-    time: '2m ago',
-    unread: 2,
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b9c62e38?w=100&h=100&fit=crop&crop=face',
-    online: true,
-    activity: 'Yoga Session'
-  },
-  {
-    id: 2,
-    name: 'Basketball Squad',
-    lastMessage: 'Mike: Who\'s bringing the ball?',
-    time: '15m ago',
-    unread: 0,
-    avatar: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=100&h=100&fit=crop',
-    isGroup: true,
-    members: 6,
-    activity: 'Basketball Game'
-  },
-  {
-    id: 3,
-    name: 'Emma Chen',
-    lastMessage: 'Thanks for the tennis tips! 🎾',
-    time: '1h ago',
-    unread: 0,
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
-    online: false,
-    activity: 'Tennis Match'
-  },
-  {
-    id: 4,
-    name: 'Running Club',
-    lastMessage: 'Meeting at the park entrance',
-    time: '3h ago',
-    unread: 1,
-    avatar: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=100&fit=crop',
-    isGroup: true,
-    members: 12,
-    activity: 'Morning Run'
-  }
-];
-
-const currentMessages = [
-  {
-    id: 1,
-    sender: 'Sarah Martinez',
-    message: 'Hey! How did the yoga session go today?',
-    time: '10:30 AM',
-    isOwn: false,
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b9c62e38?w=100&h=100&fit=crop&crop=face'
-  },
-  {
-    id: 2,
-    sender: 'You',
-    message: 'It was amazing! I feel so much more flexible already. Thanks for recommending that instructor.',
-    time: '10:32 AM',
-    isOwn: true
-  },
-  {
-    id: 3,
-    sender: 'Sarah Martinez',
-    message: 'I\'m so glad you enjoyed it! Want to join me for tomorrow\'s session too?',
-    time: '10:35 AM',
-    isOwn: false,
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b9c62e38?w=100&h=100&fit=crop&crop=face'
-  },
-  {
-    id: 4,
-    sender: 'You',
-    message: 'Absolutely! Same time and place?',
-    time: '10:36 AM',
-    isOwn: true
-  },
-  {
-    id: 5,
-    sender: 'Sarah Martinez',
-    message: 'Great workout today! Same time tomorrow?',
-    time: '11:45 AM',
-    isOwn: false,
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b9c62e38?w=100&h=100&fit=crop&crop=face'
-  }
-];
-
-interface MessagesProps {
-  initialEventId?: string | number | null;
-}
-
-export function Messages({ initialEventId }: MessagesProps = {}) {
-  const { getEventById } = useCalendarEvents();
-  const [selectedConversation, setSelectedConversation] = useState<number | null>(
-    initialEventId ? Number(initialEventId) : null
-  );
-  const [newMessage, setNewMessage] = useState('');
+export function Messages() {
+  const navigate = useNavigate();
+  const { conversations } = useChat();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-
-  useEffect(() => {
-    if (initialEventId) {
-      const event = getEventById(String(initialEventId));
-      if (event) {
-        setSelectedEvent(event);
-        setSelectedConversation(Number(initialEventId));
-      }
-    }
-  }, [initialEventId, getEventById]);
 
   const filteredConversations = conversations.filter(conv =>
-    conv.name.toLowerCase().includes(searchQuery.toLowerCase())
+    conv.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    conv.activity?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // In a real app, this would send the message
-      console.log('Sending message:', newMessage);
-      setNewMessage('');
-    }
-  };
-
-  const renderConversationList = () => (
-    <div className="h-full flex flex-col">
+  return (
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">Messages</h1>
+      <div className="glass-card border-b border-white/20 px-6 py-5 sticky top-0 z-10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-section-header font-bold gradient-text">Messages</h1>
+            <p className="text-subtext text-xs mt-0.5">{conversations.length} conversations</p>
+          </div>
+          <Button 
+            size="sm"
+            className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full shadow-lg shadow-blue-500/30 btn-scale"
+          >
+            <Plus size={16} className="mr-1" />
+            New
+          </Button>
+        </div>
         
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
           <Input
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-gray-50 border-gray-200 rounded-xl"
+            className="pl-10 bg-white/80 border-white/40 rounded-2xl focus:bg-white transition-all"
           />
         </div>
       </div>
 
       {/* Conversations */}
-      <div className="flex-1 overflow-y-auto">
-        {filteredConversations.map((conversation) => (
-          <div
-            key={conversation.id}
-            onClick={() => setSelectedConversation(conversation.id)}
-            className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-          >
-            <div className="flex items-center space-x-3">
-              {/* Avatar */}
-              <div className="relative">
-                <ImageWithFallback
-                  src={conversation.avatar}
-                  alt={conversation.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                {conversation.isGroup && (
-                  <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {conversation.members}
+      <div className="flex-1 overflow-y-auto px-4 py-3">
+        {filteredConversations.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center px-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-3xl flex items-center justify-center mb-6 shadow-lg">
+              <Search className="text-blue-600" size={40} />
+            </div>
+            {conversations.length === 0 ? (
+              <>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">No conversations yet</h3>
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  Browse events and start chatting with people
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">No results found</h3>
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  Try searching with different keywords
+                </p>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredConversations.map((conversation) => (
+              <div
+                key={conversation.eventId}
+                onClick={() => navigate(`/chat/${conversation.eventId}`)}
+                className="glass-card p-4 rounded-2xl cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+              >
+                <div className="flex items-center space-x-3">
+                  {/* Avatar */}
+                  <div className="relative flex-shrink-0">
+                    <ImageWithFallback
+                      src={conversation.image || 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=100&h=100&fit=crop'}
+                      alt={conversation.title}
+                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-white/50 shadow-sm"
+                    />
                   </div>
-                )}
-                {!conversation.isGroup && conversation.online && (
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                )}
-              </div>
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-gray-900 truncate">{conversation.name}</h3>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500">{conversation.time}</span>
-                    {conversation.unread > 0 && (
-                      <Badge className="bg-blue-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center p-0">
-                        {conversation.unread}
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h3 className="font-semibold text-foreground truncate">{conversation.title}</h3>
+                      <span className="text-xs text-muted-foreground flex-shrink-0">{conversation.time}</span>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground truncate mb-2">
+                      {conversation.lastMessage || 'No messages yet'}
+                    </p>
+                    
+                    {conversation.activity && (
+                      <Badge 
+                        variant="outline" 
+                        className="text-xs bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border-blue-200/50"
+                      >
+                        {conversation.activity}
                       </Badge>
                     )}
                   </div>
-                </div>
-                
-                <p className="text-sm text-gray-600 truncate mt-1">{conversation.lastMessage}</p>
-                
-                {conversation.activity && (
-                  <div className="flex items-center mt-1">
-                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                      {conversation.activity}
+
+                  {conversation.unreadCount > 0 && (
+                    <Badge className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center p-0 flex-shrink-0 shadow-lg">
+                      {conversation.unreadCount}
                     </Badge>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* New Message Button */}
-      <div className="p-4 bg-white border-t border-gray-200">
-        <Button className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl h-12">
-          <Plus className="mr-2 w-4 h-4" />
-          New Message
-        </Button>
-      </div>
-    </div>
-  );
-
-  const renderConversationView = () => {
-    const conversation = conversations.find(c => c.id === selectedConversation);
-    
-    // Use event data if available, otherwise fall back to conversation data
-    const displayData = selectedEvent ? {
-      name: selectedEvent.title,
-      avatar: selectedEvent.image || conversation?.avatar,
-      isGroup: selectedEvent.type === 'group',
-      members: selectedEvent.attendees?.length,
-      activity: selectedEvent.activity
-    } : conversation;
-
-    if (!displayData) return null;
-
-    return (
-      <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {
-                  setSelectedConversation(null);
-                  setSelectedEvent(null);
-                }}
-                className="p-1 text-gray-600"
-              >
-                ←
-              </Button>
-              <div className="relative">
-                <ImageWithFallback
-                  src={displayData.avatar}
-                  alt={displayData.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                {!displayData.isGroup && conversation?.online && (
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                )}
-              </div>
-              <div>
-                <h3 className="font-medium text-gray-900">{displayData.name}</h3>
-                <p className="text-xs text-gray-500">
-                  {displayData.isGroup 
-                    ? `${displayData.members} members` 
-                    : conversation?.online ? 'Online now' : 'Last seen 2h ago'
-                  }
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon" className="text-gray-600">
-                <Phone size={18} />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-600">
-                <Video size={18} />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-600">
-                <MoreVertical size={18} />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-          {currentMessages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`flex items-end space-x-2 max-w-xs ${message.isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                {!message.isOwn && (
-                  <ImageWithFallback
-                    src={message.avatar}
-                    alt={message.sender}
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                )}
-                
-                <div className={`rounded-2xl px-4 py-2 ${
-                  message.isOwn 
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white' 
-                    : 'bg-white text-gray-900'
-                }`}>
-                  <p className="text-sm">{message.message}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.isOwn ? 'text-blue-100' : 'text-gray-500'
-                  }`}>
-                    {message.time}
-                  </p>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Message Input */}
-        <div className="bg-white border-t border-gray-200 p-4">
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-gray-600">
-              <Plus size={18} />
-            </Button>
-            <div className="flex-1 relative">
-              <Input
-                placeholder="Type a message..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="pr-10 bg-gray-50 border-gray-200 rounded-xl"
-              />
-              <Button variant="ghost" size="icon" className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-600">
-                <Smile size={16} />
-              </Button>
-            </div>
-            <Button 
-              onClick={handleSendMessage}
-              className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl w-10 h-10 p-0"
-            >
-              <Send size={16} />
-            </Button>
+            ))}
           </div>
-        </div>
+        )}
       </div>
-    );
-  };
-
-  return (
-    <div className="h-full bg-gray-50">
-      {selectedConversation ? renderConversationView() : renderConversationList()}
     </div>
   );
 }

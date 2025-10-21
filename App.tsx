@@ -22,7 +22,6 @@ import CreatePairingModal from '@/components/CreatePairingModal';
 import EventCreatedModal from '@/components/EventCreatedModal';
 import PairingCreatedModal from '@/components/PairingCreatedModal';
 import { ChatPage } from '@/pages/ChatPage';
-import { MessagesPage } from '@/pages/MessagesPage';
 import { ProfileViewPage } from '@/pages/ProfileViewPage';
 import NotFound from '@/pages/NotFound';
 import { CalendarEventsProvider } from '@/context/calendar-events-context';
@@ -124,13 +123,12 @@ export default function App() {
           <ChatProvider>
             <BrowserRouter>
               <Routes>
-                {/* Standalone Routes */}
-                <Route path="/messages" element={<MessagesPage />} />
+                {/* Standalone Routes (without bottom nav) */}
                 <Route path="/chat/:eventId" element={<ChatPage />} />
                 <Route path="/profile/:userId" element={<ProfileViewPage />} />
                 
                 {/* Main App Route */}
-                <Route path="/" element={
+                <Route path="/*" element={
                   <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-gray-100">
                     <main className="flex-1 overflow-hidden">{renderContent()}</main>
                     <Navigation activeTab={activeTab} onTabChange={setActiveTab} />

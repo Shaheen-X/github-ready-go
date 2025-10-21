@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -55,7 +56,6 @@ interface CalendarProps {
   onCreateEvent?: () => void;
   onCreatePairing?: () => void;
   onCreateGroup?: () => void;
-  onStartChat?: (eventId: string | number) => void;
 }
 
 type DialogSurface = 'dialog' | 'sheet';
@@ -79,7 +79,8 @@ const parseEventDateTime = (event: CalendarEvent) => {
   return value.getTime();
 };
 
-export function Calendar({ onNavigate: _onNavigate, onStartChat }: CalendarProps = {}) {
+export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
+  const navigate = useNavigate();
   const {
     events,
     respondToInvitation,
@@ -187,7 +188,7 @@ export function Calendar({ onNavigate: _onNavigate, onStartChat }: CalendarProps
     toast.success('Chat pinned for this event', {
       description: `${event.title} • ${event.attendees.length} RSVPs`,
     });
-    onStartChat?.(event.id);
+    navigate(`/chat/${event.id}`);
     setHighlightedDate(event.date);
   };
 

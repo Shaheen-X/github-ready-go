@@ -1,5 +1,4 @@
 import { Home, Search, MessageCircle, Calendar, User } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 interface NavigationProps {
   activeTab: string;
@@ -7,22 +6,16 @@ interface NavigationProps {
 }
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
-  const navigate = useNavigate();
-  
   const tabs = [
     { id: 'home', icon: Home, label: 'Home' },
     { id: 'search', icon: Search, label: 'Search' },
-    { id: 'messages', icon: MessageCircle, label: 'Messages', route: '/messages' },
+    { id: 'messages', icon: MessageCircle, label: 'Messages' },
     { id: 'calendar', icon: Calendar, label: 'Calendar' },
     { id: 'profile', icon: User, label: 'Profile' },
   ];
 
   const handleTabClick = (tab: typeof tabs[0]) => {
-    if (tab.route) {
-      navigate(tab.route);
-    } else {
-      onTabChange(tab.id);
-    }
+    onTabChange(tab.id);
   };
 
   return (
