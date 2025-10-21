@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { MapPin, Calendar, Users, Star, Briefcase, Clock, Phone, User, MessageCircle, Repeat } from 'lucide-react';
+import { MapPin, Users, Star, Briefcase, Clock, Phone, MessageCircle, Repeat } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface User {
@@ -235,22 +235,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ user, activity, cardType = 
             <p className="text-sm text-muted-foreground line-clamp-2">{activity.details}</p>
           </div>
 
-          {/* Row 6: View Details button (stretches almost whole card) */}
-          <div className="mb-3">
-            <Button 
-              variant="outline"
-              className="w-full bg-white text-black border border-gray-200 hover:bg-gray-50 flex items-center justify-center space-x-2 btn-scale"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onCardClick) onCardClick();
-              }}
-            >
-              <Calendar className="h-4 w-4" />
-              <span>View Details</span>
-            </Button>
-          </div>
-
-          {/* Row 7: Message and Connect buttons */}
+          {/* Row 6: Message and Connect buttons */}
           <div className="flex space-x-3">
             <Button 
               variant="outline"

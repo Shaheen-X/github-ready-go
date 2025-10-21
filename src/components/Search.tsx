@@ -436,9 +436,9 @@ export function Search() {
 
   const getPlaceholderText = () => {
     if (activeTab === "partners") {
-      return "Search for workout partners in Stockholm...";
+      return "Search Partners or Group Activities...";
     } else if (activeTab === "groups") {
-      return "Search group activities and clubs...";
+      return "Search Partners or Group Activities...";
     } else {
       return "Search places, venues & events...";
     }
@@ -464,7 +464,7 @@ export function Search() {
               Customize your search by setting distance, activity type, time preferences, and skill level.
             </SheetDescription>
           </SheetHeader>
-          <ActivityFilter className="border-0 shadow-none p-0" />
+          <ActivityFilter className="border-0 shadow-none p-0" activeTab={activeTab as 'partners' | 'groups' | 'places'} />
         </SheetContent>
       </Sheet>
     ) : null;
@@ -521,26 +521,26 @@ export function Search() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
             {!isMobile && (
               <div className="lg:col-span-1 hidden lg:block">
-                <ActivityFilter />
+                <ActivityFilter activeTab={activeTab as 'partners' | 'groups' | 'places'} />
               </div>
             )}
             
-            <div className="lg:col-span-3">
-              {currentItems.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 gap-4">
-                    {currentItems.map((item, index) => (
-                      <ActivityCard 
-                        key={index} 
-                        user={item.user}
-                        activity={item.activity}
-                        cardType={activeTab === 'partners' ? 'partner' :
-                                 activeTab === 'groups' ? 'group' : 'place'}
-                        onCardClick={(activeTab === 'partners' || activeTab === 'groups') ? 
-                          () => handleActivityCardClick(item.user, item.activity) : undefined}
-                      />
-                    ))}
-                  </div>
+          <div className="lg:col-span-3">
+            {currentItems.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 gap-4">
+                  {currentItems.map((item, index) => (
+                    <ActivityCard 
+                      key={index} 
+                      user={item.user}
+                      activity={item.activity}
+                      cardType={activeTab === 'partners' ? 'partner' :
+                               activeTab === 'groups' ? 'group' : 'place'}
+                      onCardClick={(activeTab === 'partners' || activeTab === 'groups') ? 
+                        () => handleActivityCardClick(item.user, item.activity) : undefined}
+                    />
+                  ))}
+                </div>
                   
                   {activeTab !== 'partners' && totalPages > 1 && (
                     <Pagination className="mt-6">

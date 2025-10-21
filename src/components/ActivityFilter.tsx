@@ -9,17 +9,20 @@ import { MapPin, Clock, Users, Filter } from 'lucide-react';
 
 interface ActivityFilterProps {
   className?: string;
+  activeTab?: 'partners' | 'groups' | 'places';
 }
 
-const ActivityFilter: React.FC<ActivityFilterProps> = ({ className = "" }) => {
+const ActivityFilter: React.FC<ActivityFilterProps> = ({ className = "", activeTab = 'partners' }) => {
   const [distance, setDistance] = useState([10]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [selectedSkillLevels, setSelectedSkillLevels] = useState<string[]>([]);
+  const [selectedType, setSelectedType] = useState<string>('all');
 
   const categories = [
-    'Running', 'Gym Workout', 'Yoga', 'Cycling', 'Hiking', 'Basketball',
-    'Swimming', 'Tennis', 'Dancing', 'Martial Arts', 'Rock Climbing', 'Golf'
+    'Running', 'Gym', 'Yoga', 'Cycling', 'Hiking', 'Basketball',
+    'Swimming', 'Tennis', 'Dancing', 'Team Sports', 'Rock Climbing', 'Boxing',
+    'Football', 'Walking', 'Badminton', 'Table Tennis', 'Martial Arts'
   ];
 
   const timeSlots = [
@@ -62,6 +65,7 @@ const ActivityFilter: React.FC<ActivityFilterProps> = ({ className = "" }) => {
     setSelectedCategories([]);
     setSelectedTimes([]);
     setSelectedSkillLevels([]);
+    setSelectedType('all');
   };
 
   return (
@@ -83,6 +87,52 @@ const ActivityFilter: React.FC<ActivityFilterProps> = ({ className = "" }) => {
       </div>
 
       <Separator />
+
+      {/* Type Filter - Show for partners and groups tabs */}
+      {(activeTab === 'partners' || activeTab === 'groups') && (
+        <>
+          <div className="space-y-3">
+            <Label className="font-medium">Activity Type</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Badge
+                variant={selectedType === 'all' ? "default" : "secondary"}
+                className={`cursor-pointer text-center justify-center py-2 ${
+                  selectedType === 'all'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:shadow-lg' 
+                    : 'hover:bg-secondary/80'
+                }`}
+                onClick={() => setSelectedType('all')}
+              >
+                All
+              </Badge>
+              <Badge
+                variant={selectedType === 'partners' ? "default" : "secondary"}
+                className={`cursor-pointer text-center justify-center py-2 ${
+                  selectedType === 'partners'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:shadow-lg' 
+                    : 'hover:bg-secondary/80'
+                }`}
+                onClick={() => setSelectedType('partners')}
+              >
+                Partners
+              </Badge>
+              <Badge
+                variant={selectedType === 'groups' ? "default" : "secondary"}
+                className={`cursor-pointer text-center justify-center py-2 ${
+                  selectedType === 'groups'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white hover:shadow-lg' 
+                    : 'hover:bg-secondary/80'
+                }`}
+                onClick={() => setSelectedType('groups')}
+              >
+                Groups
+              </Badge>
+            </div>
+          </div>
+
+          <Separator />
+        </>
+      )}
 
       {/* Distance Filter */}
       <div className="space-y-3">
