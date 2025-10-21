@@ -173,13 +173,6 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
   const [showClearDialog, setShowClearDialog] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.isRead && !n.isArchived).length;
-  const todayCount = notifications.filter(n => 
-    !n.isArchived && (
-      n.timestamp.includes('minutes ago') || 
-      n.timestamp.includes('hour ago') || 
-      n.timestamp.includes('hours ago')
-    )
-  ).length;
 
   const getNotificationIcon = (type: Notification['type'], priority: Notification['priority']) => {
     const iconClass = priority === 'urgent' ? 'text-red-500' : 
@@ -247,24 +240,15 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
   const filteredNotifications = notifications.filter(notification => {
     if (notification.isArchived) return false;
     
-    switch (activeTab) {
-      case 'unread':
-        return !notification.isRead;
-      case 'today':
-        return notification.timestamp.includes('minutes ago') || 
-               notification.timestamp.includes('hour ago') || 
-               notification.timestamp.includes('hours ago');
-      case 'activities':
-        return notification.type === 'activity' || notification.type === 'reminder';
-      case 'social':
-        return notification.type === 'message' || notification.type === 'connection';
-      default:
-        return true;
+    if (activeTab === 'unread') {
+      return !notification.isRead;
     }
+    
+    return true; // 'all' tab
   });
 
   return (
-    <div className="h-full bg-gradient-to-br from-slate-50 to-gray-100 pb-20">
+    <div className="h-full overflow-y-auto bg-gradient-to-br from-slate-50 to-gray-100 pb-20">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
@@ -285,17 +269,6 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
             )}
           </div>
           <div className="flex items-center gap-2">
-            {unreadCount > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="choice-chip"
-                onClick={markAllAsRead}
-              >
-                <CheckCircle2 size={16} className="mr-2" />
-                Mark All Read
-              </Button>
-            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="choice-chip">
@@ -320,7 +293,7 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
       <div className="p-6">
         {/* Filter Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
-          <TabsList className="grid w-full grid-cols-5 bg-white rounded-full p-1 shadow-lg">
+          <TabsList className="grid w-full grid-cols-2 bg-white rounded-full p-1 shadow-lg">
             <TabsTrigger 
               value="all" 
               className={`rounded-full text-button transition-all duration-200 ${
@@ -346,41 +319,6 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger 
-              value="today" 
-              className={`rounded-full text-button transition-all duration-200 ${
-                activeTab === 'today' 
-                  ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg' 
-                  : 'text-gray-600 hover:text-blue-600'
-              }`}
-            >
-              Today
-              {todayCount > 0 && (
-                <Badge className="ml-1 bg-blue-500 text-white text-xs">
-                  {todayCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="activities" 
-              className={`rounded-full text-button transition-all duration-200 ${
-                activeTab === 'activities' 
-                  ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg' 
-                  : 'text-gray-600 hover:text-blue-600'
-              }`}
-            >
-              Activities
-            </TabsTrigger>
-            <TabsTrigger 
-              value="social" 
-              className={`rounded-full text-button transition-all duration-200 ${
-                activeTab === 'social' 
-                  ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg' 
-                  : 'text-gray-600 hover:text-blue-600'
-              }`}
-            >
-              Social
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value={activeTab} className="mt-6">
@@ -389,9 +327,7 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
                 <Bell size={48} className="mx-auto text-gray-300 mb-4" />
                 <h3 className="text-body font-medium mb-2">No notifications here</h3>
                 <p className="text-subtext">
-                  {activeTab === 'unread' ? "You're all caught up!" :
-                   activeTab === 'today' ? "No notifications for today yet." :
-                   "Check back later for updates."}
+                  {activeTab === 'unread' ? "You're all caught up!" : "Check back later for updates."}
                 </p>
               </Card>
             ) : (
@@ -557,7 +493,7 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
         {/* Quick Stats */}
         {notifications.length > 0 && (
           <Card className="glass-card p-4 mt-6">
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-2 gap-4 text-center">
               <div>
                 <div className="text-2xl gradient-text mb-1">{notifications.filter(n => !n.isArchived).length}</div>
                 <div className="text-subtext">Total</div>
@@ -565,10 +501,6 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
               <div>
                 <div className="text-2xl text-blue-500 mb-1">{unreadCount}</div>
                 <div className="text-subtext">Unread</div>
-              </div>
-              <div>
-                <div className="text-2xl text-green-500 mb-1">{todayCount}</div>
-                <div className="text-subtext">Today</div>
               </div>
             </div>
           </Card>
