@@ -1,4 +1,4 @@
-import { Clock, MapPin, Users, Crown } from 'lucide-react';
+import { Clock, MapPin, Users, Crown, User } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import type { CalendarEvent } from '@/types/calendar';
 
@@ -67,10 +67,16 @@ export const EventCard = ({ event, onClick, variant = 'default', onStartChat: _o
             <span>{event.time}</span>
             {event.endTime && <span>- {event.endTime}</span>}
           </div>
-          <div className="flex items-center gap-2 text-xs text-white/90">
+          <div className="flex items-center gap-2 text-xs text-white/90 mb-1">
             <MapPin className="h-3 w-3" />
             <span className="line-clamp-1">{event.location}</span>
           </div>
+          {event.hostName && (
+            <div className="flex items-center gap-2 text-xs text-white/80">
+              <User className="h-3 w-3" />
+              <span className="line-clamp-1">Hosted by {event.hostName}</span>
+            </div>
+          )}
         </div>
       </div>
 
