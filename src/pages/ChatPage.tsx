@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, Image as ImageIcon, FileText, MessageCircle, Bell, BellOff, UserPlus, Calendar } from 'lucide-react';
+import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, Image as ImageIcon, FileText, MessageCircle, Bell, BellOff, UserPlus, Calendar, Search, Copy, Share2, Mail, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
@@ -20,6 +20,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { EventDetailsModal, type CalendarEventDetails } from '@/components/EventDetailsModal';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -30,12 +33,31 @@ export function ChatPage() {
   const [showSharedMedia, setShowSharedMedia] = useState(false);
   const [sharedMediaType, setSharedMediaType] = useState<'images' | 'files'>('images');
   const [showEventDetails, setShowEventDetails] = useState(false);
+  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
+  const [showInviteSheet, setShowInviteSheet] = useState(false);
   const [showCallOptions, setShowCallOptions] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [inviteSearchQuery, setInviteSearchQuery] = useState('');
+  const [copied, setCopied] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Mock platform users for invite
+  const platformUsers = [
+    { id: '1', name: 'Sarah Kim', username: '@sarahk', avatar: 'https://images.unsplash.com/photo-1494790108755-2616b9c62e38?w=150&h=150&fit=crop&crop=face' },
+    { id: '2', name: 'Mike Chen', username: '@mikec', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face' },
+    { id: '3', name: 'Alex Johnson', username: '@alexj', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face' },
+    { id: '4', name: 'Emma Davis', username: '@emmad', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face' },
+  ];
+
   const event = eventId ? getEventById(eventId) : null;
+  
+  const inviteLink = event ? `https://connectsphere.app/event/${event.id}` : '';
+
+  const filteredUsers = platformUsers.filter(user =>
+    user.name.toLowerCase().includes(inviteSearchQuery.toLowerCase()) ||
+    user.username.toLowerCase().includes(inviteSearchQuery.toLowerCase())
+  );
   
   // Get messages directly from context - this makes it reactive
   const messages = eventId ? getMessages(eventId) : [];
@@ -177,22 +199,9 @@ export function ChatPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="glass-card border-white/20">
-                <DropdownMenuItem onClick={() => setShowEventDetails(true)}>
+                <DropdownMenuItem onClick={() => setShowEventDetailsModal(true)}>
                   <Calendar size={14} className="mr-2" />
                   View Event Details
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsMuted(!isMuted)}>
-                  {isMuted ? (
-                    <>
-                      <BellOff size={14} className="mr-2" />
-                      Unmute Notifications
-                    </>
-                  ) : (
-                    <>
-                      <Bell size={14} className="mr-2" />
-                      Mute Notifications
-                    </>
-                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
                   setSharedMediaType('images');
@@ -207,6 +216,19 @@ export function ChatPage() {
                 }}>
                   <FileText size={14} className="mr-2" />
                   Shared Files
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsMuted(!isMuted)}>
+                  {isMuted ? (
+                    <>
+                      <BellOff size={14} className="mr-2" />
+                      Unmute Notifications
+                    </>
+                  ) : (
+                    <>
+                      <Bell size={14} className="mr-2" />
+                      Mute Notifications
+                    </>
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDeleteConversation} className="text-destructive">
                   <Trash2 size={14} className="mr-2" />
@@ -258,7 +280,10 @@ export function ChatPage() {
                 </div>
                 <span className="text-xs font-medium text-foreground">Video</span>
               </button>
-              <button className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform">
+              <button 
+                onClick={() => setShowInviteSheet(true)}
+                className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform"
+              >
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
                   <UserPlus className="text-blue-600" size={20} />
                 </div>
@@ -314,13 +339,193 @@ export function ChatPage() {
             <Button 
               onClick={() => {
                 setShowEventDetails(false);
-                navigate(`/calendar`);
+                setShowEventDetailsModal(true);
               }}
               className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/30 rounded-2xl h-12"
             >
               View Full Event Details
             </Button>
           </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Event Details Modal */}
+      {event && (
+        <EventDetailsModal
+          open={showEventDetailsModal}
+          onOpenChange={setShowEventDetailsModal}
+          event={{
+            ...event,
+            date: format(new Date(event.date), 'EEEE, MMMM d, yyyy')
+          } as CalendarEventDetails}
+        />
+      )}
+
+      {/* Invite Sheet */}
+      <Sheet open={showInviteSheet} onOpenChange={setShowInviteSheet}>
+        <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30">
+          <SheetHeader>
+            <SheetTitle className="text-2xl font-bold gradient-text">Add People</SheetTitle>
+          </SheetHeader>
+
+          <Tabs defaultValue="platform" className="mt-6">
+            <TabsList className="grid w-full grid-cols-2 glass-card">
+              <TabsTrigger value="platform">From Platform</TabsTrigger>
+              <TabsTrigger value="outside">Invite Outside</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="platform" className="space-y-4 mt-4">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                <Input
+                  type="text"
+                  placeholder="Search users..."
+                  value={inviteSearchQuery}
+                  onChange={(e) => setInviteSearchQuery(e.target.value)}
+                  className="glass-card border-white/20 rounded-xl h-12 pl-10"
+                />
+              </div>
+
+              {/* User List */}
+              <ScrollArea className="h-[400px] rounded-xl">
+                <div className="space-y-2">
+                  {filteredUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="glass-card p-4 rounded-2xl flex items-center justify-between hover:scale-[1.02] transition-transform"
+                    >
+                      <div className="flex items-center gap-3">
+                        <ImageWithFallback
+                          src={user.avatar}
+                          alt={user.name}
+                          className="w-12 h-12 rounded-full object-cover ring-2 ring-white/50"
+                        />
+                        <div>
+                          <p className="font-semibold text-foreground">{user.name}</p>
+                          <p className="text-sm text-muted-foreground">{user.username}</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full"
+                      >
+                        Invite
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="outside" className="space-y-4 mt-4">
+              {/* Copy Link */}
+              <div className="glass-card p-4 rounded-2xl space-y-3">
+                <h4 className="font-semibold text-foreground">Share Link</h4>
+                <div className="flex gap-2">
+                  <Input
+                    value={inviteLink}
+                    readOnly
+                    className="glass-card border-white/20 rounded-xl flex-1"
+                  />
+                  <Button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(inviteLink);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      } catch (error) {
+                        console.error('Failed to copy');
+                      }
+                    }}
+                    className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white"
+                  >
+                    {copied ? 'Copied!' : <Copy size={18} />}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Share via Platforms */}
+              <div className="glass-card p-4 rounded-2xl space-y-3">
+                <h4 className="font-semibold text-foreground">Share via</h4>
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => {
+                      const text = `Join us for ${event?.title}! ${inviteLink}`;
+                      window.open(`sms:?body=${encodeURIComponent(text)}`, '_blank');
+                    }}
+                    className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                      <MessageSquare className="text-green-600" size={20} />
+                    </div>
+                    <span className="text-xs font-medium text-foreground">SMS</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const text = `Join us for ${event?.title}! ${inviteLink}`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                    }}
+                    className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                      <MessageCircle className="text-green-600" size={20} />
+                    </div>
+                    <span className="text-xs font-medium text-foreground">WhatsApp</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const text = `Join us for ${event?.title}!`;
+                      window.open(`mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(inviteLink)}`, '_blank');
+                    }}
+                    className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                      <Mail className="text-blue-600" size={20} />
+                    </div>
+                    <span className="text-xs font-medium text-foreground">Email</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const text = `Join us for ${event?.title}! ${inviteLink}`;
+                      window.open(`https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(text)}`, '_blank');
+                    }}
+                    className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                      <Send className="text-blue-600" size={20} />
+                    </div>
+                    <span className="text-xs font-medium text-foreground">Telegram</span>
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      if (navigator.share) {
+                        try {
+                          await navigator.share({
+                            title: event?.title || 'Join us',
+                            text: `Join us for ${event?.title}!`,
+                            url: inviteLink,
+                          });
+                        } catch (error) {
+                          console.error('Error sharing:', error);
+                        }
+                      }
+                    }}
+                    className="glass-card p-4 rounded-2xl flex flex-col items-center gap-2 hover:scale-105 transition-transform"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                      <Share2 className="text-purple-600" size={20} />
+                    </div>
+                    <span className="text-xs font-medium text-foreground">More</span>
+                  </button>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </SheetContent>
       </Sheet>
 
