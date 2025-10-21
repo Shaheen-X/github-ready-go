@@ -445,56 +445,60 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
           </CardContent>
         </Card>
 
-        <Card className="glass-card border border-white/30 shadow-xl">
-          <CardHeader className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <CardTitle className="text-section-header gradient-text">
-                Events on{' '}
-                {selectedDate.toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </CardTitle>
-              <p className="text-subtext text-sm">
-                {eventsByDate.get(selectedDate.toDateString())?.length ?? 0} upcoming
-                {(eventsByDate.get(selectedDate.toDateString())?.length ?? 0) === 1
-                  ? ' event'
-                  : ' events'}
-              </p>
-            </div>
-            <Badge className="rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 px-3 py-1 text-xs text-white shadow-md">
-              <CalendarIcon className="mr-2 h-3 w-3" />
-              {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </Badge>
-          </CardHeader>
-          <CardContent className="space-y-4 p-5">
-            {(eventsByDate.get(selectedDate.toDateString()) ?? []).length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl bg-white/75 p-6 text-center shadow-inner">
-                <CalendarIcon className="mb-3 h-12 w-12 text-muted-foreground" />
-                <p className="text-body font-semibold">No events yet</p>
-                <p className="text-subtext text-sm">
-                  Start your own!
-                </p>
-              </div>
-            ) : (
-              (eventsByDate.get(selectedDate.toDateString()) ?? []).map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  variant="compact"
-                  onClick={() => openDayEvents(event.date, event)}
-                />
-              ))
-            )}
-          </CardContent>
-        </Card>
+        {viewMode === 'month' && (
+          <>
+            <Card className="glass-card border border-white/30 shadow-xl">
+              <CardHeader className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="text-section-header gradient-text">
+                    Events on{' '}
+                    {selectedDate.toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </CardTitle>
+                  <p className="text-subtext text-sm">
+                    {eventsByDate.get(selectedDate.toDateString())?.length ?? 0} upcoming
+                    {(eventsByDate.get(selectedDate.toDateString())?.length ?? 0) === 1
+                      ? ' event'
+                      : ' events'}
+                  </p>
+                </div>
+                <Badge className="rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 px-3 py-1 text-xs text-white shadow-md">
+                  <CalendarIcon className="mr-2 h-3 w-3" />
+                  {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-4 p-5">
+                {(eventsByDate.get(selectedDate.toDateString()) ?? []).length === 0 ? (
+                  <div className="flex flex-col items-center justify-center rounded-2xl bg-white/75 p-6 text-center shadow-inner">
+                    <CalendarIcon className="mb-3 h-12 w-12 text-muted-foreground" />
+                    <p className="text-body font-semibold">No events yet</p>
+                    <p className="text-subtext text-sm">
+                      Start your own!
+                    </p>
+                  </div>
+                ) : (
+                  (eventsByDate.get(selectedDate.toDateString()) ?? []).map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      variant="compact"
+                      onClick={() => openDayEvents(event.date, event)}
+                    />
+                  ))
+                )}
+              </CardContent>
+            </Card>
 
-        <SummarySections
-          upcoming={firstUpcoming}
-          onOpenEvent={openDayEvents}
-          onViewAll={handleViewAllUpcoming}
-        />
+            <SummarySections
+              upcoming={firstUpcoming}
+              onOpenEvent={openDayEvents}
+              onViewAll={handleViewAllUpcoming}
+            />
+          </>
+        )}
       </div>
 
       {dialogSurface === 'dialog' ? (
