@@ -363,6 +363,8 @@ export function Search() {
       tags: [activity.type],
       image: user.image,
       isHost: false, // Users viewing from search are not hosts
+      hostName: user.name,
+      hostId: user.name.toLowerCase().replace(/\s+/g, '-'),
     };
   };
   const isMobile = useIsMobile();
