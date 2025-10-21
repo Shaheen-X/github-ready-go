@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Calendar as CalendarIcon,
-  Clock,
-  MapPin,
   MessageCircle,
   Users,
   MoreVertical,
@@ -363,75 +361,42 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
   return (
     <div className="h-full overflow-y-auto bg-gradient-to-br from-slate-50 to-gray-100">
       <div className="glass-card sticky top-0 z-10 mx-4 mt-4 rounded-2xl border-b border-white/20 px-4 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-app-title gradient-text">Calendar</h1>
-          <div className="flex items-center gap-2">
-            <Button 
-              className="rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-2 text-sm text-white shadow-lg hover:from-purple-600 hover:to-indigo-600"
-            >
-              <span className="mr-2">👤👤</span>
-              Plan 1:1
-            </Button>
-            <Button 
-              className="rounded-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm text-white shadow-lg hover:from-green-600 hover:to-emerald-600"
-            >
-              <span className="mr-2">👥</span>
-              Plan Group
-            </Button>
-          </div>
-        </div>
+        <h1 className="text-app-title gradient-text">Calendar</h1>
       </div>
 
       <div className="space-y-6 p-4 pb-24">
         <Card className="glass-card border border-white/30 shadow-xl">
           <CardContent className="space-y-5 p-5">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="space-y-1">
-                <h2 className="text-section-header gradient-text">
-                  {selectedDate.toLocaleDateString('en-US', {
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </h2>
-                <p className="text-subtext text-sm">
-                  {selectedDate.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="inline-flex items-center rounded-full bg-white/70 p-1 shadow-inner backdrop-blur">
+                {viewToggleOptions.map(({ label, value }) => (
+                  <Button
+                    key={value}
+                    variant="ghost"
+                    className={cn(
+                      'rounded-full px-4 py-2 text-xs font-semibold transition',
+                      viewMode === value
+                        ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg'
+                        : 'text-subtext hover:text-foreground',
+                    )}
+                    onClick={() => setViewMode(value)}
+                  >
+                    {label}
+                  </Button>
+                ))}
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-                <div className="inline-flex items-center rounded-full bg-white/70 p-1 shadow-inner backdrop-blur">
-                  {viewToggleOptions.map(({ label, value }) => (
-                    <Button
-                      key={value}
-                      variant="ghost"
-                      className={cn(
-                        'rounded-full px-4 py-2 text-xs font-semibold transition',
-                        viewMode === value
-                          ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg'
-                          : 'text-subtext hover:text-foreground',
-                      )}
-                      onClick={() => setViewMode(value)}
-                    >
-                      {label}
-                    </Button>
-                  ))}
-                </div>
-                <Button
-                  variant="outline"
-                  className="rounded-full px-4 text-xs"
-                  onClick={() => {
-                    const today = new Date();
-                    setSelectedDate(today);
-                    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
-                    setViewMode('month');
-                  }}
-                >
-                  Today
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                className="rounded-full px-4 text-xs"
+                onClick={() => {
+                  const today = new Date();
+                  setSelectedDate(today);
+                  setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+                  setViewMode('month');
+                }}
+              >
+                Today
+              </Button>
             </div>
 
             {viewMode === 'month' ? (
@@ -453,9 +418,9 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
                   months: 'flex flex-col gap-4',
                   month: 'space-y-4',
                   caption:
-                    'flex items-center justify-between rounded-xl bg-white/60 px-4 py-3 text-slate-700 backdrop-blur',
+                    'flex items-center justify-center rounded-xl bg-white/60 px-4 py-3 text-slate-700 backdrop-blur relative',
                   caption_label: 'text-base font-semibold',
-                  nav: 'flex items-center gap-2',
+                  nav: 'absolute inset-y-0 left-0 right-0 flex items-center justify-between px-2',
                   table: 'w-full border-collapse',
                   head_row: 'flex items-center gap-1 border-b border-white/40 pb-2',
                   head_cell:
@@ -475,13 +440,6 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
               <AgendaTimeline 
                 sections={agendaSections} 
                 onSelectEvent={handleAgendaSelect}
-                onEditEvent={(event) => {
-                  setEditingEvent(event);
-                  setIsEditModalOpen(true);
-                }}
-                onDeleteEvent={(eventId) => {
-                  deleteEvent(eventId);
-                }}
               />
             )}
           </CardContent>
@@ -518,18 +476,6 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
                 <p className="text-subtext text-sm">
                   Start your own!
                 </p>
-                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                  <Button
-                    className="rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-2 text-sm text-white shadow-lg"
-                  >
-                    Plan 1:1
-                  </Button>
-                  <Button
-                    className="rounded-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm text-white shadow-lg"
-                  >
-                    Plan Group
-                  </Button>
-                </div>
               </div>
             ) : (
               (eventsByDate.get(selectedDate.toDateString()) ?? []).map((event) => (
@@ -647,11 +593,9 @@ interface AgendaSection {
 interface AgendaTimelineProps {
   sections: AgendaSection[];
   onSelectEvent: (event: CalendarEvent) => void;
-  onEditEvent: (event: CalendarEvent) => void;
-  onDeleteEvent: (eventId: string) => void;
 }
 
-const AgendaTimeline = ({ sections, onSelectEvent, onEditEvent, onDeleteEvent }: AgendaTimelineProps) => {
+const AgendaTimeline = ({ sections, onSelectEvent }: AgendaTimelineProps) => {
   if (sections.length === 0) {
     return (
       <div className="rounded-2xl bg-white/75 p-6 text-center text-subtext shadow-inner">
@@ -681,149 +625,16 @@ const AgendaTimeline = ({ sections, onSelectEvent, onEditEvent, onDeleteEvent }:
               aria-hidden="true"
             />
             <div className="space-y-3 pl-10">
-              {section.events.map((event, index) => {
-                const isHost = event.isHost;
-                const handleEditEvent = () => {
-                  onEditEvent(event);
-                };
-                const handleDeleteEvent = () => {
-                  onDeleteEvent(event.id);
-                  toast.success('Event deleted');
-                };
-                
-                return (
-                  <div key={`${event.id}-${index}`} className="relative">
-                    <span className="absolute -left-6 top-6 size-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 shadow" />
-                    <div className="relative w-full rounded-2xl overflow-hidden shadow-lg">
-                      {/* Event Image Background */}
-                      {event.image ? (
-                        <div className="absolute inset-0">
-                          <ImageWithFallback
-                            src={event.image}
-                            alt={event.title}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-indigo-900/85 to-cyan-900/90" />
-                        </div>
-                      ) : (
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-500" />
-                      )}
-                      
-                      <div className="relative px-5 py-4 text-white">
-                        {/* Three Dots Menu */}
-                        <div className="absolute top-2 right-2 z-10" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white/90 transition-colors shadow-lg">
-                                <MoreVertical className="w-4 h-4 text-gray-600" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="glass-card border-white/20 w-48">
-                              {isHost ? (
-                                <>
-                                  <DropdownMenuItem 
-                                    className="flex items-center gap-2 text-blue-600 hover:bg-blue-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleEditEvent();
-                                    }}
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                    Edit Event
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    className="flex items-center gap-2 text-purple-600 hover:bg-purple-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toast.success('Event announced!', {
-                                        description: `Sent announcement for ${event.title} to all attendees.`
-                                      });
-                                    }}
-                                  >
-                                    <Megaphone className="w-4 h-4" />
-                                    Announce
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    className="flex items-center gap-2 text-green-600 hover:bg-green-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toast.success('Added to calendar!', {
-                                        description: `${event.title} saved to your device calendar.`
-                                      });
-                                    }}
-                                  >
-                                    <CalendarPlus className="w-4 h-4" />
-                                    Add to Calendar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    className="flex items-center gap-2 text-red-600 hover:bg-red-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteEvent();
-                                    }}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </>
-                              ) : (
-                                <DropdownMenuItem 
-                                  className="flex items-center gap-2 text-green-600 hover:bg-green-50"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toast.success('Added to calendar!', {
-                                      description: `${event.title} saved to your device calendar.`
-                                    });
-                                  }}
-                                >
-                                  <CalendarPlus className="w-4 h-4" />
-                                  Add to Calendar
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => onSelectEvent(event)}
-                          className="w-full text-left"
-                        >
-                          <div className="flex items-center justify-between gap-3 pr-8">
-                            <h3 className="text-sm font-semibold leading-snug">{event.title}</h3>
-                            <span className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide">
-                              {event.type === 'group' ? 'Group' : '1:1'}
-                            </span>
-                          </div>
-                          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/80">
-                            <Clock className="h-3.5 w-3.5 text-white/90" />
-                            {event.time}{event.endTime ? ` - ${event.endTime}` : ''}
-                            <MapPin className="h-3.5 w-3.5 text-white/90" />
-                            {event.location}
-                          </div>
-                          <div className="mt-3 flex items-center gap-2 text-xs text-white/80">
-                            <Users className="h-3.5 w-3.5 text-white/90" />
-                            {event.attendees.filter((attendee) => attendee.status === 'accepted').length}/
-                            {event.maxParticipants || '∞'} attending
-                          </div>
-                          {event.tags.length > 0 && (
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {event.tags.map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-medium uppercase tracking-wide"
-                                >
-                                  #{tag}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {section.events.map((event, index) => (
+                <div key={`${event.id}-${index}`} className="relative">
+                  <span className="absolute -left-6 top-6 size-3 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 shadow" />
+                  <EventCard
+                    event={event}
+                    variant="compact"
+                    onClick={() => onSelectEvent(event)}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
