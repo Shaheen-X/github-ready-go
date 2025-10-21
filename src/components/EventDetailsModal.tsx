@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { MapPin, Clock, Users, MessageCircle, Crown } from 'lucide-react';
+import { MapPin, Clock, Users, MessageCircle, Crown, Check, X } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import type { CalendarEvent } from '@/types/calendar';
 
@@ -43,6 +43,10 @@ const statusBadge = (status: RSVPStatus) => {
 export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOpenChange, event, onAccept, onDecline }) => {
   const isGroup = event?.type === 'group';
   const navigate = useNavigate();
+  
+  // Check if this is a pending invite (user hasn't responded yet)
+  const userAttendee = event?.attendees.find(a => a.name === 'You');
+  const isPendingInvite = userAttendee?.status === 'pending';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -130,21 +134,37 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOp
           <div className="px-6 py-4 border-t border-white/20 flex items-center gap-2">
             {event && (
               <>
-                <Button onClick={() => onAccept?.(event.id)} className="flex-1 bg-gradient-to-r from-green-500 to-emerald-400 text-white rounded-full">
-                  Accept
-                </Button>
-                <Button onClick={() => onDecline?.(event.id)} variant="outline" className="flex-1 rounded-full">
-                  Decline
-                </Button>
-                <Button 
-                  onClick={() => {
-                    navigate(`/chat/${event.id}`);
-                  }} 
-                  variant="outline" 
-                  className="rounded-full"
-                >
-                  <MessageCircle size={16} className="mr-2" /> Chat
-                </Button>
+                {isPendingInvite ? (
+                  /* Show Accept/Decline for pending invites */
+                  <>
+                    <Button 
+                      onClick={() => onAccept?.(event.id)} 
+                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-400 text-white rounded-full"
+                    >
+                      <Check size={16} className="mr-2" />
+                      Accept Invite
+                    </Button>
+                    <Button 
+                      onClick={() => onDecline?.(event.id)} 
+                      variant="outline" 
+                      className="flex-1 rounded-full"
+                    >
+                      <X size={16} className="mr-2" />
+                      Decline
+                    </Button>
+                  </>
+                ) : (
+                  /* Show Chat button for accepted events */
+                  <Button 
+                    onClick={() => {
+                      navigate(`/chat/${event.id}`);
+                    }} 
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full"
+                  >
+                    <MessageCircle size={16} className="mr-2" /> 
+                    Open Chat
+                  </Button>
+                )}
               </>
             )}
           </div>

@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useCalendarEvents } from '@/context/calendar-events-context';
+import { EventCard } from './EventCard';
+import { EventDetailsModal, type CalendarEventDetails } from './EventDetailsModal';
+import { format } from 'date-fns';
 import type { CalendarEvent } from '@/types/calendar';
 import { 
   Bell, 
@@ -241,6 +244,8 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
   const [notifications, setNotifications] = useState(mockNotifications);
   const [activeTab, setActiveTab] = useState('all');
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEventDetails | null>(null);
+  const [showEventDetails, setShowEventDetails] = useState(false);
   const { addEvents, respondToInvitation } = useCalendarEvents();
 
   const unreadCount = notifications.filter(n => !n.isRead && !n.isArchived).length;
@@ -340,6 +345,34 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
     }
   };
 
+  const handleEventCardClick = (notification: Notification) => {
+    if (notification.metadata?.eventData) {
+      const event = notification.metadata.eventData;
+      const eventDetails: CalendarEventDetails = {
+        ...event,
+        date: format(event.date, 'MMM d, yyyy')
+      };
+      setSelectedEvent(eventDetails);
+      setShowEventDetails(true);
+    }
+  };
+
+  const handleAcceptFromModal = (eventId: string | number) => {
+    const notification = notifications.find(n => n.metadata?.eventData?.id === eventId);
+    if (notification) {
+      handleAcceptInvite(notification);
+      setShowEventDetails(false);
+    }
+  };
+
+  const handleDeclineFromModal = (eventId: string | number) => {
+    const notification = notifications.find(n => n.metadata?.eventData?.id === eventId);
+    if (notification) {
+      handleDeclineInvite(notification);
+      setShowEventDetails(false);
+    }
+  };
+
   const filteredNotifications = notifications.filter(notification => {
     if (notification.isArchived) return false;
     
@@ -436,12 +469,54 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
             ) : (
               <div className="space-y-3">
                 {filteredNotifications.map((notification) => (
-                  <Card 
-                    key={notification.id} 
-                    className={`glass-card transition-all duration-200 hover:shadow-md ${
-                      !notification.isRead ? 'border-l-4 border-l-blue-500 bg-blue-50/30' : ''
-                    }`}
-                  >
+                  <div key={notification.id}>
+                    {/* Event Invite Cards - use EventCard component */}
+                    {notification.type === 'event_invite' && notification.metadata?.eventData ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between px-2">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${!notification.isRead ? 'bg-blue-500' : 'bg-gray-300'}`}></div>
+                            <span className="text-xs text-muted-foreground">{notification.timestamp}</span>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                <MoreVertical size={14} />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {!notification.isRead && (
+                                <DropdownMenuItem onClick={() => markAsRead(notification.id)}>
+                                  <Check size={16} className="mr-2" />
+                                  Mark as Read
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem onClick={() => archiveNotification(notification.id)}>
+                                <X size={16} className="mr-2" />
+                                Archive
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => deleteNotification(notification.id)}
+                                className="text-red-600"
+                              >
+                                <Trash2 size={16} className="mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        <EventCard 
+                          event={notification.metadata.eventData}
+                          onClick={() => handleEventCardClick(notification)}
+                        />
+                      </div>
+                    ) : (
+                      /* Regular notification cards */
+                      <Card
+                        className={`glass-card transition-all duration-200 hover:shadow-md ${
+                          !notification.isRead ? 'border-l-4 border-l-blue-500 bg-blue-50/30' : ''
+                        }`}
+                      >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
                         {/* Avatar or Icon */}
@@ -587,6 +662,8 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
                       </div>
                     </CardContent>
                   </Card>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
@@ -637,6 +714,15 @@ export function Notifications({ onNavigate }: NotificationsProps = { onNavigate:
           </Card>
         )}
       </div>
+
+      {/* Event Details Modal for Invites */}
+      <EventDetailsModal
+        open={showEventDetails}
+        onOpenChange={setShowEventDetails}
+        event={selectedEvent}
+        onAccept={handleAcceptFromModal}
+        onDecline={handleDeclineFromModal}
+      />
     </div>
   );
 }
