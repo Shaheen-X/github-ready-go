@@ -169,7 +169,7 @@ export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
 
         {/* Nearby Activities */}
         <div>
-          <NearbyActivitiesBlock />
+          <NearbyActivitiesBlock onNavigate={onNavigate} />
         </div>
 
         {/* Create Activity Prompt */}
