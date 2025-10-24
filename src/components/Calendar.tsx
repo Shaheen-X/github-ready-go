@@ -11,6 +11,7 @@ import {
   Trash2,
   Share2,
   UserPlus,
+  Search,
 } from 'lucide-react';
 import { EventCard } from './EventCard';
 import type { WeekNumberProps } from 'react-day-picker';
@@ -26,6 +27,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Calendar as DayPickerCalendar } from './ui/calendar';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import {
   Dialog,
@@ -100,6 +102,15 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
   const [viewMode, setViewMode] = useState<'month' | 'agenda'>('month');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredEvents = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return events;
+    return events.filter((e) =>
+      e.title.toLowerCase().includes(q) || e.location.toLowerCase().includes(q)
+    );
+  }, [events, searchTerm]);
 
   useEffect(() => {
     if (!isEventViewerOpen) {
@@ -109,16 +120,16 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
 
   const upcomingEvents = useMemo(
     () =>
-      events
+      filteredEvents
         .filter((event) => event.status === 'upcoming')
         .sort((a, b) => parseEventDateTime(a) - parseEventDateTime(b)),
-    [events],
+    [filteredEvents],
   );
 
 
   const eventsByDate = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
-    upcomingEvents.forEach((event) => {
+    filteredEvents.forEach((event) => {
       const key = event.date.toDateString();
       if (!map.has(key)) {
         map.set(key, []);
@@ -126,7 +137,7 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
       map.get(key)!.push(event);
     });
     return map;
-  }, [upcomingEvents]);
+  }, [filteredEvents]);
 
   const agendaSections = useMemo(() => {
     const grouped = new Map<string, CalendarEvent[]>();
@@ -399,16 +410,20 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
               </Button>
             </div>
 
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search events..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             {viewMode === 'month' ? (
               <DayPickerCalendar
                 mode="single"
                 showWeekNumber
-                fromDate={new Date()}
-                toDate={new Date(
-                  new Date().getFullYear() + 1,
-                  new Date().getMonth(),
-                  new Date().getDate(),
-                )}
                 month={currentMonth}
                 onMonthChange={setCurrentMonth}
                 selected={selectedDate}
