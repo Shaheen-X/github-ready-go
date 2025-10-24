@@ -1,19 +1,27 @@
-import { Calendar as CalendarIcon, Plus, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Calendar } from '@/components/ui/calendar';
 import { useState } from 'react';
+import { useCalendarEvents } from '@/context/calendar-events-context';
+import { format, isPast, isFuture, startOfDay } from 'date-fns';
 
 export function CalendarPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const events = [
-    { id: 1, title: 'Morning Run', date: 'Dec 15', time: '07:00 AM', location: 'Central Park' },
-    { id: 2, title: 'Badminton Match', date: 'Dec 16', time: '07:00 PM', location: 'City Sports Hall' },
-  ];
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const { events } = useCalendarEvents();
 
-  const filteredEvents = events.filter(event => 
+  const allEvents = events.filter(event => 
     event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     event.location.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const upcomingEvents = allEvents.filter(event => 
+    isFuture(startOfDay(event.date)) || format(event.date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+  );
+
+  const pastEvents = allEvents.filter(event => 
+    isPast(startOfDay(event.date)) && format(event.date, 'yyyy-MM-dd') !== format(new Date(), 'yyyy-MM-dd')
   );
 
   return (
@@ -38,34 +46,60 @@ export function CalendarPage() {
           />
         </div>
         
-        <div className="bg-white rounded-2xl p-6 mb-6 shadow-sm">
-          <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center">
-            <CalendarIcon className="h-12 w-12 text-gray-400" />
-          </div>
+        <div className="bg-white rounded-2xl p-4 mb-6 shadow-sm">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            className="rounded-md"
+          />
         </div>
 
-        <div className="space-y-3">
-          <h2 className="font-semibold">Upcoming Events</h2>
-          {filteredEvents.length === 0 ? (
-            <div className="bg-white rounded-xl p-8 shadow-sm text-center">
-              <p className="text-muted-foreground">No events found</p>
-            </div>
-          ) : (
-            filteredEvents.map((event) => (
-            <div key={event.id} className="bg-white rounded-xl p-4 shadow-sm">
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 bg-blue-100 rounded-lg flex flex-col items-center justify-center">
-                  <span className="text-xs text-blue-600 font-medium">{event.date.split(' ')[0]}</span>
-                  <span className="text-xl font-bold text-blue-600">{event.date.split(' ')[1]}</span>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">{event.title}</h3>
-                  <p className="text-sm text-gray-600">{event.time}</p>
-                  <p className="text-sm text-gray-500">{event.location}</p>
-                </div>
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <h2 className="font-semibold">Upcoming Events</h2>
+            {upcomingEvents.length === 0 ? (
+              <div className="bg-white rounded-xl p-8 shadow-sm text-center">
+                <p className="text-muted-foreground">No upcoming events found</p>
               </div>
+            ) : (
+              upcomingEvents.map((event) => (
+                <div key={event.id} className="bg-white rounded-xl p-4 shadow-sm">
+                  <div className="flex items-start gap-4">
+                    <div className="w-14 h-14 bg-blue-100 rounded-lg flex flex-col items-center justify-center">
+                      <span className="text-xs text-blue-600 font-medium">{format(event.date, 'MMM')}</span>
+                      <span className="text-xl font-bold text-blue-600">{format(event.date, 'd')}</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-1">{event.title}</h3>
+                      <p className="text-sm text-gray-600">{event.time}</p>
+                      <p className="text-sm text-gray-500">{event.location}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {pastEvents.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="font-semibold">Past Events</h2>
+              {pastEvents.map((event) => (
+                <div key={event.id} className="bg-white rounded-xl p-4 shadow-sm opacity-75">
+                  <div className="flex items-start gap-4">
+                    <div className="w-14 h-14 bg-gray-100 rounded-lg flex flex-col items-center justify-center">
+                      <span className="text-xs text-gray-600 font-medium">{format(event.date, 'MMM')}</span>
+                      <span className="text-xl font-bold text-gray-600">{format(event.date, 'd')}</span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold mb-1">{event.title}</h3>
+                      <p className="text-sm text-gray-600">{event.time}</p>
+                      <p className="text-sm text-gray-500">{event.location}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            ))
           )}
         </div>
       </div>
