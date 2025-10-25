@@ -6,7 +6,7 @@ import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Navigation } from '@/components/Navigation';
 import { Home } from '@/components/Home';
-import { Search } from '@/components/Search';
+import { SearchPage } from '@/pages/SearchPage';
 import { Messages } from '@/components/Messages';
 import { Calendar } from '@/components/Calendar';
 import { Groups } from '@/components/Groups';
@@ -85,7 +85,7 @@ function AppContent() {
   const renderContent = () => {
     switch (activeTab) {
       case 'home': return <Home onNavigate={setActiveTab} />;
-      case 'search': return <Search />;
+      case 'search': return <SearchPage />;
       case 'messages': return <Messages />;
       case 'calendar': return <Calendar onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} onCreatePairing={handleChoosePairing} onCreateGroup={handleChooseGroup} />;
       case 'groups': return <Groups />;
