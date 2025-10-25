@@ -21,6 +21,7 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import CreateActivityModal from './CreateActivityModal';
 
 import { useCalendarEvents } from '@/context/calendar-events-context';
+import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
 import type { CalendarEvent } from '@/types/calendar';
 import { userConnections } from '@/data/calendar-events';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -82,13 +83,13 @@ const parseEventDateTime = (event: CalendarEvent) => {
 export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
   const navigate = useNavigate();
   const {
-    events,
     respondToInvitation,
     pinEventToChat,
     setHighlightedDate,
-    deleteEvent,
-    updateEvent,
+    updateEvent: contextUpdateEvent,
+    deleteEvent: contextDeleteEvent,
   } = useCalendarEvents();
+  const { events, updateEvent: dbUpdateEvent, deleteEvent: dbDeleteEvent } = useCalendarEventsDB();
   const isMobile = useIsMobile();
   const dialogSurface: DialogSurface = isMobile ? 'sheet' : 'dialog';
 
@@ -211,8 +212,7 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
   const handleSaveEdit = (eventData: any) => {
     if (!editingEvent) return;
     
-    // Update the event with new data
-    updateEvent(editingEvent.id, {
+    const updates = {
       title: eventData.eventName,
       activity: eventData.activity,
       description: eventData.description || '',
@@ -222,11 +222,14 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
       maxParticipants: eventData.maxParticipants ? Number(eventData.maxParticipants) : null,
       isPrivate: eventData.visibility === 'private',
       image: eventData.selectedImage || editingEvent.image,
-    });
+    };
+
+    // Update in database
+    dbUpdateEvent({ id: editingEvent.id, updates });
     
-    toast.success('Event updated successfully!', {
-      description: `${eventData.eventName} has been updated`,
-    });
+    // Update in context for immediate UI update
+    contextUpdateEvent(editingEvent.id, updates);
+    
     setIsEditModalOpen(false);
     setEditingEvent(null);
     setIsEventViewerOpen(false);
@@ -254,11 +257,13 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
   };
 
   const handleDeleteEvent = (event: CalendarEvent) => {
-    deleteEvent(event.id);
+    // Delete from database
+    dbDeleteEvent(event.id);
+    
+    // Delete from context
+    contextDeleteEvent(event.id);
+    
     setIsEventViewerOpen(false);
-    toast.error('Event deleted', {
-      description: `${event.title} has been cancelled and removed.`
-    });
   };
 
   const handleViewAllUpcoming = () => {

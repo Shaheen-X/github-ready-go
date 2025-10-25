@@ -58,7 +58,7 @@ export function useCalendarEventsDB() {
         .insert({
           activity_id: activityId,
           title: eventInput.title,
-          sport_type: eventInput.type,
+          sport_type: eventInput.tags[0] || 'Activity',
           scheduled_datetime: eventInput.date.toISOString(),
           description: eventInput.description,
           host_id: user.id,

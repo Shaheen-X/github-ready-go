@@ -8,9 +8,9 @@ import NearbyActivitiesBlock from './NearbyActivitiesBlock';
 import CreateActivityPrompt from './CreateActivityPrompt';
 import EventSummaryCard from './EventSummaryCard';
 import CreateActivityModal from './CreateActivityModal';
-import { toast } from 'sonner';
 import { useCalendarEvents, createEventFromInput } from '@/context/calendar-events-context';
-import type { EventAttendee } from '@/types/calendar';
+import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
+import type { EventAttendee, NewEventInput } from '@/types/calendar';
 
 interface HomeProps {
   onNavigate?: (tab: string) => void;
@@ -23,6 +23,7 @@ export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
   const [nextLevelXP] = useState(1500);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { addEvents, events } = useCalendarEvents();
+  const { createEvent } = useCalendarEventsDB();
 
   const handleViewAllEvents = () => {
     onNavigate?.('calendar');
@@ -37,35 +38,37 @@ export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
   };
 
   const handleCreateActivityModal = (activityData: any) => {
-    // Convert to CalendarEvent format
+    // Convert to NewEventInput format for database
     const attendees: EventAttendee[] = activityData.invitedBuddies?.map((buddyId: string) => ({
       id: `attendee-${buddyId}`,
       name: `User ${buddyId}`,
       status: 'pending' as const
     })) || [];
 
-    const newEvent = createEventFromInput(
-      {
-        title: activityData.eventName || activityData.title,
-        type: 'group',
-        date: new Date(activityData.date),
-        time: activityData.time,
-        location: activityData.location,
-        description: activityData.description || '',
-        attendees,
-        maxParticipants: activityData.maxParticipants ? parseInt(activityData.maxParticipants) : 0,
-        tags: activityData.activity ? [activityData.activity] : [],
-        image: activityData.image
-      },
-      `event-${Date.now()}`
-    );
+    // Combine date and time into a single Date object
+    const eventDate = new Date(activityData.date + 'T' + activityData.time);
 
-    addEvents([newEvent]);
-    setIsCreateModalOpen(false);
+    const eventInput: NewEventInput = {
+      title: activityData.eventName || activityData.title,
+      type: 'group',
+      date: eventDate,
+      time: activityData.time,
+      location: activityData.location || '',
+      description: activityData.description || '',
+      attendees,
+      maxParticipants: activityData.maxParticipants ? parseInt(activityData.maxParticipants) : 0,
+      tags: activityData.activity ? [activityData.activity] : [],
+      image: activityData.selectedImage || activityData.image
+    };
+
+    // Save to database
+    createEvent(eventInput);
     
-    toast.success('Activity created successfully!', {
-      description: `${newEvent.title} has been scheduled`,
-    });
+    // Also add to local context for immediate UI update
+    const newEvent = createEventFromInput(eventInput, `event-${Date.now()}`);
+    addEvents([newEvent]);
+    
+    setIsCreateModalOpen(false);
   };
 
   return (
