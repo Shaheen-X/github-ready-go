@@ -23,16 +23,19 @@ import EventCreatedModal from '@/components/EventCreatedModal';
 import PairingCreatedModal from '@/components/PairingCreatedModal';
 import { ChatPage } from '@/pages/ChatPage';
 import { ProfileViewPage } from '@/pages/ProfileViewPage';
+import { AuthPage } from '@/pages/AuthPage';
 import NotFound from '@/pages/NotFound';
 import { CalendarEventsProvider } from '@/context/calendar-events-context';
 import { ChatProvider } from '@/context/ChatContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { toast } from 'sonner';
 
 const queryClient = new QueryClient();
 
-export default function App() {
+function AppContent() {
   const [activeTab, setActiveTab] = useState('home');
-  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
   const [isCreateGroupEventModalOpen, setIsCreateGroupEventModalOpen] = useState(false);
   const [isCreateEventChooserOpen, setIsCreateEventChooserOpen] = useState(false);
@@ -41,17 +44,12 @@ export default function App() {
   const [isPairingCreatedModalOpen, setIsPairingCreatedModalOpen] = useState(false);
   const [createdEventData, setCreatedEventData] = useState<any>(null);
   const [createdPairingData, setCreatedPairingData] = useState<any>(null);
+  const { signOut } = useAuth();
 
   const handleOnboardingComplete = () => setShowOnboarding(false);
 
-  const handleSignOut = () => {
-    setShowOnboarding(true);
-    setActiveTab('home');
-    setIsCreateGroupEventModalOpen(false);
-    setIsCreateEventChooserOpen(false);
-    setIsCreatePairingModalOpen(false);
-    setIsEventCreatedModalOpen(false);
-    setIsPairingCreatedModalOpen(false);
+  const handleSignOut = async () => {
+    await signOut();
     toast.success('Signed out successfully', {
       description: 'You have been signed out of ConnectSphere',
     });
@@ -100,85 +98,90 @@ export default function App() {
 
   if (showOnboarding) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <CalendarEventsProvider>
-            <ChatProvider>
-              <div className="h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-                <Onboarding onComplete={handleOnboardingComplete} />
-                <Toaster />
-                <Sonner />
-              </div>
-            </ChatProvider>
-          </CalendarEventsProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
+      <div className="h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+        <Onboarding onComplete={handleOnboardingComplete} />
+        <Toaster />
+        <Sonner />
+      </div>
     );
   }
 
   return (
+    <Routes>
+      {/* Auth Route (unprotected) */}
+      <Route path="/auth" element={<AuthPage />} />
+      
+      {/* Standalone Routes (protected) */}
+      <Route path="/chat/:eventId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+      <Route path="/profile/:userId" element={<ProtectedRoute><ProfileViewPage /></ProtectedRoute>} />
+      
+      {/* Main App Route (protected) */}
+      <Route path="/*" element={
+        <ProtectedRoute>
+          <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-gray-100">
+            <main className="flex-1 overflow-hidden">{renderContent()}</main>
+            <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+            <InviteFloatingAction onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} />
+
+            {/* Modals */}
+            <CreateEventChooserModal
+              isOpen={isCreateEventChooserOpen}
+              onClose={() => setIsCreateEventChooserOpen(false)}
+              onChoosePairing={handleChoosePairing}
+              onChooseGroup={handleChooseGroup}
+            />
+            <CreateActivityModal
+              isOpen={isCreateEventModalOpen}
+              onClose={() => setIsCreateEventModalOpen(false)}
+              onCreateActivity={handleCreateEventModal}
+            />
+            <CreateGroupEventModal
+              isOpen={isCreateGroupEventModalOpen}
+              onClose={() => setIsCreateGroupEventModalOpen(false)}
+              onCreateEvent={handleCreateGroupEvent}
+            />
+            <CreatePairingModal
+              isOpen={isCreatePairingModalOpen}
+              onClose={() => setIsCreatePairingModalOpen(false)}
+              onCreatePairing={handleCreatePairing}
+            />
+            <EventCreatedModal
+              isOpen={isEventCreatedModalOpen}
+              onClose={() => setIsEventCreatedModalOpen(false)}
+              onNavigate={setActiveTab}
+              eventData={createdEventData}
+            />
+            <PairingCreatedModal
+              isOpen={isPairingCreatedModalOpen}
+              onClose={() => setIsPairingCreatedModalOpen(false)}
+              pairingData={createdPairingData}
+            />
+          </div>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <CalendarEventsProvider>
-          <ChatProvider>
-            <BrowserRouter>
-              <Routes>
-                {/* Standalone Routes (without bottom nav) */}
-                <Route path="/chat/:eventId" element={<ChatPage />} />
-                <Route path="/profile/:userId" element={<ProfileViewPage />} />
+        <BrowserRouter>
+          <AuthProvider>
+            <CalendarEventsProvider>
+              <ChatProvider>
+                <AppContent />
                 
-                {/* Main App Route */}
-                <Route path="/*" element={
-                  <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-gray-100">
-                    <main className="flex-1 overflow-hidden">{renderContent()}</main>
-                    <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-                    <InviteFloatingAction onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} />
-
-                    {/* Modals */}
-                    <CreateEventChooserModal
-                      isOpen={isCreateEventChooserOpen}
-                      onClose={() => setIsCreateEventChooserOpen(false)}
-                      onChoosePairing={handleChoosePairing}
-                      onChooseGroup={handleChooseGroup}
-                    />
-                    <CreateActivityModal
-                      isOpen={isCreateEventModalOpen}
-                      onClose={() => setIsCreateEventModalOpen(false)}
-                      onCreateActivity={handleCreateEventModal}
-                    />
-                    <CreateGroupEventModal
-                      isOpen={isCreateGroupEventModalOpen}
-                      onClose={() => setIsCreateGroupEventModalOpen(false)}
-                      onCreateEvent={handleCreateGroupEvent}
-                    />
-                    <CreatePairingModal
-                      isOpen={isCreatePairingModalOpen}
-                      onClose={() => setIsCreatePairingModalOpen(false)}
-                      onCreatePairing={handleCreatePairing}
-                    />
-                    <EventCreatedModal
-                      isOpen={isEventCreatedModalOpen}
-                      onClose={() => setIsEventCreatedModalOpen(false)}
-                      onNavigate={setActiveTab}
-                      eventData={createdEventData}
-                    />
-                    <PairingCreatedModal
-                      isOpen={isPairingCreatedModalOpen}
-                      onClose={() => setIsPairingCreatedModalOpen(false)}
-                      pairingData={createdPairingData}
-                    />
-                  </div>
-                } />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-
-              {/* Toast Notifications */}
-              <Toaster />
-              <Sonner />
-            </BrowserRouter>
-          </ChatProvider>
-        </CalendarEventsProvider>
+                {/* Toast Notifications */}
+                <Toaster />
+                <Sonner />
+              </ChatProvider>
+            </CalendarEventsProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );
