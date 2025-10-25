@@ -348,13 +348,31 @@ export function Search() {
   const convertToEventDetails = (user: any, activity: any) => {
     if (!user || !activity) return null;
     
+    // Parse the time string to separate date/days from time
+    const timeString = activity.time;
+    let dateDisplay = '';
+    let timeDisplay = '';
+    
+    // Check if time contains a time range pattern (HH:MM)
+    const timeMatch = timeString.match(/(\d{1,2}:\d{2})/);
+    if (timeMatch) {
+      // Split by the first time occurrence to get date and time parts
+      const parts = timeString.split(timeMatch[0]);
+      dateDisplay = parts[0].trim().replace(/,$/, '').trim(); // Remove trailing comma
+      timeDisplay = timeString.substring(parts[0].length).trim();
+    } else {
+      // If no time pattern, use the whole string as date
+      dateDisplay = timeString;
+      timeDisplay = '';
+    }
+    
     return {
       id: `event-${user.name}`,
       title: activity.title,
       type: activeTab === 'groups' ? 'group' as const : 'one-to-one' as const,
       activity: activity.type,
-      date: activity.time.split(',')[0] || activity.time, // Use first part as date
-      time: activity.time,
+      date: dateDisplay,
+      time: timeDisplay,
       location: user.location,
       description: activity.details,
       attendees: [],
