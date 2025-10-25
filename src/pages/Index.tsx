@@ -14,7 +14,8 @@ import CreateGroupEventModal from '@/components/CreateGroupEventModal';
 import PairingCreatedModal from '@/components/PairingCreatedModal';
 import EventCreatedModal from '@/components/EventCreatedModal';
 import CreateEventChooserModal from '@/components/CreateEventChooserModal';
-import type { EventAttendee } from '@/types/calendar';
+import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
+import type { EventAttendee, NewEventInput } from '@/types/calendar';
 
 
 type Tab = 'home' | 'search' | 'messages' | 'calendar' | 'profile';
@@ -30,6 +31,7 @@ const IndexContent = () => {
   const [editingPairing, setEditingPairing] = useState<any>(null);
   
   const { addEvents, deleteEvent } = useCalendarEvents();
+  const { createEvent } = useCalendarEventsDB();
 
   const handleNavigate = (tab: string) => {
     if (tab === 'create') {
@@ -56,31 +58,32 @@ const IndexContent = () => {
       status: 'pending' as const
     })) || [];
 
-    const eventDate = pairingData.hasCustomDateTime 
-      ? new Date(pairingData.customDate)
+    const date: Date = pairingData.hasCustomDateTime
+      ? new Date(`${pairingData.customDate}T${pairingData.customTime}`)
       : new Date();
-    
-    const eventTime = pairingData.hasCustomDateTime
-      ? pairingData.customTime
-      : '09:00';
 
-    const newEvent = createEventFromInput(
-      {
-        title: pairingData.title,
-        type: 'one-to-one',
-        date: eventDate,
-        time: eventTime,
-        location: pairingData.location,
-        description: pairingData.description || '',
-        attendees,
-        maxParticipants: 2,
-        tags: pairingData.activity ? [pairingData.activity] : [],
-      },
-      `pairing-${Date.now()}`
-    );
+    const time: string = pairingData.hasCustomDateTime ? pairingData.customTime : '09:00';
 
-    addEvents([newEvent]);
-    setCreatedEventData({ ...pairingData, eventId: newEvent.id });
+    const eventInput: NewEventInput = {
+      title: pairingData.title,
+      type: 'one-to-one',
+      date,
+      time,
+      location: pairingData.location || '',
+      description: pairingData.description || '',
+      attendees,
+      maxParticipants: 2,
+      tags: pairingData.activity ? [pairingData.activity] : [],
+    };
+
+    // Save to DB
+    createEvent(eventInput);
+
+    // Optimistic local add for immediate UI
+    const localEvent = createEventFromInput(eventInput, `pairing-${Date.now()}`);
+    addEvents([localEvent]);
+
+    setCreatedEventData({ ...pairingData, eventId: localEvent.id });
     setIsCreatePairingOpen(false);
     setIsPairingCreatedOpen(true);
   };
@@ -92,24 +95,29 @@ const IndexContent = () => {
       status: 'pending' as const
     })) || [];
 
-    const newEvent = createEventFromInput(
-      {
-        title: eventData.eventName,
-        type: 'group',
-        date: new Date(eventData.date),
-        time: eventData.time,
-        location: eventData.location,
-        description: eventData.description || '',
-        attendees,
-        maxParticipants: eventData.maxParticipants ? parseInt(eventData.maxParticipants) : 0,
-        tags: eventData.activity ? [eventData.activity] : [],
-        image: eventData.selectedImage || eventData.image,
-      },
-      `event-${Date.now()}`
-    );
+    const date = new Date(`${eventData.date}T${eventData.time}`);
 
-    addEvents([newEvent]);
-    setCreatedEventData({ ...eventData, eventId: newEvent.id });
+    const eventInput: NewEventInput = {
+      title: eventData.eventName,
+      type: 'group',
+      date,
+      time: eventData.time,
+      location: eventData.location || '',
+      description: eventData.description || '',
+      attendees,
+      maxParticipants: eventData.maxParticipants ? parseInt(eventData.maxParticipants) : 0,
+      tags: eventData.activity ? [eventData.activity] : [],
+      image: eventData.selectedImage || eventData.image,
+    };
+
+    // Save to DB
+    createEvent(eventInput);
+
+    // Optimistic local add for immediate UI
+    const localEvent = createEventFromInput(eventInput, `event-${Date.now()}`);
+    addEvents([localEvent]);
+
+    setCreatedEventData({ ...eventData, eventId: localEvent.id });
     setIsCreateGroupEventOpen(false);
     setIsEventCreatedOpen(true);
   };
