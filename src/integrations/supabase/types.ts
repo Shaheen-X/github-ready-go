@@ -751,6 +751,63 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          gender: string | null
+          id: string
+          interests: string[] | null
+          level: number | null
+          location: Json | null
+          name: string | null
+          onboarding_completed: boolean | null
+          preferences: Json | null
+          skill_level: string | null
+          stats: Json | null
+          updated_at: string | null
+          xp: number | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          gender?: string | null
+          id: string
+          interests?: string[] | null
+          level?: number | null
+          location?: Json | null
+          name?: string | null
+          onboarding_completed?: boolean | null
+          preferences?: Json | null
+          skill_level?: string | null
+          stats?: Json | null
+          updated_at?: string | null
+          xp?: number | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          gender?: string | null
+          id?: string
+          interests?: string[] | null
+          level?: number | null
+          location?: Json | null
+          name?: string | null
+          onboarding_completed?: boolean | null
+          preferences?: Json | null
+          skill_level?: string | null
+          stats?: Json | null
+          updated_at?: string | null
+          xp?: number | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           auto_renew: boolean | null
