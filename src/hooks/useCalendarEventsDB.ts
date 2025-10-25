@@ -3,6 +3,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { CalendarEvent, NewEventInput } from '@/types/calendar';
 import { toast } from 'sonner';
 
+// Helper to format date as local time string for Postgres timestamp without time zone
+const formatLocalDateTime = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
 export function useCalendarEventsDB() {
   const queryClient = useQueryClient();
 
@@ -59,7 +70,7 @@ export function useCalendarEventsDB() {
           activity_id: activityId,
           title: eventInput.title,
           sport_type: eventInput.tags[0] || 'Activity',
-          scheduled_datetime: eventInput.date.toISOString(),
+          scheduled_datetime: formatLocalDateTime(eventInput.date),
           description: eventInput.description,
           host_id: user.id,
           capacity: eventInput.maxParticipants,
@@ -93,7 +104,7 @@ export function useCalendarEventsDB() {
         .update({
           title: updates.title,
           description: updates.description,
-          scheduled_datetime: updates.date?.toISOString(),
+          scheduled_datetime: updates.date ? formatLocalDateTime(updates.date) : undefined,
           status: updates.status === 'cancelled' ? 'cancelled' : 'active',
         })
         .eq('activity_id', id);

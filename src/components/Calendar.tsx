@@ -22,6 +22,13 @@ import CreateActivityModal from './CreateActivityModal';
 
 import { useCalendarEvents } from '@/context/calendar-events-context';
 import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
+
+// Helper to dedupe events by ID (prefer DB events over local context)
+const dedupeEvents = (dbEvents: CalendarEvent[], contextEvents: CalendarEvent[]): CalendarEvent[] => {
+  const dbIds = new Set(dbEvents.map(e => e.id));
+  const uniqueContext = contextEvents.filter(e => !dbIds.has(e.id));
+  return [...dbEvents, ...uniqueContext];
+};
 import type { CalendarEvent } from '@/types/calendar';
 import { userConnections } from '@/data/calendar-events';
 import { useIsMobile } from '@/hooks/use-mobile';
