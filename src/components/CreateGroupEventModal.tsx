@@ -795,6 +795,7 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
                   </div>
                 </div>
               )}
+              </div>
 
               {/* Repeat */}
               <div className="space-y-2">

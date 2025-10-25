@@ -591,37 +591,6 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
               <div className="w-full h-px bg-gradient-to-r from-blue-500/20 to-cyan-400/20 mt-2"></div>
             </div>
 
-            {/* Flexible Time Toggle */}
-            <div className="flex items-center justify-between p-4 glass-card border-white/20 rounded-xl">
-              <div className="flex items-center gap-3">
-                <Zap className="w-5 h-5 text-amber-500" />
-                <div>
-                  <p className="text-sm font-semibold">Flexible Time</p>
-                  <p className="text-xs text-muted-foreground">Time can be decided later with your partner</p>
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                checked={formData.flexibleTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, flexibleTime: e.target.checked }))}
-                className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Time Flexibility Input */}
-            {formData.flexibleTime && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">When would you prefer? (Optional)</Label>
-                <Input
-                  type="text"
-                  placeholder="e.g., Weekends, Weekday Evenings, Anytime"
-                  value={formData.timeFlexibility}
-                  onChange={(e) => setFormData(prev => ({ ...prev, timeFlexibility: e.target.value }))}
-                  className="glass-card border-white/20 rounded-xl h-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
-              </div>
-            )}
-
             {/* Custom Date/Time & Repeat - One Row Layout */}
             <div className="grid grid-cols-12 gap-4">
               {/* Custom Date/Time - Takes 8 columns */}
