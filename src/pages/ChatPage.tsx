@@ -200,9 +200,8 @@ export function ChatPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="glass-card border-white/20">
                 <DropdownMenuItem 
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    // Close dropdown first, then open modal
+                  onSelect={() => {
+                    // Let dropdown close naturally, then open modal
                     setTimeout(() => setShowEventDetailsModal(true), 100);
                   }}
                 >
