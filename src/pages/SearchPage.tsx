@@ -68,10 +68,10 @@ export function SearchPage() {
                     </p>
                     <div className="flex gap-2 flex-wrap">
                       {activity.sport_type && (
-                        <Badge variant="secondary">{activity.sport_type}</Badge>
+                        <Badge variant="activity">{activity.sport_type}</Badge>
                       )}
                       {activity.is_group_activity && (
-                        <Badge variant="outline">Group</Badge>
+                        <Badge variant="activity">Group</Badge>
                       )}
                       {activity.capacity && (
                         <Badge variant="outline">{activity.capacity} spots</Badge>

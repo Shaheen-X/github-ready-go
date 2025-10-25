@@ -37,7 +37,7 @@ export const EventCard = ({ event, onClick, variant = 'default', onStartChat: _o
         
         {/* Activity Tag */}
         <div className="absolute top-2 left-2">
-          <span className="px-2 py-1 rounded-full bg-green-500 text-white text-[10px] font-semibold shadow-lg">
+          <span className="px-2 py-1 rounded-md bg-green-500 text-white text-[10px] font-semibold shadow-lg">
             {event.activity}
           </span>
         </div>
@@ -45,7 +45,7 @@ export const EventCard = ({ event, onClick, variant = 'default', onStartChat: _o
         {/* Host Badge */}
         {isHost && (
           <div className="absolute top-2 left-20">
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold shadow-lg">
+            <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-semibold shadow-lg">
               <Crown className="w-3 h-3" />
               <span>Host</span>
             </div>
