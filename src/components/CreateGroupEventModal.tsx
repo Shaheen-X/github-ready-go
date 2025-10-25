@@ -296,7 +296,9 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
     location: '',
     maxParticipants: '',
     description: '',
-    visibility: 'public'
+    visibility: 'public',
+    flexibleTime: false,
+    timeFlexibility: ''
   });
   
   const [selectedBuddies, setSelectedBuddies] = useState<string[]>([]);
@@ -323,13 +325,17 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
           location: initialData.location || '',
           maxParticipants: initialData.maxParticipants?.toString() || '',
           description: initialData.description || '',
-          visibility: initialData.isPrivate ? 'private' : 'public'
+          visibility: initialData.isPrivate ? 'private' : 'public',
+          flexibleTime: false,
+          timeFlexibility: ''
         }));
       } else {
         setFormData(prev => ({
           ...prev,
           date: getTodayDate(),
-          time: getNextHour()
+          time: getNextHour(),
+          flexibleTime: false,
+          timeFlexibility: ''
         }));
       }
     }
@@ -446,6 +452,10 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
       activity: formData.activity === 'Other' ? formData.customActivity.trim() : formData.activity,
       selectedImage,
       invitedBuddies: selectedBuddies,
+      isPrivate: formData.visibility === 'private',
+      creator: 'You',
+      timeStatus: formData.flexibleTime ? 'flexible' as const : 'confirmed' as const,
+      timeFlexibility: formData.flexibleTime ? formData.timeFlexibility : undefined,
       createdAt: new Date().toISOString()
     };
     onCreateEvent(eventData);
@@ -467,7 +477,9 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
       location: '',
       maxParticipants: '',
       description: '',
-      visibility: 'public'
+      visibility: 'public',
+      flexibleTime: false,
+      timeFlexibility: ''
     });
     setSelectedBuddies([]);
     setSelectedImage(defaultEventImage);
@@ -725,29 +737,63 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
             </div>
 
             {/* Date and Time */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-body font-semibold flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Date *
-                </Label>
-                <Input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                  className="glass-card border-white/20 rounded-xl h-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-body font-semibold flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Date *
+                  </Label>
+                  <Input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                    disabled={formData.flexibleTime}
+                    className="glass-card border-white/20 rounded-xl h-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-body font-semibold flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Time *
+                  </Label>
+                  <FunTimePicker
+                    value={formData.time}
+                    onChange={(time) => setFormData(prev => ({ ...prev, time }))}
+                  />
+                </div>
+              </div>
+
+              {/* Flexible Time Toggle */}
+              <div className="flex items-center justify-between p-4 glass-card border-white/20 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <Zap className="w-5 h-5 text-amber-500" />
+                  <div>
+                    <p className="text-sm font-semibold">Flexible Time</p>
+                    <p className="text-xs text-muted-foreground">Time can be decided later with participants</p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={formData.flexibleTime}
+                  onChange={(e) => setFormData(prev => ({ ...prev, flexibleTime: e.target.checked }))}
+                  className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-body font-semibold flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  Time *
-                </Label>
-                <FunTimePicker
-                  value={formData.time}
-                  onChange={(time) => setFormData(prev => ({ ...prev, time }))}
-                />
-              </div>
+
+              {/* Time Flexibility Input */}
+              {formData.flexibleTime && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">When would you prefer? (Optional)</Label>
+                  <Input
+                    type="text"
+                    placeholder="e.g., Weekends, Weekday Evenings, Anytime"
+                    value={formData.timeFlexibility}
+                    onChange={(e) => setFormData(prev => ({ ...prev, timeFlexibility: e.target.value }))}
+                    className="glass-card border-white/20 rounded-xl h-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Optional Section Header */}

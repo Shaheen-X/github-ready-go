@@ -132,7 +132,9 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
     repeat: 'never',
     repeatEndDate: '',
     hasRepeat: false,
-    description: ''
+    description: '',
+    flexibleTime: false,
+    timeFlexibility: ''
   });
 
   const [selectedBuddies, setSelectedBuddies] = useState<Buddy[]>([]);
@@ -384,6 +386,9 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
       ...formData,
       activity: formData.activity === 'Other' ? formData.customActivity : formData.activity,
       invitedBuddies: selectedBuddies.map(b => b.id),
+      timeStatus: formData.flexibleTime ? 'flexible' as const : 
+                 (formData.hasCustomDateTime || formData.availableTimes.length > 0) ? 'confirmed' as const : 'flexible' as const,
+      timeFlexibility: formData.flexibleTime ? formData.timeFlexibility : undefined,
       createdAt: new Date().toISOString()
     };
     onCreatePairing(pairingData);
@@ -403,7 +408,9 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
       repeat: 'never',
       repeatEndDate: '',
       hasRepeat: false,
-      description: ''
+      description: '',
+      flexibleTime: false,
+      timeFlexibility: ''
     });
     setSelectedBuddies([]);
     setInviteSearchQuery('');
@@ -590,6 +597,37 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
               <h3 className="text-body font-semibold text-muted-foreground">Optional</h3>
               <div className="w-full h-px bg-gradient-to-r from-blue-500/20 to-cyan-400/20 mt-2"></div>
             </div>
+
+            {/* Flexible Time Toggle */}
+            <div className="flex items-center justify-between p-4 glass-card border-white/20 rounded-xl">
+              <div className="flex items-center gap-3">
+                <Zap className="w-5 h-5 text-amber-500" />
+                <div>
+                  <p className="text-sm font-semibold">Flexible Time</p>
+                  <p className="text-xs text-muted-foreground">Time can be decided later with your partner</p>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={formData.flexibleTime}
+                onChange={(e) => setFormData(prev => ({ ...prev, flexibleTime: e.target.checked }))}
+                className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Time Flexibility Input */}
+            {formData.flexibleTime && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">When would you prefer? (Optional)</Label>
+                <Input
+                  type="text"
+                  placeholder="e.g., Weekends, Weekday Evenings, Anytime"
+                  value={formData.timeFlexibility}
+                  onChange={(e) => setFormData(prev => ({ ...prev, timeFlexibility: e.target.value }))}
+                  className="glass-card border-white/20 rounded-xl h-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                />
+              </div>
+            )}
 
             {/* Custom Date/Time & Repeat - One Row Layout */}
             <div className="grid grid-cols-12 gap-4">

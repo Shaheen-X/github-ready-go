@@ -67,6 +67,8 @@ export function useCalendarEventsDB() {
           is_public: true,
           is_group_activity: eventInput.type === 'group',
           tags: eventInput.tags as any,
+          time_status: eventInput.timeStatus || 'confirmed',
+          time_flexibility: eventInput.timeFlexibility,
         })
         .select()
         .single();

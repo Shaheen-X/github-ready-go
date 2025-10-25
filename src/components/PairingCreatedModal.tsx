@@ -13,6 +13,7 @@ import yellowTextureBg from '@/assets/yellow-texture-bg.png';
 interface PairingCreatedModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onNavigate?: (tab: string) => void;
   onEdit?: () => void;
   onDelete?: () => void;
   pairingData?: {
@@ -29,6 +30,8 @@ interface PairingCreatedModalProps {
     hasRepeat?: boolean;
     description?: string;
     invitedBuddies?: string[];
+    timeStatus?: 'flexible' | 'proposed' | 'confirmed';
+    timeFlexibility?: string;
   };
 }
 
@@ -88,6 +91,7 @@ const mockBuddies: Buddy[] = [
 export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
   isOpen,
   onClose,
+  onNavigate,
   onEdit,
   onDelete,
   pairingData
@@ -167,9 +171,27 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
       setInviteCancelled(false);
       setShowInviteList(false);
       toast.success('Invitation sent!');
+      if (onNavigate) {
+        onNavigate('calendar');
+      }
     } else {
       toast.error('Please select a person to invite');
     }
+  };
+
+  const handleViewInCalendar = () => {
+    if (onNavigate) {
+      onNavigate('calendar');
+    }
+    onClose();
+    toast.success('Pairing added to calendar!');
+  };
+
+  const handleContinueBrowsing = () => {
+    if (onNavigate) {
+      onNavigate('discover');
+    }
+    onClose();
   };
 
   const handleCancelInvite = () => {
@@ -334,6 +356,23 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
 
                   {/* Pairing Details */}
                   <div className="space-y-3">
+                    {/* Time Flexibility Indicator */}
+                    {pairingData.timeStatus === 'flexible' && (
+                      <div className="flex items-start gap-3">
+                        <Clock className="w-4 h-4 text-amber-800 mt-0.5 shrink-0" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="choice-chip bg-amber-100 text-amber-700 text-xs px-3 py-1">
+                              Time TBD
+                            </span>
+                          </div>
+                          {pairingData.timeFlexibility && (
+                            <p className="text-xs text-amber-700 mt-1">{pairingData.timeFlexibility}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Days */}
                     {pairingData.availableDays && pairingData.availableDays.length > 0 && (
                       <div className="flex items-start gap-3">
@@ -955,12 +994,20 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
 
           {/* Footer with Action Buttons */}
           {!showInviteList && (
-            <div className="px-6 py-4 border-t border-white/20">
+            <div className="px-6 py-4 border-t border-white/20 space-y-3">
               <Button
-                onClick={onClose}
+                onClick={handleViewInCalendar}
                 className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl h-12 font-semibold hover:shadow-lg transition-shadow"
               >
-                Done
+                <Calendar className="w-4 h-4 mr-2" />
+                View in Calendar
+              </Button>
+              <Button
+                onClick={handleContinueBrowsing}
+                variant="outline"
+                className="w-full rounded-xl h-12 font-semibold"
+              >
+                Continue Browsing
               </Button>
             </div>
           )}

@@ -21,6 +21,8 @@ interface EventCreatedModalProps {
     selectedImage: string;
     isPrivate?: boolean;
     creator?: string;
+    timeStatus?: 'flexible' | 'proposed' | 'confirmed';
+    timeFlexibility?: string;
   };
 }
 
@@ -80,6 +82,7 @@ const mockBuddies: Buddy[] = [
 export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
   isOpen,
   onClose,
+  onNavigate,
   eventData
 }) => {
   const [selectedBuddies, setSelectedBuddies] = useState<string[]>([]);
@@ -194,10 +197,28 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
   const handleSendInvites = () => {
     if (selectedBuddies.length > 0) {
       toast.success(`Invitations sent to ${selectedBuddies.length} people!`);
+      if (onNavigate) {
+        onNavigate('calendar');
+      }
       onClose();
     } else {
       toast.error('Please select at least one person to invite');
     }
+  };
+
+  const handleViewInCalendar = () => {
+    if (onNavigate) {
+      onNavigate('calendar');
+    }
+    onClose();
+    toast.success('Event added to calendar!');
+  };
+
+  const handleContinueBrowsing = () => {
+    if (onNavigate) {
+      onNavigate('discover');
+    }
+    onClose();
   };
 
   const renderMainContent = () => (
@@ -280,9 +301,21 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
                 
                 {/* Event Details */}
                 <div className="space-y-1">
-                  <p className="text-sm text-gray-600">
-                    📅 {eventData.date} at {eventData.time}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-gray-600">
+                      📅 {eventData.date} at {eventData.time}
+                    </p>
+                    {eventData.timeStatus === 'flexible' && (
+                      <span className="choice-chip bg-amber-100 text-amber-700 text-xs px-2 py-0.5">
+                        Time TBD
+                      </span>
+                    )}
+                  </div>
+                  {eventData.timeStatus === 'flexible' && eventData.timeFlexibility && (
+                    <p className="text-xs text-gray-500">
+                      ⏰ {eventData.timeFlexibility}
+                    </p>
+                  )}
                   <p className="text-sm text-gray-600">
                     📍 {eventData.location || 'Location to be announced'}
                   </p>
@@ -564,12 +597,20 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
       </div>
 
       {/* Done Button */}
-      <div className="pt-4">
+      <div className="pt-4 space-y-3">
         <Button
-          onClick={onClose}
+          onClick={handleViewInCalendar}
           className="w-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl h-12 font-semibold hover:shadow-lg transition-shadow"
         >
-          Done
+          <Calendar className="w-4 h-4 mr-2" />
+          View in Calendar
+        </Button>
+        <Button
+          onClick={handleContinueBrowsing}
+          variant="outline"
+          className="w-full rounded-xl h-12 font-semibold"
+        >
+          Continue Browsing
         </Button>
       </div>
     </div>

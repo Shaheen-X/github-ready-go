@@ -25,11 +25,14 @@ export type Database = {
           is_group_activity: boolean | null
           is_public: boolean | null
           place_id: string | null
+          proposed_times: Json | null
           recurrence_pattern: string | null
           scheduled_datetime: string | null
           sport_type: string | null
           status: string | null
           tags: Json | null
+          time_flexibility: string | null
+          time_status: string | null
           title: string | null
           updated_at: string | null
         }
@@ -43,11 +46,14 @@ export type Database = {
           is_group_activity?: boolean | null
           is_public?: boolean | null
           place_id?: string | null
+          proposed_times?: Json | null
           recurrence_pattern?: string | null
           scheduled_datetime?: string | null
           sport_type?: string | null
           status?: string | null
           tags?: Json | null
+          time_flexibility?: string | null
+          time_status?: string | null
           title?: string | null
           updated_at?: string | null
         }
@@ -61,11 +67,14 @@ export type Database = {
           is_group_activity?: boolean | null
           is_public?: boolean | null
           place_id?: string | null
+          proposed_times?: Json | null
           recurrence_pattern?: string | null
           scheduled_datetime?: string | null
           sport_type?: string | null
           status?: string | null
           tags?: Json | null
+          time_flexibility?: string | null
+          time_status?: string | null
           title?: string | null
           updated_at?: string | null
         }

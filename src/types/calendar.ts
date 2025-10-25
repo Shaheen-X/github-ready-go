@@ -64,6 +64,8 @@ export interface NewEventInput {
   maxParticipants: number;
   tags: string[];
   image?: string;
+  timeStatus?: 'flexible' | 'proposed' | 'confirmed';
+  timeFlexibility?: string;
 }
 
 export interface RecurrenceConfig {
