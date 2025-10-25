@@ -1,4 +1,4 @@
-import { MapPin, Clock, Users, MessageCircle, Crown, Edit, Trash2, User } from 'lucide-react';
+import { MapPin, Clock, MessageCircle, Crown, Edit, Trash2, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { Button } from './ui/button';
@@ -14,6 +14,7 @@ interface ActivityDetailsModalProps {
   onDecline?: (eventId: string | number) => void;
   onEdit?: (eventId: string | number) => void;
   onDelete?: (eventId: string | number) => void;
+  showActions?: boolean;
 }
 
 const statusBadge = (status: RSVPStatus) => {
@@ -34,7 +35,8 @@ export default function ActivityDetailsModal({
   onAccept,
   onDecline,
   onEdit,
-  onDelete
+  onDelete,
+  showActions = true
 }: ActivityDetailsModalProps) {
   const isGroup = event?.type === 'group';
   const navigate = useNavigate();
@@ -45,12 +47,7 @@ export default function ActivityDetailsModal({
         <div className="glass-card flex flex-col h-full">
           <DialogHeader className="px-6 py-4 bg-gradient-to-r from-green-50 to-blue-50 border-b border-white/20">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full ${isGroup ? 'bg-gradient-to-r from-green-500 to-emerald-400' : 'bg-gradient-to-r from-purple-500 to-pink-500'} flex items-center justify-center`}>
-                  <Users className="w-5 h-5 text-white" />
-                </div>
-                <DialogTitle className="text-section-header font-semibold gradient-text">{event?.title || 'Event'}</DialogTitle>
-              </div>
+              <DialogTitle className="text-section-header font-semibold gradient-text">{event?.title || 'Event'}</DialogTitle>
             </div>
             <DialogDescription className="sr-only">View event details and respond to the invitation</DialogDescription>
           </DialogHeader>
@@ -102,9 +99,17 @@ export default function ActivityDetailsModal({
               <div className="glass-card p-4 rounded-xl border border-white/20">
                 <h4 className="text-body font-semibold mb-3">Host</h4>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
-                    <User className="w-6 h-6 text-white" />
-                  </div>
+                  {event.hostAvatar ? (
+                    <ImageWithFallback 
+                      src={event.hostAvatar} 
+                      alt={event.hostName}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
+                  )}
                   <div className="flex-1">
                     <div className="text-sm text-foreground font-semibold">{event.hostName}</div>
                     <div className="text-xs text-subtext">Event Organizer</div>
@@ -150,56 +155,58 @@ export default function ActivityDetailsModal({
             )}
           </div>
 
-          <div className="px-6 py-4 border-t border-white/20 flex items-center gap-2">
-            {event && (
-              <>
-                {event.isHost ? (
-                  <>
-                    <Button 
-                      onClick={() => onEdit?.(event.id)} 
-                      className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full"
-                    >
-                      <Edit size={16} className="mr-2" /> Edit
-                    </Button>
-                    <Button 
-                      onClick={() => onDelete?.(event.id)} 
-                      variant="outline" 
-                      className="flex-1 rounded-full border-red-500 text-red-500 hover:bg-red-50"
-                    >
-                      <Trash2 size={16} className="mr-2" /> Delete
-                    </Button>
-                    <Button 
-                      onClick={() => {
-                        navigate(`/chat/${event.id}`);
-                      }} 
-                      variant="outline" 
-                      className="rounded-full"
-                    >
-                      <MessageCircle size={16} className="mr-2" /> Chat
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button onClick={() => onAccept?.(event.id)} className="flex-1 bg-gradient-to-r from-green-500 to-emerald-400 text-white rounded-full">
-                      Accept
-                    </Button>
-                    <Button onClick={() => onDecline?.(event.id)} variant="outline" className="flex-1 rounded-full">
-                      Decline
-                    </Button>
-                    <Button 
-                      onClick={() => {
-                        navigate(`/chat/${event.id}`);
-                      }} 
-                      variant="outline" 
-                      className="rounded-full"
-                    >
-                      <MessageCircle size={16} className="mr-2" /> Chat
-                    </Button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
+          {showActions && (
+            <div className="px-6 py-4 border-t border-white/20 flex items-center gap-2">
+              {event && (
+                <>
+                  {event.isHost ? (
+                    <>
+                      <Button 
+                        onClick={() => onEdit?.(event.id)} 
+                        className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full"
+                      >
+                        <Edit size={16} className="mr-2" /> Edit
+                      </Button>
+                      <Button 
+                        onClick={() => onDelete?.(event.id)} 
+                        variant="outline" 
+                        className="flex-1 rounded-full border-red-500 text-red-500 hover:bg-red-50"
+                      >
+                        <Trash2 size={16} className="mr-2" /> Delete
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          navigate(`/chat/${event.id}`);
+                        }} 
+                        variant="outline" 
+                        className="rounded-full"
+                      >
+                        <MessageCircle size={16} className="mr-2" /> Chat
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button onClick={() => onAccept?.(event.id)} className="flex-1 bg-gradient-to-r from-green-500 to-emerald-400 text-white rounded-full">
+                        Accept
+                      </Button>
+                      <Button onClick={() => onDecline?.(event.id)} variant="outline" className="flex-1 rounded-full">
+                        Decline
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          navigate(`/chat/${event.id}`);
+                        }} 
+                        variant="outline" 
+                        className="rounded-full"
+                      >
+                        <MessageCircle size={16} className="mr-2" /> Chat
+                      </Button>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

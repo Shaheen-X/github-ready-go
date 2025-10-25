@@ -34,6 +34,7 @@ export interface CalendarEvent {
   isPrivate?: boolean;
   hostName?: string;
   hostId?: string;
+  hostAvatar?: string;
   isRepeating?: boolean;
   repeatFrequency?: 'daily' | 'weekly' | 'monthly' | null;
   recurrenceId?: string;

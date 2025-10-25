@@ -365,6 +365,7 @@ export function Search() {
       isHost: false, // Users viewing from search are not hosts
       hostName: user.name,
       hostId: user.name.toLowerCase().replace(/\s+/g, '-'),
+      hostAvatar: user.image,
     };
   };
   const isMobile = useIsMobile();
@@ -592,14 +593,7 @@ export function Search() {
           isOpen={isActivityDetailsModalOpen}
           onClose={() => setIsActivityDetailsModalOpen(false)}
           event={convertToEventDetails(selectedActivity.user, selectedActivity.activity)}
-          onAccept={(eventId) => {
-            console.log('Accepted event:', eventId);
-            setIsActivityDetailsModalOpen(false);
-          }}
-          onDecline={(eventId) => {
-            console.log('Declined event:', eventId);
-            setIsActivityDetailsModalOpen(false);
-          }}
+          showActions={false}
         />
       )}
     </div>
