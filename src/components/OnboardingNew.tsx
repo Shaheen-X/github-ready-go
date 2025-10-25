@@ -11,6 +11,7 @@ import { Checkbox } from './ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { ChoiceButton } from './ChoiceButton';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { useProfileDB } from '@/hooks/useProfileDB';
 
 interface OnboardingProps {
   onComplete: () => void;
@@ -85,6 +86,9 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   
   // State for remember me checkbox
   const [rememberMe, setRememberMe] = useState(true);
+  
+  // Profile database hook
+  const { completeOnboarding } = useProfileDB();
   
   // Sliding images for landing page - using fresh Unsplash URLs
   const landingImages = [
@@ -388,6 +392,33 @@ export function Onboarding({ onComplete }: OnboardingProps) {
         } else if (currentStep < totalSteps - 1) {
           setCurrentStep(currentStep + 1);
         } else {
+          // Save profile data before completing
+          const birthDate = formData.birthdayYear && formData.birthdayMonth && formData.birthdayDay
+            ? `${formData.birthdayYear}-${formData.birthdayMonth.padStart(2, '0')}-${formData.birthdayDay.padStart(2, '0')}`
+            : null;
+
+          completeOnboarding({
+            name: formData.firstName,
+            date_of_birth: birthDate,
+            gender: formData.gender === 'other' ? formData.customGender : formData.gender,
+            interests: formData.selectedActivities,
+            skill_level: formData.activityLevel,
+            preferences: {
+              goals: formData.goals,
+              personality: formData.personalityTraits,
+              vibe: formData.vibePreference,
+              punctuality: formData.punctuality,
+              availableDays: formData.availableDays,
+              availableTimes: formData.availableTimes,
+              preferredDistance: formData.preferredDistance[0],
+              isGlobal: formData.isGlobal,
+              genderPreference: formData.genderPreference,
+              ageRange: formData.ageRange,
+              teamPreferences: formData.teamPreferences,
+              shareContacts: formData.shareContacts,
+              allowLocation: formData.allowLocation,
+            },
+          });
           setCurrentFlow('complete');
         }
       } else if (currentFlow === 'complete') {
