@@ -25,10 +25,12 @@ import { ChatPage } from '@/pages/ChatPage';
 import { ProfileViewPage } from '@/pages/ProfileViewPage';
 import { AuthPage } from '@/pages/AuthPage';
 import NotFound from '@/pages/NotFound';
-import { CalendarEventsProvider } from '@/context/calendar-events-context';
+import { CalendarEventsProvider, useCalendarEvents, createEventFromInput } from '@/context/calendar-events-context';
 import { ChatProvider } from '@/context/ChatContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
+import type { NewEventInput } from '@/types/calendar';
 import { toast } from 'sonner';
 
 const queryClient = new QueryClient();
@@ -45,6 +47,8 @@ function AppContent() {
   const [createdEventData, setCreatedEventData] = useState<any>(null);
   const [createdPairingData, setCreatedPairingData] = useState<any>(null);
   const { signOut } = useAuth();
+  const { addEvents } = useCalendarEvents();
+  const { createEvent } = useCalendarEventsDB();
 
   const handleOnboardingComplete = () => setShowOnboarding(false);
 
@@ -60,6 +64,38 @@ function AppContent() {
   const handleChooseGroup = () => { setIsCreateEventChooserOpen(false); setIsCreateGroupEventModalOpen(true); };
 
   const handleCreatePairing = (pairingData: any) => {
+    const attendees = (pairingData.selectedBuddies || []).map((buddy: any) => ({
+      id: buddy.id,
+      name: buddy.name,
+      avatar: buddy.avatar,
+      status: 'pending' as const
+    }));
+
+    const date: Date = pairingData.hasCustomDateTime
+      ? new Date(`${pairingData.customDate}T${pairingData.customTime}`)
+      : new Date();
+
+    const time: string = pairingData.hasCustomDateTime ? pairingData.customTime : '09:00';
+
+    const eventInput: NewEventInput = {
+      title: pairingData.title,
+      type: 'one-to-one',
+      date,
+      time,
+      location: pairingData.location || '',
+      description: pairingData.description || '',
+      attendees,
+      maxParticipants: 2,
+      tags: pairingData.activity ? [pairingData.activity] : [],
+    };
+
+    // Save to DB
+    createEvent(eventInput);
+
+    // Optimistic local add for immediate UI
+    const localEvent = createEventFromInput(eventInput, `pairing-${Date.now()}`);
+    addEvents([localEvent]);
+
     setIsCreatePairingModalOpen(false);
     setCreatedPairingData(pairingData);
     setIsPairingCreatedModalOpen(true);
@@ -75,6 +111,35 @@ function AppContent() {
   };
 
   const handleCreateGroupEvent = (eventData: any) => {
+    const attendees = (eventData.selectedBuddies || []).map((buddy: any) => ({
+      id: buddy.id,
+      name: buddy.name,
+      avatar: buddy.avatar,
+      status: 'pending' as const
+    }));
+
+    const date = new Date(`${eventData.date}T${eventData.time}`);
+
+    const eventInput: NewEventInput = {
+      title: eventData.eventName,
+      type: 'group',
+      date,
+      time: eventData.time,
+      location: eventData.location || '',
+      description: eventData.description || '',
+      attendees,
+      maxParticipants: eventData.maxParticipants ? parseInt(eventData.maxParticipants) : 0,
+      tags: eventData.activity ? [eventData.activity] : [],
+      image: eventData.selectedImage || eventData.image,
+    };
+
+    // Save to DB
+    createEvent(eventInput);
+
+    // Optimistic local add for immediate UI
+    const localEvent = createEventFromInput(eventInput, `event-${Date.now()}`);
+    addEvents([localEvent]);
+
     setIsCreateGroupEventModalOpen(false);
     const enhancedEventData = { ...eventData, isPrivate: eventData.visibility === 'private', creator: 'You' };
     setCreatedEventData(enhancedEventData);

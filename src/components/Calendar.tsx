@@ -95,8 +95,12 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
     setHighlightedDate,
     updateEvent: contextUpdateEvent,
     deleteEvent: contextDeleteEvent,
+    events: contextEvents,
   } = useCalendarEvents();
-  const { events, updateEvent: dbUpdateEvent, deleteEvent: dbDeleteEvent } = useCalendarEventsDB();
+  const { events: dbEvents, updateEvent: dbUpdateEvent, deleteEvent: dbDeleteEvent } = useCalendarEventsDB();
+  
+  // Merge DB events with local context (deduped)
+  const events = dedupeEvents(dbEvents, contextEvents);
   const isMobile = useIsMobile();
   const dialogSurface: DialogSurface = isMobile ? 'sheet' : 'dialog';
 

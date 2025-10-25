@@ -78,15 +78,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "activities_host_id_fkey"
-            columns: ["host_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       activityplaces: {
         Row: {
@@ -152,15 +144,7 @@ export type Database = {
           usage_id?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "appusages_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       bookings: {
         Row: {
@@ -196,59 +180,7 @@ export type Database = {
           start_time?: string | null
           status?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "bookings_booked_by_id_fkey"
-            columns: ["booked_by_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      businesses: {
-        Row: {
-          business_id: string
-          business_type: string | null
-          business_type_detail: string | null
-          contact_info: Json | null
-          linked_user_id: string | null
-          location_id: string | null
-          name: string | null
-          opening_hours: Json | null
-          rating: number | null
-        }
-        Insert: {
-          business_id: string
-          business_type?: string | null
-          business_type_detail?: string | null
-          contact_info?: Json | null
-          linked_user_id?: string | null
-          location_id?: string | null
-          name?: string | null
-          opening_hours?: Json | null
-          rating?: number | null
-        }
-        Update: {
-          business_id?: string
-          business_type?: string | null
-          business_type_detail?: string | null
-          contact_info?: Json | null
-          linked_user_id?: string | null
-          location_id?: string | null
-          name?: string | null
-          opening_hours?: Json | null
-          rating?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "businesses_linked_user_id_fkey"
-            columns: ["linked_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       calendarentries: {
         Row: {
@@ -302,91 +234,6 @@ export type Database = {
           is_group_calendar?: boolean | null
           owner_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "calendars_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      coaches: {
-        Row: {
-          certifications: Json | null
-          coach_id: string
-          expertise: string | null
-          languages_spoken: Json | null
-          location: Json | null
-          price_per_hour: number | null
-          profile_description: string | null
-          ratings: number | null
-          user_id: string | null
-          verified_status: boolean | null
-        }
-        Insert: {
-          certifications?: Json | null
-          coach_id: string
-          expertise?: string | null
-          languages_spoken?: Json | null
-          location?: Json | null
-          price_per_hour?: number | null
-          profile_description?: string | null
-          ratings?: number | null
-          user_id?: string | null
-          verified_status?: boolean | null
-        }
-        Update: {
-          certifications?: Json | null
-          coach_id?: string
-          expertise?: string | null
-          languages_spoken?: Json | null
-          location?: Json | null
-          price_per_hour?: number | null
-          profile_description?: string | null
-          ratings?: number | null
-          user_id?: string | null
-          verified_status?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "coaches_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      ecommerceproducts: {
-        Row: {
-          affiliate_link: string | null
-          available_stock: number | null
-          brand: string | null
-          category: string | null
-          name: string | null
-          price: number | null
-          product_id: string
-        }
-        Insert: {
-          affiliate_link?: string | null
-          available_stock?: number | null
-          brand?: string | null
-          category?: string | null
-          name?: string | null
-          price?: number | null
-          product_id: string
-        }
-        Update: {
-          affiliate_link?: string | null
-          available_stock?: number | null
-          brand?: string | null
-          category?: string | null
-          name?: string | null
-          price?: number | null
-          product_id?: string
-        }
         Relationships: []
       }
       events: {
@@ -423,15 +270,7 @@ export type Database = {
           title?: string | null
           type?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "events_organizer_id_fkey"
-            columns: ["organizer_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       feedback: {
         Row: {
@@ -464,22 +303,7 @@ export type Database = {
           place_id?: string | null
           rating?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "feedback_coach_id_fkey"
-            columns: ["coach_id"]
-            isOneToOne: false
-            referencedRelation: "coaches"
-            referencedColumns: ["coach_id"]
-          },
-          {
-            foreignKeyName: "feedback_given_by_user_id_fkey"
-            columns: ["given_by_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       groupmembers: {
         Row: {
@@ -511,13 +335,6 @@ export type Database = {
             referencedRelation: "groups"
             referencedColumns: ["group_id"]
           },
-          {
-            foreignKeyName: "groupmembers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       groups: {
@@ -548,15 +365,7 @@ export type Database = {
           privacy_type?: string | null
           sport_type?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "groups_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       matches: {
         Row: {
@@ -589,22 +398,7 @@ export type Database = {
           user1_id?: string | null
           user2_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "matches_user1_id_fkey"
-            columns: ["user1_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "matches_user2_id_fkey"
-            columns: ["user2_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       messages: {
         Row: {
@@ -647,20 +441,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "groups"
             referencedColumns: ["group_id"]
-          },
-          {
-            foreignKeyName: "messages_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -706,13 +486,6 @@ export type Database = {
             referencedRelation: "activities"
             referencedColumns: ["activity_id"]
           },
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       orders: {
@@ -743,22 +516,7 @@ export type Database = {
           total_amount?: number | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "orders_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "ecommerceproducts"
-            referencedColumns: ["product_id"]
-          },
-          {
-            foreignKeyName: "orders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -766,6 +524,7 @@ export type Database = {
           bio: string | null
           created_at: string | null
           date_of_birth: string | null
+          email: string | null
           gender: string | null
           id: string
           interests: string[] | null
@@ -784,6 +543,7 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          email?: string | null
           gender?: string | null
           id: string
           interests?: string[] | null
@@ -802,6 +562,7 @@ export type Database = {
           bio?: string | null
           created_at?: string | null
           date_of_birth?: string | null
+          email?: string | null
           gender?: string | null
           id?: string
           interests?: string[] | null
@@ -848,15 +609,7 @@ export type Database = {
           subscription_id?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       transactions: {
         Row: {
@@ -901,87 +654,6 @@ export type Database = {
           type?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_coach_id_fkey"
-            columns: ["coach_id"]
-            isOneToOne: false
-            referencedRelation: "coaches"
-            referencedColumns: ["coach_id"]
-          },
-          {
-            foreignKeyName: "transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      users: {
-        Row: {
-          account_status: string | null
-          availability: Json | null
-          churn_risk: number | null
-          created_at: string | null
-          date_of_birth: string | null
-          email: string | null
-          friends: string[] | null
-          gender: string | null
-          last_login_at: string | null
-          location: Json | null
-          name: string | null
-          password_hash: string | null
-          preferences: Json | null
-          profile_picture_url: string | null
-          role: string | null
-          skill_level: string | null
-          subscription_id: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          account_status?: string | null
-          availability?: Json | null
-          churn_risk?: number | null
-          created_at?: string | null
-          date_of_birth?: string | null
-          email?: string | null
-          friends?: string[] | null
-          gender?: string | null
-          last_login_at?: string | null
-          location?: Json | null
-          name?: string | null
-          password_hash?: string | null
-          preferences?: Json | null
-          profile_picture_url?: string | null
-          role?: string | null
-          skill_level?: string | null
-          subscription_id?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          account_status?: string | null
-          availability?: Json | null
-          churn_risk?: number | null
-          created_at?: string | null
-          date_of_birth?: string | null
-          email?: string | null
-          friends?: string[] | null
-          gender?: string | null
-          last_login_at?: string | null
-          location?: Json | null
-          name?: string | null
-          password_hash?: string | null
-          preferences?: Json | null
-          profile_picture_url?: string | null
-          role?: string | null
-          skill_level?: string | null
-          subscription_id?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
         Relationships: []
       }
     }
@@ -989,7 +661,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      sync_profile_email: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
