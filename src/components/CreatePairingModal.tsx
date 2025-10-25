@@ -133,8 +133,6 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
     repeatEndDate: '',
     hasRepeat: false,
     description: '',
-    flexibleTime: false,
-    timeFlexibility: ''
   });
 
   const [selectedBuddies, setSelectedBuddies] = useState<Buddy[]>([]);
@@ -386,9 +384,6 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
       ...formData,
       activity: formData.activity === 'Other' ? formData.customActivity : formData.activity,
       invitedBuddies: selectedBuddies.map(b => b.id),
-      timeStatus: formData.flexibleTime ? 'flexible' as const : 
-                 (formData.hasCustomDateTime || formData.availableTimes.length > 0) ? 'confirmed' as const : 'flexible' as const,
-      timeFlexibility: formData.flexibleTime ? formData.timeFlexibility : undefined,
       createdAt: new Date().toISOString()
     };
     onCreatePairing(pairingData);
@@ -409,8 +404,6 @@ export const CreatePairingModal: React.FC<CreatePairingModalProps> = ({
       repeatEndDate: '',
       hasRepeat: false,
       description: '',
-      flexibleTime: false,
-      timeFlexibility: ''
     });
     setSelectedBuddies([]);
     setInviteSearchQuery('');

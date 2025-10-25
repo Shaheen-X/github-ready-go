@@ -30,8 +30,6 @@ interface PairingCreatedModalProps {
     hasRepeat?: boolean;
     description?: string;
     invitedBuddies?: string[];
-    timeStatus?: 'flexible' | 'proposed' | 'confirmed';
-    timeFlexibility?: string;
   };
 }
 
@@ -356,23 +354,6 @@ export const PairingCreatedModal: React.FC<PairingCreatedModalProps> = ({
 
                   {/* Pairing Details */}
                   <div className="space-y-3">
-                    {/* Time Flexibility Indicator */}
-                    {pairingData.timeStatus === 'flexible' && (
-                      <div className="flex items-start gap-3">
-                        <Clock className="w-4 h-4 text-amber-800 mt-0.5 shrink-0" />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="choice-chip bg-amber-100 text-amber-700 text-xs px-3 py-1">
-                              Time TBD
-                            </span>
-                          </div>
-                          {pairingData.timeFlexibility && (
-                            <p className="text-xs text-amber-700 mt-1">{pairingData.timeFlexibility}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
                     {/* Days */}
                     {pairingData.availableDays && pairingData.availableDays.length > 0 && (
                       <div className="flex items-start gap-3">

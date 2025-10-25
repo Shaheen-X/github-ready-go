@@ -21,8 +21,6 @@ interface EventCreatedModalProps {
     selectedImage: string;
     isPrivate?: boolean;
     creator?: string;
-    timeStatus?: 'flexible' | 'proposed' | 'confirmed';
-    timeFlexibility?: string;
   };
 }
 
@@ -301,21 +299,9 @@ export const EventCreatedModal: React.FC<EventCreatedModalProps> = ({
                 
                 {/* Event Details */}
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm text-gray-600">
-                      📅 {eventData.date} at {eventData.time}
-                    </p>
-                    {eventData.timeStatus === 'flexible' && (
-                      <span className="choice-chip bg-amber-100 text-amber-700 text-xs px-2 py-0.5">
-                        Time TBD
-                      </span>
-                    )}
-                  </div>
-                  {eventData.timeStatus === 'flexible' && eventData.timeFlexibility && (
-                    <p className="text-xs text-gray-500">
-                      ⏰ {eventData.timeFlexibility}
-                    </p>
-                  )}
+                  <p className="text-sm text-gray-600">
+                    📅 {eventData.date} at {eventData.time}
+                  </p>
                   <p className="text-sm text-gray-600">
                     📍 {eventData.location || 'Location to be announced'}
                   </p>

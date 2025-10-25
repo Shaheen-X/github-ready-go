@@ -119,10 +119,12 @@ export function Calendar({ onNavigate: _onNavigate }: CalendarProps = {}) {
   }, [isEventViewerOpen]);
 
   const upcomingEvents = useMemo(
-    () =>
-      filteredEvents
-        .filter((event) => event.status === 'upcoming')
-        .sort((a, b) => parseEventDateTime(a) - parseEventDateTime(b)),
+    () => {
+      const now = new Date().getTime();
+      return filteredEvents
+        .filter((event) => event.status === 'upcoming' && parseEventDateTime(event) >= now)
+        .sort((a, b) => parseEventDateTime(a) - parseEventDateTime(b));
+    },
     [filteredEvents],
   );
 

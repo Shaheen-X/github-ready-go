@@ -297,8 +297,6 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
     maxParticipants: '',
     description: '',
     visibility: 'public',
-    flexibleTime: false,
-    timeFlexibility: ''
   });
   
   const [selectedBuddies, setSelectedBuddies] = useState<string[]>([]);
@@ -326,16 +324,12 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
           maxParticipants: initialData.maxParticipants?.toString() || '',
           description: initialData.description || '',
           visibility: initialData.isPrivate ? 'private' : 'public',
-          flexibleTime: false,
-          timeFlexibility: ''
         }));
       } else {
         setFormData(prev => ({
           ...prev,
           date: getTodayDate(),
           time: getNextHour(),
-          flexibleTime: false,
-          timeFlexibility: ''
         }));
       }
     }
@@ -454,8 +448,6 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
       invitedBuddies: selectedBuddies,
       isPrivate: formData.visibility === 'private',
       creator: 'You',
-      timeStatus: formData.flexibleTime ? 'flexible' as const : 'confirmed' as const,
-      timeFlexibility: formData.flexibleTime ? formData.timeFlexibility : undefined,
       createdAt: new Date().toISOString()
     };
     onCreateEvent(eventData);
@@ -478,8 +470,6 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
       maxParticipants: '',
       description: '',
       visibility: 'public',
-      flexibleTime: false,
-      timeFlexibility: ''
     });
     setSelectedBuddies([]);
     setSelectedImage(defaultEventImage);
@@ -748,8 +738,7 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                    disabled={formData.flexibleTime}
-                    className="glass-card border-white/20 rounded-xl h-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50"
+                    className="glass-card border-white/20 rounded-xl h-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>
                 <div className="space-y-2">
@@ -763,37 +752,6 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
                   />
                 </div>
               </div>
-
-              {/* Flexible Time Toggle */}
-              <div className="flex items-center justify-between p-4 glass-card border-white/20 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <Zap className="w-5 h-5 text-amber-500" />
-                  <div>
-                    <p className="text-sm font-semibold">Flexible Time</p>
-                    <p className="text-xs text-muted-foreground">Time can be decided later with participants</p>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={formData.flexibleTime}
-                  onChange={(e) => setFormData(prev => ({ ...prev, flexibleTime: e.target.checked }))}
-                  className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Time Flexibility Input */}
-              {formData.flexibleTime && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">When would you prefer? (Optional)</Label>
-                  <Input
-                    type="text"
-                    placeholder="e.g., Weekends, Weekday Evenings, Anytime"
-                    value={formData.timeFlexibility}
-                    onChange={(e) => setFormData(prev => ({ ...prev, timeFlexibility: e.target.value }))}
-                    className="glass-card border-white/20 rounded-xl h-12 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
-                </div>
-              )}
             </div>
 
             {/* Optional Section Header */}
@@ -829,15 +787,14 @@ export const CreateGroupEventModal: React.FC<CreateGroupEventModalProps> = ({
                       onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
                       className="glass-card border-white/20 rounded-lg h-10 text-sm"
                     />
-                    <div className="h-10">
-                      <FunTimePicker
-                        value={formData.endTime}
-                        onChange={(endTime) => setFormData(prev => ({ ...prev, endTime }))}
-                      />
-                    </div>
+                  <div className="h-10">
+                    <FunTimePicker
+                      value={formData.endTime}
+                      onChange={(endTime) => setFormData(prev => ({ ...prev, endTime }))}
+                    />
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Repeat */}
               <div className="space-y-2">

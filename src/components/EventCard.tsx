@@ -64,7 +64,9 @@ export const EventCard = ({ event, onClick, variant = 'default', onStartChat: _o
           <h3 className="text-sm font-bold text-white mb-1 line-clamp-1">{event.title}</h3>
           <div className="flex items-center gap-2 text-xs text-white/90 mb-1">
             <Clock className="h-3 w-3" />
-            <span>{event.time}</span>
+            <span>
+              {event.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} • {event.time}
+            </span>
             {event.endTime && <span>- {event.endTime}</span>}
           </div>
           <div className="flex items-center gap-2 text-xs text-white/90 mb-1">
