@@ -48,6 +48,20 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOp
   const userAttendee = event?.attendees.find(a => a.name === 'You');
   const isPendingInvite = userAttendee?.status === 'pending';
 
+  const handleOpenChat = () => {
+    if (!event) return;
+    
+    // Check if we're already on the chat page for this event
+    const currentPath = window.location.pathname;
+    if (currentPath === `/chat/${event.id}`) {
+      // Just close the modal if we're already on this chat
+      onOpenChange?.(false);
+    } else {
+      // Navigate to the chat
+      navigate(`/chat/${event.id}`);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-0 max-w-lg max-h-[95vh] p-0">
@@ -156,9 +170,7 @@ export const EventDetailsModal: React.FC<EventDetailsModalProps> = ({ open, onOp
                 ) : (
                   /* Show Chat button for accepted events */
                   <Button 
-                    onClick={() => {
-                      navigate(`/chat/${event.id}`);
-                    }} 
+                    onClick={handleOpenChat} 
                     className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full"
                   >
                     <MessageCircle size={16} className="mr-2" /> 
