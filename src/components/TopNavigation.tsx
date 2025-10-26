@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { UserPlus, Copy, Share, X, QrCode, MessageCircle, Bell } from 'lucide-react';
+import { UserPlus, Copy, Share, X, QrCode, MessageCircle, Bell, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 interface TopNavigationProps {
   onNavigate?: (tab: string) => void;
@@ -73,8 +74,24 @@ export function TopNavigation({ onNavigate }: TopNavigationProps) {
             <span className="font-semibold text-slate-700">ConnectSphere</span>
           </div>
 
-          {/* Floating Action Menu */}
-          <div className="relative z-50">
+          {/* Right Actions */}
+          <div className="flex items-center gap-3">
+            {/* Profile Avatar Button */}
+            <Button
+              onClick={() => onNavigate?.('profile')}
+              variant="ghost"
+              className="h-10 w-10 rounded-full p-0 hover:ring-2 hover:ring-blue-400 transition-all"
+            >
+              <Avatar className="h-10 w-10">
+                <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face" />
+                <AvatarFallback className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white">
+                  <User size={18} />
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+
+            {/* Floating Action Menu */}
+            <div className="relative z-50">
             {/* Quick Action Bubbles */}
             {showInviteOptions && (
               <div className="absolute top-14 right-0 space-y-2 z-[60] animate-in fade-in-0 slide-in-from-top-2 duration-200">
@@ -112,6 +129,7 @@ export function TopNavigation({ onNavigate }: TopNavigationProps) {
             >
               {showInviteOptions ? <X size={20} /> : <UserPlus size={20} />}
             </Button>
+            </div>
           </div>
         </div>
       </div>

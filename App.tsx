@@ -5,12 +5,14 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Navigation } from '@/components/Navigation';
+import { TopNavigation } from '@/components/TopNavigation';
 import { Home } from '@/components/Home';
 import { Search } from '@/components/Search';
 import { Messages } from '@/components/Messages';
 import { Calendar } from '@/components/Calendar';
 import { Groups } from '@/components/Groups';
 import { ProfileNew } from '@/components/ProfileNew';
+import { OneToOneConnections } from '@/components/OneToOneConnections';
 import { Settings } from '@/components/SettingsTemp';
 import { Notifications } from '@/components/Notifications';
 import { Onboarding } from '@/components/OnboardingNew';
@@ -141,6 +143,7 @@ function AppContent() {
       case 'messages': return <Messages />;
       case 'calendar': return <Calendar onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} onCreatePairing={handleChoosePairing} onCreateGroup={handleChooseGroup} />;
       case 'groups': return <Groups />;
+      case 'connection': return <OneToOneConnections />;
       case 'profile': return <ProfileNew onNavigate={setActiveTab} />;
       case 'settings': return <Settings onNavigate={setActiveTab} onSignOut={handleSignOut} />;
       case 'notifications': return <Notifications onNavigate={setActiveTab} />;
@@ -171,7 +174,8 @@ function AppContent() {
       <Route path="/*" element={
         <ProtectedRoute>
           <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-gray-100">
-            <main className="flex-1 overflow-hidden">{renderContent()}</main>
+            <TopNavigation onNavigate={setActiveTab} />
+            <main className="flex-1 overflow-hidden pt-20">{renderContent()}</main>
             <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
             <InviteFloatingAction onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} />
 

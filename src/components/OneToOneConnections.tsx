@@ -85,7 +85,7 @@ export function OneToOneConnections() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-gray-100">
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-gray-100 pb-20">
       {/* Header */}
       <div className="px-4 pt-6 pb-4">
         <div className="flex items-center justify-between mb-3">

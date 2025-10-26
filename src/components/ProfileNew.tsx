@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Edit3, Trophy, Users, Calendar, MapPin, Star, Target, Zap, Camera, QrCode, Copy, Check, Plus, X } from 'lucide-react';
+import { Settings, Edit3, Trophy, Users, Calendar, MapPin, Star, Target, Zap, Camera, QrCode, Copy, Check, Plus, X, ArrowLeft } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -240,12 +240,22 @@ export function ProfileNew({ onNavigate }: ProfileProps = { onNavigate: () => {}
   };
 
   return (
-    <div className="h-full bg-gradient-to-br from-slate-50 to-gray-100 pb-20 overflow-y-auto">
+    <div className="h-full bg-gradient-to-br from-slate-50 to-gray-100 pb-20 pt-20 overflow-y-auto">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-section-header">Profile</h1>
-          <Button 
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onNavigate?.('home')}
+              className="rounded-full"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-section-header">Profile</h1>
+          </div>
+          <Button
             variant="outline" 
             size="sm" 
             className="choice-chip"
