@@ -22,7 +22,7 @@ export const EventCard = ({ event, onClick, variant = 'default', onStartChat: _o
     >
       {/* Event Image with Compact Ratio */}
       <div className="relative w-full" style={{ aspectRatio: variant === 'compact' ? '2/1' : '3/1.5' }}>
-        {event.image ? (
+        {event.type === 'group' && event.image ? (
           <ImageWithFallback
             src={event.image}
             alt={event.title}
