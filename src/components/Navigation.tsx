@@ -11,7 +11,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
     { id: 'search', icon: Search, label: 'Search' },
     { id: 'messages', icon: MessageCircle, label: 'Messages' },
     { id: 'calendar', icon: Calendar, label: 'Calendar' },
-    { id: 'connection', icon: User, label: 'Connect' },
+    { id: 'profile', icon: User, label: 'Profile' },
   ];
 
   const handleTabClick = (tab: typeof tabs[0]) => {
