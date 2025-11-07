@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Plus, Calendar, MapPin, Users, Loader2 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from './ui/button';

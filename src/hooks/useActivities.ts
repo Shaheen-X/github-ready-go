@@ -26,15 +26,6 @@ export const useActivities = () => {
 
       if (error) throw error;
 
-      // Get all activity IDs
-      const activityIds = (data || []).map(a => a.activity_id);
-      
-      // Fetch participants for all activities
-      const { data: participants } = await supabase
-        .from('activity_participants')
-        .select('activity_id, user_id, status')
-        .in('activity_id', activityIds);
-
       // Fetch host profiles
       const hostIds = [...new Set((data || []).map(a => a.host_id).filter((id): id is string => id !== null))];
       const { data: hosts } = await supabase
