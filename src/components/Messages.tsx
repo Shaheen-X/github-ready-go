@@ -5,11 +5,11 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { useChat } from '@/context/ChatContext';
+import { useMessagesDB } from '@/hooks/useMessagesDB';
 
 export function Messages() {
   const navigate = useNavigate();
-  const { conversations } = useChat();
+  const { conversations } = useMessagesDB();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredConversations = conversations.filter(conv =>

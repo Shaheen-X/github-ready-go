@@ -6,8 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useCalendarEvents } from '@/context/calendar-events-context';
 import { format } from 'date-fns';
-import { useChat } from '@/context/ChatContext';
-import { type Message } from '@/types/chat';
+import { useMessagesDB } from '@/hooks/useMessagesDB';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +27,8 @@ export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { getEventById } = useCalendarEvents();
-  const { conversations, getMessages, sendMessage, deleteConversation, createConversation } = useChat();
+  const { useConversationMessages, sendMessage } = useMessagesDB();
+  const { data: messages = [] } = useConversationMessages(eventId || '');
   const [newMessage, setNewMessage] = useState('');
   const [showSharedMedia, setShowSharedMedia] = useState(false);
   const [sharedMediaType, setSharedMediaType] = useState<'images' | 'files'>('images');
@@ -58,69 +58,33 @@ export function ChatPage() {
     user.name.toLowerCase().includes(inviteSearchQuery.toLowerCase()) ||
     user.username.toLowerCase().includes(inviteSearchQuery.toLowerCase())
   );
-  
-  // Get messages directly from context - this makes it reactive
-  const messages = eventId ? getMessages(eventId) : [];
-
-  // Create conversation when opening chat for the first time
-  useEffect(() => {
-    if (event && eventId) {
-      createConversation(eventId, event.title, event.image, event.activity);
-    }
-  }, [event, eventId, createConversation]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !eventId || !event) return;
+    if (!newMessage.trim() || !eventId) return;
 
-    const message: Message = {
-      id: Date.now().toString(),
-      sender: 'You',
-      text: newMessage,
-      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      isOwn: true
-    };
-
-    // Update context (which auto-saves to localStorage and triggers re-render)
-    sendMessage(eventId, message, event.title, event.image, event.activity);
-    
+    sendMessage({ eventId, text: newMessage });
     setNewMessage('');
   };
 
   const handleDeleteConversation = () => {
     if (!eventId) return;
-    deleteConversation(eventId);
+    // TODO: Implement delete conversation in database
     navigate('/messages');
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (!files || files.length === 0 || !eventId) return;
 
-    // For demo purposes, create mock URLs (in production, upload to server/storage)
     const file = files[0];
-    const mockUrl = URL.createObjectURL(file);
     const isImage = file.type.startsWith('image/');
-
-    const message: Message = {
-      id: Date.now().toString(),
-      sender: 'You',
-      text: isImage ? '📷 Image' : `📎 ${file.name}`,
-      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      isOwn: true,
-      attachments: [{
-        type: isImage ? 'image' : 'file',
-        url: mockUrl,
-        name: file.name
-      }]
-    };
+    const text = isImage ? '📷 Image' : `📎 ${file.name}`;
     
-    if (eventId && event) {
-      sendMessage(eventId, message, event.title, event.image, event.activity);
-    }
+    sendMessage({ eventId, text });
   };
 
   if (!event) {
@@ -673,44 +637,15 @@ export function ChatPage() {
             </div>
             <div className="p-6">
               {sharedMediaType === 'images' ? (
-                conversations.find(c => c.eventId === eventId)?.sharedImages.length ? (
-                  <div className="grid grid-cols-3 gap-3">
-                    {conversations.find(c => c.eventId === eventId)?.sharedImages.map((url, idx) => (
-                      <img 
-                        key={idx} 
-                        src={url} 
-                        alt="" 
-                        className="w-full h-32 object-cover rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer" 
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No shared images yet</p>
-                  </div>
-                )
+                <div className="text-center py-12">
+                  <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No shared images yet</p>
+                </div>
               ) : (
-                conversations.find(c => c.eventId === eventId)?.sharedFiles.length ? (
-                  <div className="space-y-2">
-                    {conversations.find(c => c.eventId === eventId)?.sharedFiles.map((url, idx) => (
-                      <a 
-                        key={idx}
-                        href={url} 
-                        download
-                        className="flex items-center gap-3 p-4 glass-card hover:scale-[1.02] transition-all"
-                      >
-                        <FileText size={24} className="text-blue-600" />
-                        <span className="text-foreground">File {idx + 1}</span>
-                      </a>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No shared files yet</p>
-                  </div>
-                )
+                <div className="text-center py-12">
+                  <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No shared files yet</p>
+                </div>
               )}
             </div>
           </div>
