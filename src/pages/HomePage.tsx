@@ -1,4 +1,13 @@
+import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
+import { format, isFuture, startOfDay } from 'date-fns';
+
 export function HomePage() {
+  const { events } = useCalendarEventsDB();
+  
+  const upcomingEvents = events.filter(event => 
+    isFuture(startOfDay(event.date)) || format(event.date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+  ).slice(0, 3);
+
   return (
     <div className="h-full bg-gradient-to-br from-slate-50 to-gray-100 overflow-y-auto pb-20">
       <div className="p-6">
@@ -21,7 +30,7 @@ export function HomePage() {
               <div className="text-xs text-gray-600">Connections</div>
             </div>
             <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-              <div className="text-2xl font-bold text-blue-600">24</div>
+              <div className="text-2xl font-bold text-blue-600">{events.length}</div>
               <div className="text-xs text-gray-600">Activities</div>
             </div>
             <div className="bg-white rounded-xl p-4 text-center shadow-sm">
@@ -33,17 +42,23 @@ export function HomePage() {
           {/* Upcoming Events */}
           <div className="bg-white rounded-2xl p-6 shadow-sm">
             <h3 className="font-semibold mb-4">Upcoming Events</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
-                  15
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">Morning Run</p>
-                  <p className="text-sm text-gray-600">07:00 AM • Central Park</p>
-                </div>
+            {upcomingEvents.length === 0 ? (
+              <p className="text-gray-500 text-center py-4">No upcoming events</p>
+            ) : (
+              <div className="space-y-3">
+                {upcomingEvents.map(event => (
+                  <div key={event.id} className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                    <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
+                      {format(event.date, 'd')}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{event.title}</p>
+                      <p className="text-sm text-gray-600">{event.time} • {event.location}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

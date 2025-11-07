@@ -8,7 +8,6 @@ import NearbyActivitiesBlock from './NearbyActivitiesBlock';
 import CreateActivityPrompt from './CreateActivityPrompt';
 import EventSummaryCard from './EventSummaryCard';
 import CreateActivityModal from './CreateActivityModal';
-import { useCalendarEvents, createEventFromInput } from '@/context/calendar-events-context';
 import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
 import type { EventAttendee, NewEventInput } from '@/types/calendar';
 
@@ -22,8 +21,7 @@ export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
   const [userXP] = useState(1250);
   const [nextLevelXP] = useState(1500);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { addEvents, events } = useCalendarEvents();
-  const { createEvent } = useCalendarEventsDB();
+  const { createEvent, events } = useCalendarEventsDB();
 
   const handleViewAllEvents = () => {
     onNavigate?.('calendar');
@@ -63,10 +61,6 @@ export function Home({ onNavigate }: HomeProps = { onNavigate: () => {} }) {
 
     // Save to database
     createEvent(eventInput);
-    
-    // Also add to local context for immediate UI update
-    const newEvent = createEventFromInput(eventInput, `event-${Date.now()}`);
-    addEvents([newEvent]);
     
     setIsCreateModalOpen(false);
   };

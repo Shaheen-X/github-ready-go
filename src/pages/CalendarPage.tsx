@@ -3,13 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
 import { useState } from 'react';
-import { useCalendarEvents } from '@/context/calendar-events-context';
+import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
 import { format, isPast, isFuture, startOfDay } from 'date-fns';
 
 export function CalendarPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const { events } = useCalendarEvents();
+  const { events } = useCalendarEventsDB();
 
   const allEvents = events.filter(event => 
     event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
