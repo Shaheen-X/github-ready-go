@@ -26,6 +26,22 @@ export const useActivities = () => {
 
       if (error) throw error;
 
+      // Get all activity IDs to fetch participants
+      const activityIds = (data || []).map(a => a.activity_id);
+      
+      // Fetch participants count for all activities
+      const { data: participantsData } = await supabase
+        .from('activity_participants')
+        .select('activity_id, user_id, status')
+        .in('activity_id', activityIds)
+        .eq('status', 'accepted');
+
+      // Create participants count map
+      const participantsMap = new Map<string, number>();
+      participantsData?.forEach(p => {
+        participantsMap.set(p.activity_id, (participantsMap.get(p.activity_id) || 0) + 1);
+      });
+
       // Fetch host profiles
       const hostIds = [...new Set((data || []).map(a => a.host_id).filter((id): id is string => id !== null))];
       const { data: hosts } = await supabase
@@ -66,7 +82,7 @@ export const useActivities = () => {
           }),
           location: activity.location_name || activity.place_id || 'TBD',
           description: activity.description || '',
-          attendees: [], // Simplified for now
+          attendees: Array(participantsMap.get(activity.activity_id) || 0).fill({ name: 'Participant' }),
           maxParticipants: activity.capacity || null,
           status: 'upcoming',
           tags: tags,

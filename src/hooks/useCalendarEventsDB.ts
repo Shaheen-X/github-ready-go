@@ -96,6 +96,7 @@ export function useCalendarEventsDB() {
           sport_type: eventInput.tags[0] || 'Activity',
           scheduled_datetime: formatLocalDateTime(eventInput.date),
           description: eventInput.description,
+          location_name: eventInput.location,
           host_id: user.id,
           capacity: eventInput.maxParticipants,
           status: 'active',

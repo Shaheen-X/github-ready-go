@@ -61,10 +61,26 @@ export function useActivityParticipants() {
     },
   });
 
+  // Check if user has joined activity
+  const checkParticipation = async (activityId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data } = await supabase
+      .from('activity_participants')
+      .select('id')
+      .eq('activity_id', activityId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    return !!data;
+  };
+
   return {
     joinActivity: joinActivity.mutate,
     leaveActivity: leaveActivity.mutate,
     isJoining: joinActivity.isPending,
     isLeaving: leaveActivity.isPending,
+    checkParticipation,
   };
 }

@@ -5,15 +5,38 @@ import { Badge } from './ui/badge';
 import { useActivities } from '@/hooks/useActivities';
 import { useActivityParticipants } from '@/hooks/useActivityParticipants';
 import { format } from 'date-fns';
+import { useState, useEffect } from 'react';
 
 export function Activities() {
   const { activities, loading } = useActivities();
-  const { joinActivity, isJoining } = useActivityParticipants();
+  const { joinActivity, leaveActivity, isJoining, isLeaving, checkParticipation } = useActivityParticipants();
+  const [participationStatus, setParticipationStatus] = useState<Record<string, boolean>>({});
 
   const filteredActivities = activities;
 
+  // Check participation status for all activities
+  useEffect(() => {
+    const checkAllParticipation = async () => {
+      const status: Record<string, boolean> = {};
+      for (const activity of activities) {
+        status[activity.id] = await checkParticipation(activity.id);
+      }
+      setParticipationStatus(status);
+    };
+    
+    if (activities.length > 0) {
+      checkAllParticipation();
+    }
+  }, [activities]);
+
   const handleJoinActivity = (activityId: string) => {
     joinActivity(activityId);
+    setParticipationStatus(prev => ({ ...prev, [activityId]: true }));
+  };
+
+  const handleLeaveActivity = (activityId: string) => {
+    leaveActivity(activityId);
+    setParticipationStatus(prev => ({ ...prev, [activityId]: false }));
   };
 
   if (loading) {
@@ -102,14 +125,26 @@ export function Activities() {
                         <p className="text-sm font-medium">{activity.hostName || 'Host'}</p>
                       </div>
                     </div>
-                    <Button 
-                      size="sm" 
-                      className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white"
-                      onClick={() => handleJoinActivity(activity.id)}
-                      disabled={isJoining}
-                    >
-                      {isJoining ? 'Joining...' : 'Join Activity'}
-                    </Button>
+                    {participationStatus[activity.id] ? (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="border-red-500 text-red-500 hover:bg-red-50"
+                        onClick={() => handleLeaveActivity(activity.id)}
+                        disabled={isLeaving}
+                      >
+                        {isLeaving ? 'Leaving...' : 'Leave'}
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white"
+                        onClick={() => handleJoinActivity(activity.id)}
+                        disabled={isJoining}
+                      >
+                        {isJoining ? 'Joining...' : 'Join Activity'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
