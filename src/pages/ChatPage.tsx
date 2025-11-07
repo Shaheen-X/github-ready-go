@@ -4,7 +4,7 @@ import { ArrowLeft, Phone, Video, MoreVertical, Send, Smile, Paperclip, Trash2, 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
-import { useCalendarEvents } from '@/context/calendar-events-context';
+import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
 import { format } from 'date-fns';
 import { useMessagesDB } from '@/hooks/useMessagesDB';
 import {
@@ -26,7 +26,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
-  const { getEventById } = useCalendarEvents();
+  const { events } = useCalendarEventsDB();
   const { useConversationMessages, sendMessage } = useMessagesDB();
   const { data: messages = [] } = useConversationMessages(eventId || '');
   const [newMessage, setNewMessage] = useState('');
@@ -50,7 +50,7 @@ export function ChatPage() {
     { id: '4', name: 'Emma Davis', username: '@emmad', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face' },
   ];
 
-  const event = eventId ? getEventById(eventId) : null;
+  const event = events.find(e => e.id === eventId);
   
   const inviteLink = event ? `https://connectsphere.app/event/${event.id}` : '';
 
