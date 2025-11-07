@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarEvent, NewEventInput } from '@/types/calendar';
 import { toast } from 'sonner';
@@ -55,6 +56,29 @@ export function useCalendarEventsDB() {
       }));
     },
   });
+
+  // Set up real-time subscription for activities
+  useEffect(() => {
+    const channel = supabase
+      .channel('activities-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activities'
+        },
+        () => {
+          // Invalidate and refetch events when any change occurs
+          queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Create new event
   const createEvent = useMutation({
