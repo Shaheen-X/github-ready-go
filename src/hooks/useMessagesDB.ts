@@ -17,27 +17,33 @@ export function useMessagesDB() {
       // Get all messages where user is sender or receiver
       const { data, error } = await supabase
         .from('messages')
-        .select('*')
+        .select(`
+          *,
+          activity:activities!messages_group_id_fkey(title, sport_type)
+        `)
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('timestamp', { ascending: false });
 
       if (error) throw error;
 
-      // Group messages by conversation (using group_id or creating pairwise conversation)
+      // Group messages by conversation
       const conversationsMap = new Map<string, Conversation>();
       
       data?.forEach((msg) => {
         const convId = msg.group_id || `dm-${msg.sender_id}-${msg.receiver_id}`;
         
         if (!conversationsMap.has(convId)) {
+          const activity = Array.isArray(msg.activity) ? msg.activity[0] : msg.activity;
+          
           conversationsMap.set(convId, {
             eventId: convId,
-            title: msg.group_id ? 'Group Chat' : 'Direct Message',
+            title: activity?.title || msg.group_id ? 'Group Chat' : 'Direct Message',
             lastMessage: msg.content || '',
             time: new Date(msg.timestamp || new Date()).toLocaleTimeString(),
             unreadCount: 0,
             sharedImages: [],
             sharedFiles: [],
+            activity: activity?.sport_type,
           });
         }
       });

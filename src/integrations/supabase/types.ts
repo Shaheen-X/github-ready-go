@@ -24,6 +24,7 @@ export type Database = {
           host_id: string | null
           is_group_activity: boolean | null
           is_public: boolean | null
+          location_name: string | null
           place_id: string | null
           proposed_times: Json | null
           recurrence_pattern: string | null
@@ -45,6 +46,7 @@ export type Database = {
           host_id?: string | null
           is_group_activity?: boolean | null
           is_public?: boolean | null
+          location_name?: string | null
           place_id?: string | null
           proposed_times?: Json | null
           recurrence_pattern?: string | null
@@ -66,6 +68,7 @@ export type Database = {
           host_id?: string | null
           is_group_activity?: boolean | null
           is_public?: boolean | null
+          location_name?: string | null
           place_id?: string | null
           proposed_times?: Json | null
           recurrence_pattern?: string | null
@@ -77,6 +80,30 @@ export type Database = {
           time_status?: string | null
           title?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      activity_participants: {
+        Row: {
+          activity_id: string
+          id: string
+          joined_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          id?: string
+          joined_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          id?: string
+          joined_at?: string
+          status?: string
+          user_id?: string
         }
         Relationships: []
       }

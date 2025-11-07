@@ -6,7 +6,6 @@ import Search from '@/components/Search';
 import { Messages } from '@/components/Messages';
 import { Calendar } from '@/components/Calendar';
 import { ProfileNew } from '@/components/ProfileNew';
-import { CalendarEventsProvider, useCalendarEvents, createEventFromInput } from '@/context/calendar-events-context';
 import { Navigation } from '@/components/Navigation';
 import { InviteFloatingAction } from '@/components/InviteFloatingAction';
 import CreatePairingModal from '@/components/CreatePairingModal';
@@ -30,8 +29,7 @@ const IndexContent = () => {
   const [createdEventData, setCreatedEventData] = useState<any>(null);
   const [editingPairing, setEditingPairing] = useState<any>(null);
   
-  const { addEvents, deleteEvent } = useCalendarEvents();
-  const { createEvent } = useCalendarEventsDB();
+  const { createEvent, deleteEvent } = useCalendarEventsDB();
 
   const handleNavigate = (tab: string) => {
     if (tab === 'create') {
@@ -76,14 +74,10 @@ const IndexContent = () => {
       tags: pairingData.activity ? [pairingData.activity] : [],
     };
 
-    // Save to DB
+    // Save to DB only
     createEvent(eventInput);
 
-    // Optimistic local add for immediate UI
-    const localEvent = createEventFromInput(eventInput, `pairing-${Date.now()}`);
-    addEvents([localEvent]);
-
-    setCreatedEventData({ ...pairingData, eventId: localEvent.id });
+    setCreatedEventData({ ...pairingData, eventId: `pairing-${Date.now()}` });
     setIsCreatePairingOpen(false);
     setIsPairingCreatedOpen(true);
   };
@@ -110,14 +104,10 @@ const IndexContent = () => {
       image: eventData.selectedImage || eventData.image,
     };
 
-    // Save to DB
+    // Save to DB only
     createEvent(eventInput);
 
-    // Optimistic local add for immediate UI
-    const localEvent = createEventFromInput(eventInput, `event-${Date.now()}`);
-    addEvents([localEvent]);
-
-    setCreatedEventData({ ...eventData, eventId: localEvent.id });
+    setCreatedEventData({ ...eventData, eventId: `event-${Date.now()}` });
     setIsCreateGroupEventOpen(false);
     setIsEventCreatedOpen(true);
   };
@@ -227,10 +217,6 @@ const IndexContent = () => {
   );
 };
 
-const Index = () => (
-  <CalendarEventsProvider>
-    <IndexContent />
-  </CalendarEventsProvider>
-);
+const Index = () => <IndexContent />;
 
 export default Index;

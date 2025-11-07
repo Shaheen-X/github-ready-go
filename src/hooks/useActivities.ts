@@ -14,6 +14,8 @@ export const useActivities = () => {
   const fetchActivities = async () => {
     try {
       setLoading(true);
+      
+      // Fetch activities and participants separately
       const { data, error } = await supabase
         .from('activities')
         .select('*')
@@ -24,19 +26,41 @@ export const useActivities = () => {
 
       if (error) throw error;
 
+      // Get all activity IDs
+      const activityIds = (data || []).map(a => a.activity_id);
+      
+      // Fetch participants for all activities
+      const { data: participants } = await supabase
+        .from('activity_participants')
+        .select('activity_id, user_id, status')
+        .in('activity_id', activityIds);
+
+      // Fetch host profiles
+      const hostIds = [...new Set((data || []).map(a => a.host_id).filter((id): id is string => id !== null))];
+      const { data: hosts } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url')
+        .in('id', hostIds);
+
+      // Create host lookup map
+      const hostMap = new Map(hosts?.map(h => [h.id, h]) || []);
+
       // Transform activities to CalendarEvent format
       const transformedActivities: CalendarEvent[] = (data || []).map((activity) => {
         const scheduledDate = activity.scheduled_datetime 
           ? new Date(activity.scheduled_datetime)
           : new Date();
         
-        // Handle tags - it's a Json type from Supabase
+        // Handle tags
         let tags: string[] = [];
         if (activity.tags) {
           if (Array.isArray(activity.tags)) {
             tags = activity.tags.filter((tag): tag is string => typeof tag === 'string');
           }
         }
+
+        // Get host info
+        const host = activity.host_id ? hostMap.get(activity.host_id) : null;
         
         return {
           id: activity.activity_id,
@@ -49,14 +73,15 @@ export const useActivities = () => {
             minute: '2-digit',
             hour12: true 
           }),
-          location: activity.place_id || 'TBD',
+          location: activity.location_name || activity.place_id || 'TBD',
           description: activity.description || '',
-          attendees: [], // TODO: Fetch from participants table
+          attendees: [], // Simplified for now
           maxParticipants: activity.capacity || null,
           status: 'upcoming',
           tags: tags,
           hostId: activity.host_id || undefined,
-          hostName: 'Activity Host', // TODO: Fetch from users table
+          hostName: host?.name || 'Host',
+          hostAvatar: host?.avatar_url,
           isHost: false,
         } as CalendarEvent;
       });
