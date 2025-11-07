@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Message, Conversation } from '@/types/chat';
 import { toast } from 'sonner';
@@ -44,6 +45,30 @@ export function useMessagesDB() {
       return Array.from(conversationsMap.values());
     },
   });
+
+  // Set up real-time subscription for messages
+  useEffect(() => {
+    const channel = supabase
+      .channel('messages-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages'
+        },
+        () => {
+          // Invalidate conversations and messages when any change occurs
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          queryClient.invalidateQueries({ queryKey: ['messages'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Fetch messages for a conversation
   const useConversationMessages = (eventId: string) => {
