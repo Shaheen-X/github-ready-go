@@ -263,6 +263,48 @@ export type Database = {
         }
         Relationships: []
       }
+      connections: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["connection_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["connection_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["connection_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connections_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connections_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           activity_id: string | null
@@ -776,7 +818,7 @@ export type Database = {
       sync_profile_email: { Args: never; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      connection_status: "pending" | "accepted" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -903,6 +945,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      connection_status: ["pending", "accepted", "rejected"],
+    },
   },
 } as const

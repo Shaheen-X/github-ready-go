@@ -4,12 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { QrCode, UserSearch, Mail, Camera, Copy } from 'lucide-react';
+import { QrCode, UserSearch, Mail, Camera, Copy, Check, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useProfileSearch } from '@/hooks/useProfileSearch';
+import { useConnections } from '@/hooks/useConnections';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import { ScrollArea } from './ui/scroll-area';
+import { Badge } from './ui/badge';
 
 interface ConnectModalProps {
   isOpen: boolean;
@@ -29,6 +31,8 @@ export function ConnectModal({ isOpen, onClose, username = 'alexmorgan' }: Conne
     debouncedSearch
   );
 
+  const { sendRequest, getConnectionStatus, isSending } = useConnections();
+
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -37,6 +41,43 @@ export function ConnectModal({ isOpen, onClose, username = 'alexmorgan' }: Conne
 
     return () => clearTimeout(timer);
   }, [searchValue]);
+
+  const handleConnect = (userId: string) => {
+    sendRequest(userId);
+  };
+
+  const getConnectionButton = (userId: string) => {
+    const status = getConnectionStatus(userId);
+
+    if (status === 'pending') {
+      return (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Clock className="h-3 w-3" />
+          Pending
+        </Badge>
+      );
+    }
+
+    if (status === 'accepted') {
+      return (
+        <Badge variant="default" className="flex items-center gap-1 bg-green-500">
+          <Check className="h-3 w-3" />
+          Connected
+        </Badge>
+      );
+    }
+
+    return (
+      <Button
+        size="sm"
+        className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg"
+        onClick={() => handleConnect(userId)}
+        disabled={isSending}
+      >
+        Connect
+      </Button>
+    );
+  };
 
   const profileUrl = `https://connectsphere.app/user/${username}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(profileUrl)}`;
@@ -197,13 +238,7 @@ export function ConnectModal({ isOpen, onClose, username = 'alexmorgan' }: Conne
                                     <p className="font-semibold text-body truncate">{profile.name}</p>
                                     <p className="text-xs text-subtext truncate">{profile.email}</p>
                                   </div>
-                                  <Button
-                                    size="sm"
-                                    className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg"
-                                    onClick={() => toast.success(`Connect request sent to ${profile.name}`)}
-                                  >
-                                    Connect
-                                  </Button>
+                                  {getConnectionButton(profile.id)}
                                 </div>
                               ))}
                             </div>
@@ -248,13 +283,7 @@ export function ConnectModal({ isOpen, onClose, username = 'alexmorgan' }: Conne
                                     <p className="font-semibold text-body truncate">{profile.name}</p>
                                     <p className="text-xs text-subtext truncate">{profile.email}</p>
                                   </div>
-                                  <Button
-                                    size="sm"
-                                    className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg"
-                                    onClick={() => toast.success(`Connect request sent to ${profile.name}`)}
-                                  >
-                                    Connect
-                                  </Button>
+                                  {getConnectionButton(profile.id)}
                                 </div>
                               ))}
                             </div>
