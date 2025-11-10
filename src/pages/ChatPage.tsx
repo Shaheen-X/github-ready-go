@@ -27,7 +27,7 @@ export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { events } = useCalendarEventsDB();
-  const { useConversationMessages, sendMessage } = useMessagesDB();
+  const { useConversationMessages, sendMessage, deleteConversation } = useMessagesDB();
   const { data: messages = [] } = useConversationMessages(eventId || '');
   const [newMessage, setNewMessage] = useState('');
   const [showSharedMedia, setShowSharedMedia] = useState(false);
@@ -72,8 +72,10 @@ export function ChatPage() {
 
   const handleDeleteConversation = () => {
     if (!eventId) return;
-    // TODO: Implement delete conversation in database
-    navigate('/messages');
+    if (window.confirm('Are you sure you want to delete this conversation? This action cannot be undone.')) {
+      deleteConversation(eventId);
+      navigate('/messages');
+    }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
