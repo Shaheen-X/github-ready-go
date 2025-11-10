@@ -17,36 +17,52 @@ export function useMessagesDB() {
       // Get all messages where user is sender or receiver
       const { data, error } = await supabase
         .from('messages')
-        .select(`
-          *,
-          activity:activities!messages_group_id_fkey(title, sport_type)
-        `)
+        .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('timestamp', { ascending: false });
 
       if (error) throw error;
 
-      // Group messages by conversation
+      // Group messages by conversation and fetch activity data
       const conversationsMap = new Map<string, Conversation>();
+      const activityIds = new Set<string>();
       
       data?.forEach((msg) => {
         const convId = msg.group_id || `dm-${msg.sender_id}-${msg.receiver_id}`;
         
         if (!conversationsMap.has(convId)) {
-          const activity = Array.isArray(msg.activity) ? msg.activity[0] : msg.activity;
-          
           conversationsMap.set(convId, {
             eventId: convId,
-            title: activity?.title || msg.group_id ? 'Group Chat' : 'Direct Message',
+            title: msg.group_id || 'Direct Message',
             lastMessage: msg.content || '',
-            time: new Date(msg.timestamp || new Date()).toLocaleTimeString(),
+            time: new Date(msg.timestamp || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             unreadCount: 0,
             sharedImages: [],
             sharedFiles: [],
-            activity: activity?.sport_type,
+            activity: undefined,
           });
+          
+          if (msg.group_id) {
+            activityIds.add(msg.group_id);
+          }
         }
       });
+
+      // Fetch activity details for all activity IDs
+      if (activityIds.size > 0) {
+        const { data: activities } = await supabase
+          .from('activities')
+          .select('activity_id, title, sport_type')
+          .in('activity_id', Array.from(activityIds));
+
+        activities?.forEach((activity) => {
+          const conv = conversationsMap.get(activity.activity_id);
+          if (conv) {
+            conv.title = activity.title || 'Group Chat';
+            conv.activity = activity.sport_type || undefined;
+          }
+        });
+      }
 
       return Array.from(conversationsMap.values());
     },

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus } from 'lucide-react';
-import { Button } from './ui/button';
+import { Search } from 'lucide-react';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -26,13 +25,6 @@ export function Messages() {
             <h1 className="text-section-header font-bold gradient-text">Messages</h1>
             <p className="text-subtext text-xs mt-0.5">{conversations.length} conversations</p>
           </div>
-          <Button 
-            size="sm"
-            className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-full shadow-lg shadow-blue-500/30 btn-scale"
-          >
-            <Plus size={16} className="mr-1" />
-            New
-          </Button>
         </div>
         
         {/* Search */}
