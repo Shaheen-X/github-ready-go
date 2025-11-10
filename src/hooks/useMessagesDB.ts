@@ -152,9 +152,36 @@ export function useMessagesDB() {
     },
   });
 
+  // Delete conversation
+  const deleteConversation = useMutation({
+    mutationFn: async (eventId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Delete all messages in this conversation
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('group_id', eventId)
+        .eq('sender_id', user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      toast.success('Conversation deleted');
+    },
+    onError: (error: any) => {
+      toast.error('Failed to delete conversation', {
+        description: error.message,
+      });
+    },
+  });
+
   return {
     conversations,
     useConversationMessages,
     sendMessage: sendMessage.mutate,
+    deleteConversation: deleteConversation.mutate,
   };
 }

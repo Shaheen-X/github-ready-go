@@ -1,15 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Trash2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useMessagesDB } from '@/hooks/useMessagesDB';
+import { Button } from './ui/button';
 
 export function Messages() {
   const navigate = useNavigate();
-  const { conversations } = useMessagesDB();
+  const { conversations, deleteConversation } = useMessagesDB();
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleDelete = (e: React.MouseEvent, eventId: string) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this conversation?')) {
+      deleteConversation(eventId);
+    }
+  };
 
   const filteredConversations = conversations.filter(conv =>
     conv.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -106,6 +114,16 @@ export function Messages() {
                       {conversation.unreadCount}
                     </Badge>
                   )}
+
+                  {/* Delete Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => handleDelete(e, conversation.eventId)}
+                    className="flex-shrink-0 hover:bg-red-100 hover:text-red-600 transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </Button>
                 </div>
               </div>
             ))}
