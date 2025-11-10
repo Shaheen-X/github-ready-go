@@ -467,15 +467,7 @@ export type Database = {
           sender_id?: string | null
           timestamp?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "messages_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "groups"
-            referencedColumns: ["group_id"]
-          },
-        ]
+        Relationships: []
       }
       notifications: {
         Row: {
