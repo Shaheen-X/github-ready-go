@@ -133,6 +133,9 @@ export function useMessagesDB() {
           reactionsData = reactions || [];
         }
 
+        // Create a map for quick message lookup for replies
+        const messagesMap = new Map(data?.map(msg => [msg.message_id, msg]) || []);
+
         return (data || []).map((msg): Message => {
           // Group reactions by type for this message
           const msgReactions = reactionsData.filter(r => r.message_id === msg.message_id);
@@ -156,6 +159,19 @@ export function useMessagesDB() {
             hasReacted: data.hasReacted,
           }));
 
+          // Get reply information if this message is a reply
+          let replyTo = undefined;
+          if (msg.reply_to_message_id) {
+            const replyToMsg = messagesMap.get(msg.reply_to_message_id);
+            if (replyToMsg) {
+              replyTo = {
+                id: replyToMsg.message_id,
+                text: replyToMsg.content || '',
+                sender: replyToMsg.sender_id || '',
+              };
+            }
+          }
+
           return {
             id: msg.message_id,
             sender: msg.sender_id || '',
@@ -163,6 +179,7 @@ export function useMessagesDB() {
             time: new Date(msg.timestamp || new Date()).toLocaleTimeString(),
             isOwn: msg.sender_id === user.id,
             reactions: reactions.length > 0 ? reactions : undefined,
+            replyTo,
           };
         });
       },
@@ -172,7 +189,7 @@ export function useMessagesDB() {
 
   // Send message
   const sendMessage = useMutation({
-    mutationFn: async ({ eventId, text }: { eventId: string; text: string }) => {
+    mutationFn: async ({ eventId, text, replyToId }: { eventId: string; text: string; replyToId?: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
@@ -187,6 +204,7 @@ export function useMessagesDB() {
           content: text,
           message_type: 'text',
           timestamp: new Date().toISOString(),
+          reply_to_message_id: replyToId || null,
         });
 
       if (error) throw error;

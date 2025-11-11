@@ -41,6 +41,7 @@ export function ChatPage() {
   const [copied, setCopied] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
   const [showAllReactions, setShowAllReactions] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<{ id: string; text: string; sender: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,8 +69,9 @@ export function ChatPage() {
   const handleSendMessage = () => {
     if (!newMessage.trim() || !eventId) return;
 
-    sendMessage({ eventId, text: newMessage });
+    sendMessage({ eventId, text: newMessage, replyToId: replyingTo?.id });
     setNewMessage('');
+    setReplyingTo(null);
   };
 
   const handleDeleteConversation = () => {
@@ -555,6 +557,24 @@ export function ChatPage() {
                     }`}
                     onClick={() => setShowReactionPicker(showReactionPicker === message.id ? null : message.id)}
                   >
+                    {/* Reply Preview */}
+                    {message.replyTo && (
+                      <div className={`mb-2 pb-2 border-b ${
+                        message.isOwn ? 'border-blue-300/30' : 'border-border/30'
+                      }`}>
+                        <p className={`text-xs font-medium mb-1 ${
+                          message.isOwn ? 'text-blue-100' : 'text-muted-foreground'
+                        }`}>
+                          Replying to
+                        </p>
+                        <p className={`text-xs line-clamp-2 ${
+                          message.isOwn ? 'text-blue-50' : 'text-foreground/70'
+                        }`}>
+                          {message.replyTo.text}
+                        </p>
+                      </div>
+                    )}
+
                     {message.attachments && message.attachments.length > 0 && (
                       <div className="mb-2 space-y-2">
                         {message.attachments.map((att, idx) => (
@@ -609,21 +629,36 @@ export function ChatPage() {
                       }`}
                     >
                       {!showAllReactions ? (
-                        <div className="flex gap-1">
-                          {quickReactions.map((emoji) => (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-1">
+                            {quickReactions.map((emoji) => (
+                              <button
+                                key={emoji}
+                                onClick={() => handleReaction(message.id, emoji)}
+                                className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
                             <button
-                              key={emoji}
-                              onClick={() => handleReaction(message.id, emoji)}
-                              className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
+                              onClick={() => setShowAllReactions(true)}
+                              className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125 font-bold text-muted-foreground"
                             >
-                              {emoji}
+                              +
                             </button>
-                          ))}
+                          </div>
                           <button
-                            onClick={() => setShowAllReactions(true)}
-                            className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125 font-bold text-muted-foreground"
+                            onClick={() => {
+                              setReplyingTo({ id: message.id, text: message.text, sender: message.sender });
+                              setShowReactionPicker(null);
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-foreground"
                           >
-                            +
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="9 17 4 12 9 7"></polyline>
+                              <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
+                            </svg>
+                            Reply
                           </button>
                         </div>
                       ) : (
@@ -662,6 +697,31 @@ export function ChatPage() {
 
       {/* Message Input */}
       <div className="glass-card border-t border-white/20 p-4 sticky bottom-0">
+        {/* Reply Preview */}
+        {replyingTo && (
+          <div className="mb-3 flex items-center justify-between glass-card p-3 rounded-xl">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-muted-foreground mb-1">
+                Replying to
+              </p>
+              <p className="text-sm text-foreground truncate">
+                {replyingTo.text}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setReplyingTo(null)}
+              className="flex-shrink-0 ml-2"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </Button>
+          </div>
+        )}
+        
         <div className="flex items-center space-x-2">
           <input
             ref={fileInputRef}

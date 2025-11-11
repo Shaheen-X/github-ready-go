@@ -11,6 +11,12 @@ export interface MessageReaction {
   hasReacted: boolean;
 }
 
+export interface ReplyToMessage {
+  id: string;
+  text: string;
+  sender: string;
+}
+
 export interface Message {
   id: string;
   sender: string;
@@ -20,6 +26,7 @@ export interface Message {
   avatar?: string;
   attachments?: Attachment[];
   reactions?: MessageReaction[];
+  replyTo?: ReplyToMessage;
 }
 
 export interface Conversation {
