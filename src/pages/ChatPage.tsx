@@ -40,6 +40,7 @@ export function ChatPage() {
   const [inviteSearchQuery, setInviteSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
+  const [showAllReactions, setShowAllReactions] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -96,7 +97,12 @@ export function ChatPage() {
     setShowReactionPicker(null);
   };
 
-  const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+  const quickReactions = ['👍', '❤️', '😂', '😮', '🤝', '🙏'];
+  const allReactions = [
+    '👍', '❤️', '😂', '😮', '🤝', '🙏', '🔥', '🎉', '👏', '💯', 
+    '✨', '💪', '🙌', '👌', '✅', '❌', '💔', '😍', '🤔', '😎',
+    '😭', '😊', '🥳', '🤗', '😴', '🤯', '👀', '💡', '⚡', '🎯'
+  ];
 
   if (!event) {
     return (
@@ -598,19 +604,52 @@ export function ChatPage() {
                   {/* Reaction Picker */}
                   {showReactionPicker === message.id && (
                     <div 
-                      className={`glass-card p-2 rounded-2xl shadow-lg flex gap-1 ${
+                      className={`glass-card p-2 rounded-2xl shadow-lg ${
                         message.isOwn ? 'self-end' : 'self-start'
                       }`}
                     >
-                      {availableReactions.map((emoji) => (
-                        <button
-                          key={emoji}
-                          onClick={() => handleReaction(message.id, emoji)}
-                          className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
-                        >
-                          {emoji}
-                        </button>
-                      ))}
+                      {!showAllReactions ? (
+                        <div className="flex gap-1">
+                          {quickReactions.map((emoji) => (
+                            <button
+                              key={emoji}
+                              onClick={() => handleReaction(message.id, emoji)}
+                              className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => setShowAllReactions(true)}
+                            className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125 font-bold text-muted-foreground"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-2 max-w-xs">
+                          <div className="grid grid-cols-6 gap-1">
+                            {allReactions.map((emoji) => (
+                              <button
+                                key={emoji}
+                                onClick={() => {
+                                  handleReaction(message.id, emoji);
+                                  setShowAllReactions(false);
+                                }}
+                                className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => setShowAllReactions(false)}
+                            className="text-xs text-muted-foreground hover:text-foreground py-1"
+                          >
+                            Show less
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
