@@ -4,6 +4,13 @@ export interface Attachment {
   name?: string;
 }
 
+export interface MessageReaction {
+  type: string;
+  count: number;
+  users: string[];
+  hasReacted: boolean;
+}
+
 export interface Message {
   id: string;
   sender: string;
@@ -12,6 +19,7 @@ export interface Message {
   isOwn: boolean;
   avatar?: string;
   attachments?: Attachment[];
+  reactions?: MessageReaction[];
 }
 
 export interface Conversation {

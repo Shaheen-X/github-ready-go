@@ -68,7 +68,7 @@ export function useMessagesDB() {
     },
   });
 
-  // Set up real-time subscription for messages
+  // Set up real-time subscription for messages and reactions
   useEffect(() => {
     const channel = supabase
       .channel('messages-changes')
@@ -82,6 +82,18 @@ export function useMessagesDB() {
         () => {
           // Invalidate conversations and messages when any change occurs
           queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          queryClient.invalidateQueries({ queryKey: ['messages'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'message_reactions'
+        },
+        () => {
+          // Invalidate messages when reactions change
           queryClient.invalidateQueries({ queryKey: ['messages'] });
         }
       )
@@ -108,13 +120,51 @@ export function useMessagesDB() {
 
         if (error) throw error;
 
-        return (data || []).map((msg): Message => ({
-          id: msg.message_id,
-          sender: msg.sender_id || '',
-          text: msg.content || '',
-          time: new Date(msg.timestamp || new Date()).toLocaleTimeString(),
-          isOwn: msg.sender_id === user.id,
-        }));
+        // Fetch reactions for all messages
+        const messageIds = (data || []).map(msg => msg.message_id);
+        let reactionsData: any[] = [];
+        
+        if (messageIds.length > 0) {
+          const { data: reactions } = await supabase
+            .from('message_reactions')
+            .select('*')
+            .in('message_id', messageIds);
+          
+          reactionsData = reactions || [];
+        }
+
+        return (data || []).map((msg): Message => {
+          // Group reactions by type for this message
+          const msgReactions = reactionsData.filter(r => r.message_id === msg.message_id);
+          const reactionGroups = new Map<string, { users: string[], hasReacted: boolean }>();
+          
+          msgReactions.forEach(reaction => {
+            if (!reactionGroups.has(reaction.reaction_type)) {
+              reactionGroups.set(reaction.reaction_type, { users: [], hasReacted: false });
+            }
+            const group = reactionGroups.get(reaction.reaction_type)!;
+            group.users.push(reaction.user_id);
+            if (reaction.user_id === user.id) {
+              group.hasReacted = true;
+            }
+          });
+
+          const reactions = Array.from(reactionGroups.entries()).map(([type, data]) => ({
+            type,
+            count: data.users.length,
+            users: data.users,
+            hasReacted: data.hasReacted,
+          }));
+
+          return {
+            id: msg.message_id,
+            sender: msg.sender_id || '',
+            text: msg.content || '',
+            time: new Date(msg.timestamp || new Date()).toLocaleTimeString(),
+            isOwn: msg.sender_id === user.id,
+            reactions: reactions.length > 0 ? reactions : undefined,
+          };
+        });
       },
       enabled: !!eventId,
     });
@@ -178,10 +228,61 @@ export function useMessagesDB() {
     },
   });
 
+  // Toggle reaction on a message
+  const toggleReaction = useMutation({
+    mutationFn: async ({ messageId, reactionType, eventId }: { messageId: string; reactionType: string; eventId: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Check if reaction already exists
+      const { data: existing } = await supabase
+        .from('message_reactions')
+        .select('*')
+        .eq('message_id', messageId)
+        .eq('user_id', user.id)
+        .eq('reaction_type', reactionType)
+        .single();
+
+      if (existing) {
+        // Remove reaction
+        const { error } = await supabase
+          .from('message_reactions')
+          .delete()
+          .eq('message_id', messageId)
+          .eq('user_id', user.id)
+          .eq('reaction_type', reactionType);
+
+        if (error) throw error;
+      } else {
+        // Add reaction
+        const { error } = await supabase
+          .from('message_reactions')
+          .insert({
+            message_id: messageId,
+            user_id: user.id,
+            reaction_type: reactionType,
+          });
+
+        if (error) throw error;
+      }
+
+      return { eventId };
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', variables.eventId] });
+    },
+    onError: (error: any) => {
+      toast.error('Failed to update reaction', {
+        description: error.message,
+      });
+    },
+  });
+
   return {
     conversations,
     useConversationMessages,
     sendMessage: sendMessage.mutate,
     deleteConversation: deleteConversation.mutate,
+    toggleReaction: toggleReaction.mutate,
   };
 }

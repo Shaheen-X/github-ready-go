@@ -27,7 +27,7 @@ export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { events } = useCalendarEventsDB();
-  const { useConversationMessages, sendMessage, deleteConversation } = useMessagesDB();
+  const { useConversationMessages, sendMessage, deleteConversation, toggleReaction } = useMessagesDB();
   const { data: messages = [] } = useConversationMessages(eventId || '');
   const [newMessage, setNewMessage] = useState('');
   const [showSharedMedia, setShowSharedMedia] = useState(false);
@@ -39,6 +39,7 @@ export function ChatPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [inviteSearchQuery, setInviteSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
+  const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,6 +89,14 @@ export function ChatPage() {
     
     sendMessage({ eventId, text });
   };
+
+  const handleReaction = (messageId: string, reactionType: string) => {
+    if (!eventId) return;
+    toggleReaction({ messageId, reactionType, eventId });
+    setShowReactionPicker(null);
+  };
+
+  const availableReactions = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
   if (!event) {
     return (
@@ -531,37 +540,79 @@ export function ChatPage() {
                   />
                 )}
                 
-                <div className={`rounded-2xl px-4 py-2.5 shadow-sm ${
-                  message.isOwn 
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white' 
-                    : 'glass-card'
-                }`}>
-                  {message.attachments && message.attachments.length > 0 && (
-                    <div className="mb-2 space-y-2">
-                      {message.attachments.map((att, idx) => (
-                        <div key={idx}>
-                          {att.type === 'image' ? (
-                            <img src={att.url} alt="" className="max-h-48 rounded-lg" />
-                          ) : (
-                            <a 
-                              href={att.url} 
-                              download={att.name}
-                              className={`flex items-center gap-2 underline ${message.isOwn ? 'text-blue-100' : 'text-blue-600'}`}
-                            >
-                              <FileText size={16} />
-                              {att.name || 'File'}
-                            </a>
-                          )}
-                        </div>
+                <div className="relative flex flex-col gap-1">
+                  <div 
+                    className={`rounded-2xl px-4 py-2.5 shadow-sm cursor-pointer ${
+                      message.isOwn 
+                        ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white' 
+                        : 'glass-card'
+                    }`}
+                    onClick={() => setShowReactionPicker(showReactionPicker === message.id ? null : message.id)}
+                  >
+                    {message.attachments && message.attachments.length > 0 && (
+                      <div className="mb-2 space-y-2">
+                        {message.attachments.map((att, idx) => (
+                          <div key={idx}>
+                            {att.type === 'image' ? (
+                              <img src={att.url} alt="" className="max-h-48 rounded-lg" />
+                            ) : (
+                              <a 
+                                href={att.url} 
+                                download={att.name}
+                                className={`flex items-center gap-2 underline ${message.isOwn ? 'text-blue-100' : 'text-blue-600'}`}
+                              >
+                                <FileText size={16} />
+                                {att.name || 'File'}
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-sm">{message.text}</p>
+                    <p className={`text-xs mt-1 ${
+                      message.isOwn ? 'text-blue-100' : 'text-muted-foreground'
+                    }`}>
+                      {message.time}
+                    </p>
+                  </div>
+
+                  {/* Reactions Display */}
+                  {message.reactions && message.reactions.length > 0 && (
+                    <div className={`flex flex-wrap gap-1 ${message.isOwn ? 'justify-end' : 'justify-start'}`}>
+                      {message.reactions.map((reaction) => (
+                        <button
+                          key={reaction.type}
+                          onClick={() => handleReaction(message.id, reaction.type)}
+                          className={`glass-card px-2 py-0.5 rounded-full text-xs flex items-center gap-1 hover:scale-110 transition-transform ${
+                            reaction.hasReacted ? 'ring-2 ring-blue-500' : ''
+                          }`}
+                        >
+                          <span>{reaction.type}</span>
+                          <span className="font-medium">{reaction.count}</span>
+                        </button>
                       ))}
                     </div>
                   )}
-                  <p className="text-sm">{message.text}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.isOwn ? 'text-blue-100' : 'text-muted-foreground'
-                  }`}>
-                    {message.time}
-                  </p>
+
+                  {/* Reaction Picker */}
+                  {showReactionPicker === message.id && (
+                    <div 
+                      className={`glass-card p-2 rounded-2xl shadow-lg flex gap-1 ${
+                        message.isOwn ? 'self-end' : 'self-start'
+                      }`}
+                    >
+                      {availableReactions.map((emoji) => (
+                        <button
+                          key={emoji}
+                          onClick={() => handleReaction(message.id, emoji)}
+                          className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
