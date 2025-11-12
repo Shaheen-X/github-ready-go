@@ -7,7 +7,6 @@ import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
 import { format } from 'date-fns';
 import { useMessagesDB } from '@/hooks/useMessagesDB';
-import { ForwardMessageModal } from '@/components/ForwardMessageModal';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -30,7 +29,6 @@ export function ChatPage() {
   const navigate = useNavigate();
   const { events } = useCalendarEventsDB();
   const { 
-    conversations,
     useConversationMessages, 
     sendMessage, 
     deleteConversation, 
@@ -50,10 +48,7 @@ export function ChatPage() {
   const [inviteSearchQuery, setInviteSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
-  const [showAllReactions, setShowAllReactions] = useState(false);
   const [replyingTo, setReplyingTo] = useState<{ id: string; text: string; sender: string } | null>(null);
-  const [forwardModalOpen, setForwardModalOpen] = useState(false);
-  const [messageToForward, setMessageToForward] = useState<{ text: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -131,26 +126,7 @@ export function ChatPage() {
     }
   };
 
-  const handleForwardMessage = (text: string) => {
-    setMessageToForward({ text });
-    setForwardModalOpen(true);
-    setShowReactionPicker(null);
-  };
-
-  const handleForwardToConversation = (conversationId: string) => {
-    if (messageToForward) {
-      sendMessage({ eventId: conversationId, text: messageToForward.text });
-      toast.success('Message forwarded');
-      setMessageToForward(null);
-    }
-  };
-
-  const quickReactions = ['👍', '❤️', '😂', '😮', '🤝', '🙏'];
-  const allReactions = [
-    '👍', '❤️', '😂', '😮', '🤝', '🙏', '🔥', '🎉', '👏', '💯', 
-    '✨', '💪', '🙌', '👌', '✅', '❌', '💔', '😍', '🤔', '😎',
-    '😭', '😊', '🥳', '🤗', '😴', '🤯', '👀', '💡', '⚡', '🎯'
-  ];
+  const quickReactions = ['👍', '❤️', '😂', '😮', '🤝', '🙏', '🔥', '🎉'];
 
   if (!event) {
     return (
@@ -670,100 +646,67 @@ export function ChatPage() {
                   {/* Reaction Picker */}
                   {showReactionPicker === message.id && (
                     <div 
-                      className={`glass-card p-2 rounded-2xl shadow-lg ${
+                      className={`glass-card p-3 rounded-2xl shadow-lg ${
                         message.isOwn ? 'self-end' : 'self-start'
                       }`}
                     >
-                      {!showAllReactions ? (
-                        <div className="flex flex-col gap-2">
-                          <div className="flex gap-1">
-                            {quickReactions.map((emoji) => (
-                              <button
-                                key={emoji}
-                                onClick={() => handleReaction(message.id, emoji)}
-                                className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
-                              >
-                                {emoji}
-                              </button>
-                            ))}
+                      <div className="flex flex-col gap-3">
+                        {/* Reactions Row */}
+                        <div className="flex gap-1">
+                          {quickReactions.map((emoji) => (
                             <button
-                              onClick={() => setShowAllReactions(true)}
-                              className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125 font-bold text-muted-foreground"
+                              key={emoji}
+                              onClick={() => handleReaction(message.id, emoji)}
+                              className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
                             >
-                              +
+                              {emoji}
                             </button>
-                          </div>
+                          ))}
+                        </div>
+                        
+                        {/* Action Icons Row */}
+                        <div className="flex gap-2 pt-2 border-t border-white/20">
                           <button
                             onClick={() => {
                               setReplyingTo({ id: message.id, text: message.text, sender: message.sender });
                               setShowReactionPicker(null);
                             }}
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-foreground"
+                            className="p-2 rounded-xl hover:bg-white/50 transition-all text-muted-foreground hover:text-foreground"
+                            title="Reply"
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="9 17 4 12 9 7"></polyline>
                               <path d="M20 18v-2a4 4 0 0 0-4-4H4"></path>
                             </svg>
-                            Reply
                           </button>
                           <button
                             onClick={() => handleCopyMessage(message.text)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-foreground"
+                            className="p-2 rounded-xl hover:bg-white/50 transition-all text-muted-foreground hover:text-foreground"
+                            title="Copy"
                           >
-                            <Copy size={16} />
-                            Copy
-                          </button>
-                          <button
-                            onClick={() => handleForwardMessage(message.text)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-foreground"
-                          >
-                            <Share2 size={16} />
-                            Forward
+                            <Copy size={18} />
                           </button>
                           <button
                             onClick={() => handlePinMessage(message.id, message.isPinned || false)}
-                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-foreground"
+                            className="p-2 rounded-xl hover:bg-white/50 transition-all text-muted-foreground hover:text-foreground"
+                            title={message.isPinned ? 'Unpin' : 'Pin'}
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <line x1="12" y1="17" x2="12" y2="22"></line>
                               <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
                             </svg>
-                            {message.isPinned ? 'Unpin' : 'Pin'}
                           </button>
                           {message.isOwn && (
                             <button
                               onClick={() => handleDeleteMessage(message.id)}
-                              className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-destructive"
+                              className="p-2 rounded-xl hover:bg-white/50 transition-all text-destructive hover:text-destructive/80"
+                              title="Delete"
                             >
-                              <Trash2 size={16} />
-                              Delete
+                              <Trash2 size={18} />
                             </button>
                           )}
                         </div>
-                      ) : (
-                        <div className="flex flex-col gap-2 max-w-xs">
-                          <div className="grid grid-cols-6 gap-1">
-                            {allReactions.map((emoji) => (
-                              <button
-                                key={emoji}
-                                onClick={() => {
-                                  handleReaction(message.id, emoji);
-                                  setShowAllReactions(false);
-                                }}
-                                className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
-                          <button
-                            onClick={() => setShowAllReactions(false)}
-                            className="text-xs text-muted-foreground hover:text-foreground py-1"
-                          >
-                            Show less
-                          </button>
-                        </div>
-                      )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -882,14 +825,6 @@ export function ChatPage() {
           </div>
         </div>
       )}
-
-      <ForwardMessageModal
-        open={forwardModalOpen}
-        onClose={() => setForwardModalOpen(false)}
-        conversations={conversations}
-        onForward={handleForwardToConversation}
-        messageText={messageToForward?.text || ''}
-      />
     </div>
   );
 }
