@@ -578,6 +578,38 @@ export type Database = {
         }
         Relationships: []
       }
+      pinned_messages: {
+        Row: {
+          group_id: string
+          id: string
+          message_id: string
+          pinned_at: string
+          pinned_by_user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          message_id: string
+          pinned_at?: string
+          pinned_by_user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          message_id?: string
+          pinned_at?: string
+          pinned_by_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pinned_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["message_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -27,6 +27,7 @@ export interface Message {
   attachments?: Attachment[];
   reactions?: MessageReaction[];
   replyTo?: ReplyToMessage;
+  isPinned?: boolean;
 }
 
 export interface Conversation {

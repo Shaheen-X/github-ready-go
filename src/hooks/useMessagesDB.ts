@@ -7,6 +7,23 @@ import { toast } from 'sonner';
 export function useMessagesDB() {
   const queryClient = useQueryClient();
 
+  // Fetch pinned messages for a conversation
+  const usePinnedMessages = (eventId: string) => {
+    return useQuery({
+      queryKey: ['pinned-messages', eventId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('pinned_messages')
+          .select('message_id')
+          .eq('group_id', eventId);
+
+        if (error) throw error;
+        return new Set((data || []).map(pm => pm.message_id));
+      },
+      enabled: !!eventId,
+    });
+  };
+
   // Fetch conversations
   const { data: conversations = [] } = useQuery({
     queryKey: ['conversations'],
@@ -123,6 +140,7 @@ export function useMessagesDB() {
         // Fetch reactions for all messages
         const messageIds = (data || []).map(msg => msg.message_id);
         let reactionsData: any[] = [];
+        let pinnedMessageIds: Set<string> = new Set();
         
         if (messageIds.length > 0) {
           const { data: reactions } = await supabase
@@ -131,6 +149,14 @@ export function useMessagesDB() {
             .in('message_id', messageIds);
           
           reactionsData = reactions || [];
+
+          // Fetch pinned messages
+          const { data: pinnedData } = await supabase
+            .from('pinned_messages')
+            .select('message_id')
+            .eq('group_id', eventId);
+          
+          pinnedMessageIds = new Set((pinnedData || []).map(pm => pm.message_id));
         }
 
         // Create a map for quick message lookup for replies
@@ -180,6 +206,7 @@ export function useMessagesDB() {
             isOwn: msg.sender_id === user.id,
             reactions: reactions.length > 0 ? reactions : undefined,
             replyTo,
+            isPinned: pinnedMessageIds.has(msg.message_id),
           };
         });
       },
@@ -296,11 +323,79 @@ export function useMessagesDB() {
     },
   });
 
+  // Delete a message
+  const deleteMessage = useMutation({
+    mutationFn: async ({ messageId, eventId }: { messageId: string; eventId: string }) => {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('message_id', messageId);
+
+      if (error) throw error;
+      return { eventId };
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', variables.eventId] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      toast.success('Message deleted');
+    },
+    onError: (error: any) => {
+      toast.error('Failed to delete message', {
+        description: error.message,
+      });
+    },
+  });
+
+  // Pin/Unpin a message
+  const togglePinMessage = useMutation({
+    mutationFn: async ({ messageId, eventId, isPinned }: { messageId: string; eventId: string; isPinned: boolean }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      if (isPinned) {
+        // Unpin
+        const { error } = await supabase
+          .from('pinned_messages')
+          .delete()
+          .eq('message_id', messageId)
+          .eq('group_id', eventId);
+
+        if (error) throw error;
+      } else {
+        // Pin
+        const { error } = await supabase
+          .from('pinned_messages')
+          .insert({
+            message_id: messageId,
+            group_id: eventId,
+            pinned_by_user_id: user.id,
+          });
+
+        if (error) throw error;
+      }
+
+      return { eventId };
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['messages', variables.eventId] });
+      queryClient.invalidateQueries({ queryKey: ['pinned-messages', variables.eventId] });
+      toast.success(variables.isPinned ? 'Message unpinned' : 'Message pinned');
+    },
+    onError: (error: any) => {
+      toast.error('Failed to update pin status', {
+        description: error.message,
+      });
+    },
+  });
+
   return {
     conversations,
     useConversationMessages,
+    usePinnedMessages,
     sendMessage: sendMessage.mutate,
     deleteConversation: deleteConversation.mutate,
     toggleReaction: toggleReaction.mutate,
+    deleteMessage: deleteMessage.mutate,
+    togglePinMessage: togglePinMessage.mutate,
   };
 }

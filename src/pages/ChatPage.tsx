@@ -7,6 +7,8 @@ import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
 import { format } from 'date-fns';
 import { useMessagesDB } from '@/hooks/useMessagesDB';
+import { ForwardMessageModal } from '@/components/ForwardMessageModal';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +29,15 @@ export function ChatPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { events } = useCalendarEventsDB();
-  const { useConversationMessages, sendMessage, deleteConversation, toggleReaction } = useMessagesDB();
+  const { 
+    conversations,
+    useConversationMessages, 
+    sendMessage, 
+    deleteConversation, 
+    toggleReaction,
+    deleteMessage,
+    togglePinMessage,
+  } = useMessagesDB();
   const { data: messages = [] } = useConversationMessages(eventId || '');
   const [newMessage, setNewMessage] = useState('');
   const [showSharedMedia, setShowSharedMedia] = useState(false);
@@ -42,6 +52,8 @@ export function ChatPage() {
   const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null);
   const [showAllReactions, setShowAllReactions] = useState(false);
   const [replyingTo, setReplyingTo] = useState<{ id: string; text: string; sender: string } | null>(null);
+  const [forwardModalOpen, setForwardModalOpen] = useState(false);
+  const [messageToForward, setMessageToForward] = useState<{ text: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -97,6 +109,40 @@ export function ChatPage() {
     if (!eventId) return;
     toggleReaction({ messageId, reactionType, eventId });
     setShowReactionPicker(null);
+  };
+
+  const handleCopyMessage = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Message copied to clipboard');
+    setShowReactionPicker(null);
+  };
+
+  const handleDeleteMessage = (messageId: string) => {
+    if (eventId) {
+      deleteMessage({ messageId, eventId });
+      setShowReactionPicker(null);
+    }
+  };
+
+  const handlePinMessage = (messageId: string, isPinned: boolean) => {
+    if (eventId) {
+      togglePinMessage({ messageId, eventId, isPinned });
+      setShowReactionPicker(null);
+    }
+  };
+
+  const handleForwardMessage = (text: string) => {
+    setMessageToForward({ text });
+    setForwardModalOpen(true);
+    setShowReactionPicker(null);
+  };
+
+  const handleForwardToConversation = (conversationId: string) => {
+    if (messageToForward) {
+      sendMessage({ eventId: conversationId, text: messageToForward.text });
+      toast.success('Message forwarded');
+      setMessageToForward(null);
+    }
   };
 
   const quickReactions = ['👍', '❤️', '😂', '😮', '🤝', '🙏'];
@@ -660,6 +706,39 @@ export function ChatPage() {
                             </svg>
                             Reply
                           </button>
+                          <button
+                            onClick={() => handleCopyMessage(message.text)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-foreground"
+                          >
+                            <Copy size={16} />
+                            Copy
+                          </button>
+                          <button
+                            onClick={() => handleForwardMessage(message.text)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-foreground"
+                          >
+                            <Share2 size={16} />
+                            Forward
+                          </button>
+                          <button
+                            onClick={() => handlePinMessage(message.id, message.isPinned || false)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-foreground"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="12" y1="17" x2="12" y2="22"></line>
+                              <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+                            </svg>
+                            {message.isPinned ? 'Unpin' : 'Pin'}
+                          </button>
+                          {message.isOwn && (
+                            <button
+                              onClick={() => handleDeleteMessage(message.id)}
+                              className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/50 transition-all text-sm text-destructive"
+                            >
+                              <Trash2 size={16} />
+                              Delete
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <div className="flex flex-col gap-2 max-w-xs">
@@ -803,6 +882,14 @@ export function ChatPage() {
           </div>
         </div>
       )}
+
+      <ForwardMessageModal
+        open={forwardModalOpen}
+        onClose={() => setForwardModalOpen(false)}
+        conversations={conversations}
+        onForward={handleForwardToConversation}
+        messageText={messageToForward?.text || ''}
+      />
     </div>
   );
 }
