@@ -22,6 +22,7 @@ import CreatePairingModal from '@/components/CreatePairingModal';
 import EventCreatedModal from '@/components/EventCreatedModal';
 import PairingCreatedModal from '@/components/PairingCreatedModal';
 import { ChatPage } from '@/pages/ChatPage';
+import { CallsPage } from '@/pages/CallsPage';
 import { ProfileViewPage } from '@/pages/ProfileViewPage';
 import { AuthPage } from '@/pages/AuthPage';
 import NotFound from '@/pages/NotFound';
