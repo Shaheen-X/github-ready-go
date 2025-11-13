@@ -204,6 +204,15 @@ All colors MUST be HSL.
   .smooth-scroll {
     scroll-behavior: smooth;
   }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @keyframes cardEnter {

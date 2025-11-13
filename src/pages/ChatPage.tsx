@@ -126,7 +126,7 @@ export function ChatPage() {
     }
   };
 
-  const quickReactions = ['👍', '❤️', '😂', '😮', '🤝', '🙏', '🔥', '🎉'];
+  const quickReactions = ['👍', '❤️', '😂', '😮', '🤝', '🙏', '🔥', '🎉', '💯', '👏'];
 
   if (!event) {
     return (
@@ -618,11 +618,42 @@ export function ChatPage() {
                       </div>
                     )}
                     <p className="text-sm">{message.text}</p>
-                    <p className={`text-xs mt-1 ${
+                    <div className={`flex items-center justify-between gap-2 mt-1 ${
                       message.isOwn ? 'text-blue-100' : 'text-muted-foreground'
                     }`}>
-                      {message.time}
-                    </p>
+                      <p className="text-xs">
+                        {message.time}
+                      </p>
+                      {message.isOwn && message.status && (
+                        <div className="flex items-center gap-0.5">
+                          {message.status === 'sent' && (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          )}
+                          {message.status === 'delivered' && (
+                            <>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="-ml-2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            </>
+                          )}
+                          {message.status === 'read' && (
+                            <>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="-ml-2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Reactions Display */}
@@ -652,16 +683,25 @@ export function ChatPage() {
                     >
                       <div className="flex flex-col gap-3">
                         {/* Reactions Row */}
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide items-center">
                           {quickReactions.map((emoji) => (
                             <button
                               key={emoji}
                               onClick={() => handleReaction(message.id, emoji)}
-                              className="w-10 h-10 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
+                              className="w-10 h-10 flex-shrink-0 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125"
                             >
                               {emoji}
                             </button>
                           ))}
+                          <button
+                            onClick={() => {
+                              const emoji = prompt('Enter emoji:');
+                              if (emoji) handleReaction(message.id, emoji);
+                            }}
+                            className="w-10 h-10 flex-shrink-0 rounded-full hover:bg-white/50 transition-all flex items-center justify-center text-xl hover:scale-125 text-muted-foreground font-bold"
+                          >
+                            +
+                          </button>
                         </div>
                         
                         {/* Action Icons Row */}

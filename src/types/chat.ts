@@ -28,6 +28,7 @@ export interface Message {
   reactions?: MessageReaction[];
   replyTo?: ReplyToMessage;
   isPinned?: boolean;
+  status?: 'sent' | 'delivered' | 'read';
 }
 
 export interface Conversation {

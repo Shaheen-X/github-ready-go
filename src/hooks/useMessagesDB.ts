@@ -207,6 +207,7 @@ export function useMessagesDB() {
             reactions: reactions.length > 0 ? reactions : undefined,
             replyTo,
             isPinned: pinnedMessageIds.has(msg.message_id),
+            status: msg.status as 'sent' | 'delivered' | 'read',
           };
         });
       },
@@ -279,17 +280,17 @@ export function useMessagesDB() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Check if reaction already exists
+      // Check if this exact reaction exists
       const { data: existing } = await supabase
         .from('message_reactions')
         .select('*')
         .eq('message_id', messageId)
         .eq('user_id', user.id)
         .eq('reaction_type', reactionType)
-        .single();
+        .maybeSingle();
 
       if (existing) {
-        // Remove reaction
+        // Remove this reaction
         const { error } = await supabase
           .from('message_reactions')
           .delete()
@@ -299,7 +300,14 @@ export function useMessagesDB() {
 
         if (error) throw error;
       } else {
-        // Add reaction
+        // Delete any existing reaction by this user on this message first
+        await supabase
+          .from('message_reactions')
+          .delete()
+          .eq('message_id', messageId)
+          .eq('user_id', user.id);
+
+        // Then add the new reaction
         const { error } = await supabase
           .from('message_reactions')
           .insert({
