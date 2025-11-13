@@ -7,11 +7,10 @@ export interface Attachment {
 export interface MessageReaction {
   type: string;
   count: number;
-  users: string[];
   hasReacted: boolean;
 }
 
-export interface ReplyToMessage {
+export interface ReplyTo {
   id: string;
   text: string;
   sender: string;
@@ -22,13 +21,14 @@ export interface Message {
   sender: string;
   text: string;
   time: string;
+  timestamp?: string;
   isOwn: boolean;
   avatar?: string;
   attachments?: Attachment[];
   reactions?: MessageReaction[];
-  replyTo?: ReplyToMessage;
-  isPinned?: boolean;
+  replyTo?: ReplyTo;
   status?: 'sent' | 'delivered' | 'read';
+  isPinned?: boolean;
 }
 
 export interface Conversation {
