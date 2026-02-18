@@ -24,6 +24,7 @@ import PairingCreatedModal from '@/components/PairingCreatedModal';
 import { ChatPage } from '@/pages/ChatPage';
 import { ProfileViewPage } from '@/pages/ProfileViewPage';
 import { AuthPage } from '@/pages/AuthPage';
+import { BrowseActivitiesPage } from '@/pages/BrowseActivitiesPage';
 import NotFound from '@/pages/NotFound';
 import { CalendarEventsProvider } from '@/context/calendar-events-context';
 import { ChatProvider } from '@/context/ChatContext';
@@ -160,8 +161,9 @@ function AppContent() {
 
   return (
     <Routes>
-      {/* Auth Route (unprotected) */}
+      {/* Public Routes (no login required) */}
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/browse" element={<BrowseActivitiesPage />} />
       
       {/* Standalone Routes (protected) */}
       <Route path="/chat/:eventId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
