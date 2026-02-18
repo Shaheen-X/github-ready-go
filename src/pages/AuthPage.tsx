@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,16 +11,17 @@ export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate(redirectTo);
     }
-  }, [user, navigate]);
+  }, [user, navigate, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,10 +49,10 @@ export function AuthPage() {
           }
         } else {
           toast.success('Signed in successfully!');
-          navigate('/');
+          navigate(redirectTo);
         }
       } else {
-        const { error } = await signUp(email, password, name);
+        const { error } = await signUp(email, password);
         if (error) {
           if (error.message.includes('User already registered')) {
             toast.error('This email is already registered. Please sign in instead.');
@@ -59,7 +60,7 @@ export function AuthPage() {
             toast.error(error.message);
           }
         } else {
-          toast.success('Account created! Please check your email to verify your account.');
+          toast.success('Account created! You can now sign in.');
           setIsLogin(true);
         }
       }
@@ -80,25 +81,11 @@ export function AuthPage() {
               ConnectSphere
             </h1>
             <p className="text-muted-foreground">
-              {isLogin ? 'Welcome back!' : 'Create your account'}
+              {isLogin ? 'Welcome back!' : 'Join and start connecting'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Your name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -137,7 +124,7 @@ export function AuthPage() {
                   {isLogin ? 'Signing in...' : 'Creating account...'}
                 </>
               ) : (
-                isLogin ? 'Sign In' : 'Sign Up'
+                isLogin ? 'Sign In' : 'Create Account — it\'s free'
               )}
             </Button>
           </form>

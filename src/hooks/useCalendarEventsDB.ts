@@ -112,7 +112,8 @@ export function useCalendarEventsDB() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
-      toast.success('Event created successfully!');
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      toast.success('Activity created successfully!');
     },
     onError: (error: any) => {
       toast.error('Failed to create event', {

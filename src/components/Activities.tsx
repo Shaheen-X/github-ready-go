@@ -4,15 +4,18 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useActivities } from '@/hooks/useActivities';
 import { useActivityParticipants } from '@/hooks/useActivityParticipants';
+import { useCalendarEventsDB } from '@/hooks/useCalendarEventsDB';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
+import { CreateActivityModal } from './CreateActivityModal';
+import type { NewEventInput } from '@/types/calendar';
 
 export function Activities() {
-  const { activities, loading } = useActivities();
+  const { activities, loading, refreshActivities } = useActivities();
   const { joinActivity, leaveActivity, isJoining, isLeaving, checkParticipation } = useActivityParticipants();
+  const { createEvent } = useCalendarEventsDB();
   const [participationStatus, setParticipationStatus] = useState<Record<string, boolean>>({});
-
-  const filteredActivities = activities;
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Check participation status for all activities
   useEffect(() => {
@@ -39,10 +42,29 @@ export function Activities() {
     setParticipationStatus(prev => ({ ...prev, [activityId]: false }));
   };
 
+  const handleCreateActivity = (activityData: any) => {
+    const date = new Date(`${activityData.date}T${activityData.time}`);
+    const eventInput: NewEventInput = {
+      title: activityData.eventName,
+      type: 'group',
+      date,
+      time: activityData.time,
+      location: activityData.location || '',
+      description: activityData.description || '',
+      attendees: [],
+      maxParticipants: activityData.maxParticipants ? parseInt(activityData.maxParticipants) : 0,
+      tags: activityData.activity ? [activityData.activity] : [],
+      image: activityData.selectedImage,
+    };
+    createEvent(eventInput);
+    // Refresh after a short delay to let the DB settle
+    setTimeout(() => refreshActivities(), 1500);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -56,7 +78,10 @@ export function Activities() {
             <h1 className="text-2xl font-bold gradient-text">Activities</h1>
             <p className="text-subtext text-sm">{activities.length} public activities</p>
           </div>
-          <Button className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white">
+          <Button
+            className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Create
           </Button>
@@ -65,19 +90,22 @@ export function Activities() {
 
       <div className="p-6 space-y-6">
         {/* Activities List */}
-        {filteredActivities.length === 0 ? (
+        {activities.length === 0 ? (
           <div className="glass-card p-12 text-center">
-            <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <Calendar className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="text-xl font-semibold mb-2">No activities yet</h3>
             <p className="text-muted-foreground mb-6">Be the first to create an activity!</p>
-            <Button className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white">
+            <Button
+              className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Create Activity
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredActivities.map((activity) => (
+            {activities.map((activity) => (
               <div key={activity.id} className="glass-card overflow-hidden">
                 <div className="relative h-48">
                   <ImageWithFallback
@@ -113,7 +141,7 @@ export function Activities() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
                     <div className="flex items-center space-x-2">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
                         <span className="text-xs font-semibold text-blue-600">
@@ -129,7 +157,7 @@ export function Activities() {
                       <Button 
                         size="sm" 
                         variant="outline"
-                        className="border-red-500 text-red-500 hover:bg-red-50"
+                        className="border-destructive text-destructive hover:bg-destructive/10"
                         onClick={() => handleLeaveActivity(activity.id)}
                         disabled={isLeaving}
                       >
@@ -152,6 +180,12 @@ export function Activities() {
           </div>
         )}
       </div>
+
+      <CreateActivityModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreateActivity={handleCreateActivity}
+      />
     </div>
   );
 }
