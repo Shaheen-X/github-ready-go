@@ -1,4 +1,4 @@
-import { Home, Search, MessageCircle, Calendar, User } from 'lucide-react';
+import { Home, Activity, MessageCircle, Calendar, User } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -8,7 +8,7 @@ interface NavigationProps {
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const tabs = [
     { id: 'home', icon: Home, label: 'Home' },
-    { id: 'search', icon: Search, label: 'Search' },
+    { id: 'activities', icon: Activity, label: 'Activities' },
     { id: 'messages', icon: MessageCircle, label: 'Messages' },
     { id: 'calendar', icon: Calendar, label: 'Calendar' },
     { id: 'profile', icon: User, label: 'Profile' },
