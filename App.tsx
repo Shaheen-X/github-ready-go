@@ -143,6 +143,7 @@ function AppContent() {
       case 'activities': return <Activities />;
       case 'messages': return <Messages />;
       case 'calendar': return <Calendar onNavigate={setActiveTab} onCreateEvent={handleCreateEvent} onCreatePairing={handleChoosePairing} onCreateGroup={handleChooseGroup} />;
+      case 'connect': return <Groups />;
       case 'groups': return <Groups />;
       case 'profile': return <ProfileNew onNavigate={setActiveTab} />;
       case 'settings': return <Settings onNavigate={setActiveTab} onSignOut={handleSignOut} />;
