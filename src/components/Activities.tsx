@@ -1,4 +1,4 @@
-import { Plus, Calendar, MapPin, Users, Loader2, MessageCircle } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, Loader2 } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -9,7 +9,6 @@ import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { CreateActivityModal } from './CreateActivityModal';
 import type { NewEventInput } from '@/types/calendar';
-import { useNavigate } from 'react-router-dom';
 
 export function Activities() {
   const { activities, loading, refreshActivities } = useActivities();
@@ -17,7 +16,6 @@ export function Activities() {
   const { createEvent } = useCalendarEventsDB();
   const [participationStatus, setParticipationStatus] = useState<Record<string, boolean>>({});
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const navigate = useNavigate();
 
   // Check participation status for all activities
   useEffect(() => {
@@ -155,39 +153,26 @@ export function Activities() {
                         <p className="text-sm font-medium">{activity.hostName || 'Host'}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {participationStatus[activity.id] && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1"
-                          onClick={() => navigate(`/chat/${activity.id}`)}
-                        >
-                          <MessageCircle className="h-3 w-3" />
-                          Chat
-                        </Button>
-                      )}
-                      {participationStatus[activity.id] ? (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          className="border-destructive text-destructive hover:bg-destructive/10"
-                          onClick={() => handleLeaveActivity(activity.id)}
-                          disabled={isLeaving}
-                        >
-                          {isLeaving ? 'Leaving...' : 'Leave'}
-                        </Button>
-                      ) : (
-                        <Button 
-                          size="sm" 
-                          className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white"
-                          onClick={() => handleJoinActivity(activity.id)}
-                          disabled={isJoining}
-                        >
-                          {isJoining ? 'Joining...' : 'Join Activity'}
-                        </Button>
-                      )}
-                    </div>
+                    {participationStatus[activity.id] ? (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="border-destructive text-destructive hover:bg-destructive/10"
+                        onClick={() => handleLeaveActivity(activity.id)}
+                        disabled={isLeaving}
+                      >
+                        {isLeaving ? 'Leaving...' : 'Leave'}
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white"
+                        onClick={() => handleJoinActivity(activity.id)}
+                        disabled={isJoining}
+                      >
+                        {isJoining ? 'Joining...' : 'Join Activity'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
