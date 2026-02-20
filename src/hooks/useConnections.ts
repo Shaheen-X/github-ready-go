@@ -179,6 +179,13 @@ export function useConnections() {
     return connection?.status || null;
   };
 
+  // Get the full connection object for a specific user (includes direction info)
+  const getConnectionWith = (userId: string): ConnectionWithProfile | undefined => {
+    return connections.find(
+      (c) => c.requester_id === userId || c.receiver_id === userId
+    );
+  };
+
   // Get pending requests received
   const getPendingRequests = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -200,6 +207,7 @@ export function useConnections() {
     rejectRequest: rejectRequest.mutate,
     cancelRequest: cancelRequest.mutate,
     getConnectionStatus,
+    getConnectionWith,
     getPendingRequests,
     acceptedConnections,
     isSending: sendRequest.isPending,

@@ -4,11 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { QrCode, UserSearch, Mail, Camera, Copy, Check, Clock } from 'lucide-react';
+import { QrCode, UserSearch, Mail, Camera, Copy, Check, Clock, UserCheck, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useProfileSearch } from '@/hooks/useProfileSearch';
 import { useConnections } from '@/hooks/useConnections';
+import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
 import { ScrollArea } from './ui/scroll-area';
 import { Badge } from './ui/badge';
@@ -31,7 +32,8 @@ export function ConnectModal({ isOpen, onClose, username = 'alexmorgan' }: Conne
     debouncedSearch
   );
 
-  const { sendRequest, getConnectionStatus, isSending } = useConnections();
+  const { sendRequest, acceptRequest, rejectRequest, getConnectionWith, isSending } = useConnections();
+  const { user } = useAuth();
 
   // Debounce search input
   useEffect(() => {
@@ -46,19 +48,23 @@ export function ConnectModal({ isOpen, onClose, username = 'alexmorgan' }: Conne
     sendRequest(userId);
   };
 
-  const getConnectionButton = (userId: string) => {
-    const status = getConnectionStatus(userId);
+  const getConnectionButton = (profileId: string) => {
+    const connection = getConnectionWith(profileId);
 
-    if (status === 'pending') {
+    if (!connection) {
       return (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          Pending
-        </Badge>
+        <Button
+          size="sm"
+          className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg"
+          onClick={() => handleConnect(profileId)}
+          disabled={isSending}
+        >
+          Connect
+        </Button>
       );
     }
 
-    if (status === 'accepted') {
+    if (connection.status === 'accepted') {
       return (
         <Badge variant="default" className="flex items-center gap-1 bg-green-500">
           <Check className="h-3 w-3" />
@@ -67,11 +73,45 @@ export function ConnectModal({ isOpen, onClose, username = 'alexmorgan' }: Conne
       );
     }
 
+    if (connection.status === 'pending') {
+      // I sent the request → show "Pending"
+      if (connection.requester_id === user?.id) {
+        return (
+          <Badge variant="secondary" className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            Pending
+          </Badge>
+        );
+      }
+      // They sent the request to me → show Accept / Reject
+      return (
+        <div className="flex items-center gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 w-7 p-0 text-red-500 hover:bg-red-50"
+            onClick={() => rejectRequest(connection.id)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            className="h-7 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg px-2"
+            onClick={() => acceptRequest(connection.id)}
+          >
+            <UserCheck className="h-3 w-3 mr-1" />
+            Accept
+          </Button>
+        </div>
+      );
+    }
+
+    // Rejected → allow re-sending
     return (
       <Button
         size="sm"
         className="bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg"
-        onClick={() => handleConnect(userId)}
+        onClick={() => handleConnect(profileId)}
         disabled={isSending}
       >
         Connect
